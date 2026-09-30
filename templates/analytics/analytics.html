@@ -656,6 +656,39 @@ document.getElementById('productSelect').addEventListener('change', e => {
   }
 });
 
+// Ensure tabs switch reliably and Chart.js charts resize properly when tabs change
+const tabButtons = document.querySelectorAll('#analyticsTabs button[data-bs-toggle="pill"]');
+tabButtons.forEach(btn => {
+  btn.addEventListener('shown.bs.tab', () => {
+    Object.values(charts).forEach(c => {
+      if (c && typeof c.resize === 'function') {
+        c.resize();
+      }
+    });
+  });
+
+  btn.addEventListener('click', function(e) {
+    if (typeof bootstrap === 'undefined' || !bootstrap.Tab) {
+      e.preventDefault();
+      tabButtons.forEach(b => b.classList.remove('active'));
+      this.classList.add('active');
+      const targetId = this.getAttribute('data-bs-target');
+      document.querySelectorAll('#analyticsTabContent > .tab-pane').forEach(p => {
+        p.classList.remove('show', 'active');
+      });
+      const targetPane = document.querySelector(targetId);
+      if (targetPane) {
+        targetPane.classList.add('show', 'active');
+      }
+      setTimeout(() => {
+        Object.values(charts).forEach(c => {
+          if (c && typeof c.resize === 'function') c.resize();
+        });
+      }, 50);
+    }
+  });
+});
+
 // Initial load
 load('');
 </script>
