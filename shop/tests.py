@@ -64,6 +64,23 @@ class StorefrontFlowTests(TestCase):
         r = self.client.get(reverse("customer_orders"))
         self.assertContains(r, "shopper")
 
+    def test_admin_sees_walkin_guest_order_without_customer_account(self):
+        # Walk-in guest order has customer=None
+        order = Order.objects.create(
+            customer=None,
+            customer_name="Table 4 Guest",
+            order_type="dine_in",
+            table_number="Table 4",
+            payment_method="cash",
+            total_amount="10.00",
+        )
+        self.client.force_login(self.admin)
+        r = self.client.get(reverse("customer_orders"))
+        self.assertEqual(r.status_code, 200)
+        self.assertContains(r, "Table 4 Guest")
+        self.assertContains(r, "DINE IN")
+
+
 
 class RegistrationTests(TestCase):
     def test_register_creates_customer_and_logs_in(self):
@@ -72,3 +89,68 @@ class RegistrationTests(TestCase):
         user = get_user_model().objects.get(username="newuser")
         self.assertFalse(user.is_staff)
         self.assertRedirects(r, reverse("catalog"))
+
+
+class WalkInPOSTests(TestCase):
+    def setUp(self):
+        self.product = Product.objects.create(
+            name="Artisan Cappuccino",
+            category="Beverages",
+            price="4.50",
+            stock_quantity=50,
+            reorder_level=10,
+        )
+
+    def test_guest_can_browse_and_order_walkin(self):
+        # 1. Unauthenticated guest can view catalog (status 200)
+        r = self.client.get(reverse("catalog"))
+        self.assertEqual(r.status_code, 200)
+        self.assertContains(r, "Walk-in Order Ticket")
+        self.assertContains(r, "Artisan Cappuccino")
+
+        # 2. Add via AJAX
+        r_add = self.client.post(
+            reverse("add_to_cart", args=[self.product.id]),
+            {"quantity": 2},
+            HTTP_X_REQUESTED_WITH="XMLHttpRequest",
+        )
+        self.assertEqual(r_add.status_code, 200)
+        data = r_add.json()
+        self.assertTrue(data["success"])
+        self.assertEqual(data["cart"]["count"], 2)
+        self.assertEqual(data["cart"]["total"], 9.00)
+
+        # 3. Checkout via AJAX as Dine-In with table number and card payment
+        r_checkout = self.client.post(
+            reverse("checkout"),
+            {
+                "order_type": "dine_in",
+                "customer_name": "Walk-in Guest",
+                "table_number": "Table 7",
+                "payment_method": "card",
+            },
+            HTTP_X_REQUESTED_WITH="XMLHttpRequest",
+        )
+        self.assertEqual(r_checkout.status_code, 200)
+        co_data = r_checkout.json()
+        self.assertTrue(co_data["success"])
+        self.assertTrue(co_data["ticket_number"].startswith("W-"))
+        self.assertEqual(co_data["order_type"], "dine_in")
+        self.assertEqual(co_data["table_number"], "Table 7")
+        self.assertEqual(co_data["payment_method"], "card")
+        self.assertEqual(co_data["total"], 9.00)
+
+        # 4. Product stock decremented & SalesRecord created
+        self.product.refresh_from_db()
+        self.assertEqual(self.product.stock_quantity, 48)
+        sales = SalesRecord.objects.filter(product=self.product)
+        self.assertEqual(sales.count(), 1)
+        self.assertEqual(sales.first().source_file, "Walk-in order")
+
+        # 5. Order history for this guest session shows the order
+        r_hist = self.client.get(reverse("order_history"))
+        self.assertEqual(r_hist.status_code, 200)
+        self.assertContains(r_hist, co_data["ticket_number"])
+        self.assertContains(r_hist, "TABLE 7")
+
+

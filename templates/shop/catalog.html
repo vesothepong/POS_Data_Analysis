@@ -1,72 +1,1331 @@
-{% extends 'shop/base_shop.html' %}{% block title %}Products{% endblock %}
+{% extends 'shop/base_shop.html' %}
+{% load static %}
+{% block title %}Walk-in Menu &amp; POS Kiosk{% endblock %}
+
 {% block content %}
-<div class="page-heading"><div><span class="eyebrow">Catalog / Products</span><h1>Shop products</h1><p>Find what you need and add it to your cart.</p></div><span class="shop-heading-icon"><i class="bi bi-box-seam"></i></span></div>
-<form class="shop-search" method="get" role="search"><label for="productSearch" class="visually-hidden">Search products</label><div class="shop-search-input"><i class="bi bi-search"></i><input id="productSearch" class="form-control" name="q" placeholder="Search products or categories" value="{{ q }}"></div><button class="btn btn-primary" type="submit">Search</button>{% if q %}<a class="btn btn-outline-secondary" href="{% url 'catalog' %}">Clear</a>{% endif %}</form>
-<div class="shop-section-heading"><div><h2>{% if q %}Search results{% else %}Available products{% endif %}</h2><p>{% if q %}For “{{ q }}”{% else %}Browse the catalog{% endif %}</p></div><span class="shop-result-count">{{ products|length }} product{{ products|length|pluralize }}</span></div>
-<style>
-  .shop-grid {
-    display: grid !important;
-    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
-    gap: 18px !important;
-    align-items: stretch !important;
-  }
-  @media (max-width: 1080px) and (min-width: 650px) {
-    .shop-grid {
-      grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-    }
-  }
-  @media (max-width: 649px) {
-    .shop-grid {
-      grid-template-columns: 1fr !important;
-    }
-  }
-</style>
-<div class="shop-grid">
-{% for p in products %}
-<article class="card shop-card h-100 d-flex flex-column shadow-sm" style="overflow: hidden; border-radius: 14px;">
-  <!-- Fixed 180px Image Viewport with Object-Fit Cover -->
-  <div class="shop-card-visual" style="height: 180px; min-height: 180px; max-height: 180px; width: 100%; position: relative; overflow: hidden; background: rgba(148,163,184,0.1); border-bottom: 1px solid var(--line);">
-    {% if p.image %}
-      <img src="{{ p.image.url }}" alt="{{ p.name }}" class="shop-card-img" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; object-position: center; display: block;" loading="lazy">
-    {% else %}
-      <div style="display: flex; align-items: center; justify-content: center; height: 100%; width: 100%; color: var(--brand);">
-        <i class="bi bi-box-seam" aria-hidden="true" style="font-size: 42px; opacity: 0.78;"></i>
+<div class="pos-layout">
+  <!-- LEFT: Menu & Catalog Area -->
+  <div class="pos-menu-column">
+    <!-- Search and Controls Bar -->
+    <div class="pos-menu-topbar">
+      <div class="pos-search-wrapper">
+        <i class="bi bi-search"></i>
+        <input type="text" id="posSearchInput" class="form-control pos-search-input"
+          placeholder="Search artisan drinks, food, bakery..." value="{{ q }}">
+        {% if q %}
+        <a href="{% url 'catalog' %}" class="pos-search-clear" title="Clear search"><i
+            class="bi bi-x-circle-fill"></i></a>
+        {% endif %}
       </div>
-    {% endif %}
-    <span class="shop-card-index" style="position: absolute; right: 12px; top: 12px; z-index: 2; font-family: 'Space Grotesk', sans-serif; font-size: 11px; font-weight: 600; color: #fff; background: rgba(0,0,0,0.6); backdrop-filter: blur(4px); padding: 2px 8px; border-radius: 10px;">{{ forloop.counter|stringformat:"02d" }}</span>
-  </div>
+      <div class="pos-quick-stats d-none d-sm-flex align-items-center gap-2">
+        <span class="badge bg-secondary-subtle text-secondary-emphasis">
+          <i class="bi bi-box-seam me-1"></i><span id="posVisibleCount">{{ products|length }}</span> Items Available
+        </span>
+      </div>
+    </div>
 
-  <!-- Card Body with Fixed Min-Height for Title Alignment -->
-  <div class="shop-card-body d-flex flex-column flex-grow-1 p-3">
-    <span class="shop-category d-block mb-1 text-uppercase fw-semibold" style="font-size: 10px; letter-spacing: 0.1em; color: var(--brand);">
-      {{ p.category|default:"Uncategorized" }}
-    </span>
-    <h3 class="fw-semibold mb-3 flex-grow-1" style="font-size: 16px; line-height: 1.35; min-height: 44px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; margin-top: 2px;" title="{{ p.name }}">
-      {{ p.name }}
-    </h3>
-    <div class="shop-card-meta mt-auto d-flex justify-content-between align-items-center pt-2">
-      <strong class="shop-price fs-5">${{ p.price }}</strong>
-      {% if p.stock_quantity > 0 %}
-        <span class="shop-stock small text-muted"><span class="live-dot me-1"></span>{{ p.stock_quantity }} in stock</span>
-      {% else %}
-        <span class="badge text-bg-danger">Out of stock</span>
-      {% endif %}
+    <!-- Category Pills Tabs -->
+    <div class="pos-category-nav" role="tablist" aria-label="Menu categories">
+      <a href="{% url 'catalog' %}{% if q %}?q={{ q }}{% endif %}"
+        class="pos-cat-pill {% if not selected_category %}active{% endif %}" data-category="">
+        <i class="bi bi-grid-fill"></i>
+        <span>All Items</span>
+        <span class="pos-cat-count">{{ total_products_count }}</span>
+      </a>
+      {% for cat in category_data %}
+      <a href="{% url 'catalog' %}?category={{ cat.name|urlencode }}{% if q %}&q={{ q }}{% endif %}"
+        class="pos-cat-pill {% if selected_category == cat.name %}active{% endif %}" data-category="{{ cat.name }}">
+        {% if "drink" in cat.name|lower or "beverage" in cat.name|lower or "coffee" in cat.name|lower %}
+        <i class="bi bi-cup-hot-fill"></i>
+        {% elif "food" in cat.name|lower or "burger" in cat.name|lower or "croissant" in cat.name|lower or "bakery" in
+        cat.name|lower %}
+        <i class="bi bi-egg-fried"></i>
+        {% else %}
+        <i class="bi bi-tag-fill"></i>
+        {% endif %}
+        <span>{{ cat.name }}</span>
+        <span class="pos-cat-count">{{ cat.count }}</span>
+      </a>
+      {% endfor %}
+    </div>
+
+    <!-- Product Grid -->
+    <div class="pos-product-grid" id="posProductGrid">
+      {% for p in products %}
+      <article class="pos-card card {% if p.stock_quantity <= 0 %}is-soldout{% endif %}" data-product-id="{{ p.id }}"
+        data-product-name="{{ p.name }}" data-product-price="{{ p.price }}"
+        data-product-category="{{ p.category|default:'Uncategorized' }}" data-product-stock="{{ p.stock_quantity }}">
+        <div class="pos-card-media">
+          {% if p.image %}
+          <img src="{{ p.image.url }}" alt="{{ p.name }}" class="pos-card-img" loading="lazy">
+          {% else %}
+          <div class="pos-card-placeholder">
+            <i class="bi bi-cup-hot"></i>
+          </div>
+          {% endif %}
+          <span class="pos-card-number">{{ forloop.counter|stringformat:"02d" }}</span>
+          <span class="pos-card-category-tag">{{ p.category|default:"Special" }}</span>
+          <span class="pos-card-qty-badge d-none" data-card-badge="{{ p.id }}">0 in ticket</span>
+        </div>
+
+        <div class="pos-card-content">
+          <h3 class="pos-card-title" title="{{ p.name }}">{{ p.name }}</h3>
+          <div class="pos-card-bottom">
+            <div class="pos-card-pricing">
+              <span class="pos-card-price">${{ p.price|floatformat:2 }}</span>
+              {% if p.stock_quantity > 10 %}
+              <span class="pos-stock in-stock"><span class="pos-dot"></span>{{ p.stock_quantity }} in stock</span>
+              {% elif p.stock_quantity > 0 %}
+              <span class="pos-stock low-stock"><span class="pos-dot"></span>Only {{ p.stock_quantity }} left</span>
+              {% else %}
+              <span class="pos-stock out-stock"><i class="bi bi-x-circle me-1"></i>Sold Out</span>
+              {% endif %}
+            </div>
+
+            <!-- Quick Add Button with progressive form fallback -->
+            <form method="post" action="{% url 'add_to_cart' p.id %}" class="pos-add-form m-0">
+              {% csrf_token %}
+              <input type="hidden" name="quantity" value="1">
+              <input type="hidden" name="next" value="{{ request.get_full_path }}">
+              <button type="button" class="btn pos-btn-add {% if p.stock_quantity <= 0 %}disabled{% endif %}"
+                data-action="add-item" data-id="{{ p.id }}" data-name="{{ p.name }}" data-price="{{ p.price }}" {% if
+                p.stock_quantity <=0 %}disabled{% endif %}>
+                <i class="bi bi-plus-lg"></i>
+                <span>Add</span>
+              </button>
+            </form>
+          </div>
+        </div>
+      </article>
+      {% empty %}
+      <div class="pos-empty-state">
+        <div class="pos-empty-icon"><i class="bi bi-search"></i></div>
+        <h3>No menu items found</h3>
+        <p>{% if q %}No items matched “{{ q }}”. Try searching another dish or drink.{% else %}No items available in
+          this category.{% endif %}</p>
+        <a href="{% url 'catalog' %}" class="btn btn-outline-primary btn-sm"><i
+            class="bi bi-arrow-counterclockwise"></i> Reset Filters</a>
+      </div>
+      {% endfor %}
     </div>
   </div>
 
-  <!-- Footer with Add to Cart Form -->
-  <form method="post" action="{% url 'add_to_cart' p.id %}" class="shop-card-footer mt-auto p-3 pt-2" style="border-top: 1px solid var(--line);">
-    {% csrf_token %}
-    <input type="hidden" name="next" value="{{ request.get_full_path }}">
-    <div class="d-flex gap-2">
-      <label class="visually-hidden" for="qty-{{ p.id }}">Quantity for {{ p.name }}</label>
-      <input id="qty-{{ p.id }}" type="number" name="quantity" value="1" min="1" max="{{ p.stock_quantity }}" class="form-control form-control-sm text-center" style="width: 62px; min-width: 62px;" {% if p.stock_quantity == 0 %}disabled{% endif %}>
-      <button class="btn btn-primary btn-sm flex-grow-1" type="submit" {% if p.stock_quantity == 0 %}disabled{% endif %}>
-        <i class="bi bi-bag-plus"></i> Add to cart
-      </button>
+  <!-- RIGHT: Sticky Walk-in Order Ticket Panel -->
+  <aside class="pos-ticket-column" id="posTicketPanel" data-cart-count="{{ cart_count|default:0 }}"
+    data-cart-total="{{ cart_total|default:0 }}">
+    <div class="pos-ticket-card card">
+      <!-- Ticket Top -->
+      <div class="pos-ticket-header">
+        <div class="d-flex align-items-center gap-2">
+          <div class="pos-ticket-badge-icon"><i class="bi bi-receipt"></i></div>
+          <div>
+            <h2 class="pos-ticket-title">Walk-in Order Ticket</h2>
+            <div class="pos-ticket-sub">Counter Terminal #01</div>
+          </div>
+        </div>
+        <button type="button" class="btn btn-outline-danger btn-sm pos-btn-clear" id="posClearCartBtn"
+          title="Clear Ticket" aria-label="Clear Ticket" {% if not cart_items %}disabled
+          style="opacity: 0.35; pointer-events: none;" {% endif %}>
+          <i class="bi bi-trash3"></i>
+        </button>
+      </div>
+
+      <!-- Dine In / Takeaway Switcher -->
+      <div class="pos-order-type-picker">
+        <label class="pos-type-option">
+          <input type="radio" name="order_type_toggle" value="dine_in" checked id="typeDineIn">
+          <div class="pos-type-card">
+            <i class="bi bi-cup-hot-fill"></i>
+            <strong>Dine In</strong>
+          </div>
+        </label>
+        <label class="pos-type-option">
+          <input type="radio" name="order_type_toggle" value="takeaway" id="typeTakeaway">
+          <div class="pos-type-card">
+            <i class="bi bi-bag-check-fill"></i>
+            <strong>Takeaway</strong>
+          </div>
+        </label>
+      </div>
+
+      <!-- Customer / Table info -->
+      <div class="pos-guest-info-row">
+        <div class="pos-guest-field">
+          <label for="posCustomerName"><i class="bi bi-person me-1"></i>Guest Name</label>
+          <input type="text" id="posCustomerName" class="form-control form-control-sm" placeholder="Walk-in Guest"
+            value="{% if request.user.is_authenticated %}{{ request.user.username }}{% else %}Walk-in Guest{% endif %}">
+        </div>
+        <div class="pos-guest-field" id="posTableFieldWrapper">
+          <label for="posTableNumber"><i class="bi bi-geo-alt me-1"></i>Table / Buzzer #</label>
+          <input type="text" id="posTableNumber" class="form-control form-control-sm" placeholder="e.g. Table 4">
+        </div>
+      </div>
+
+      <!-- Quick Table Chips -->
+      <div class="pos-table-chips mb-1" id="posTableChips">
+        <button type="button" class="pos-chip-btn" data-table="Table 1">T-1</button>
+        <button type="button" class="pos-chip-btn" data-table="Table 2">T-2</button>
+        <button type="button" class="pos-chip-btn" data-table="Table 3">T-3</button>
+        <button type="button" class="pos-chip-btn" data-table="Table 4">T-4</button>
+        <button type="button" class="pos-chip-btn" data-table="Counter">Counter</button>
+      </div>
+
+      <!-- Scrollable Ticket Lines List -->
+      <div class="pos-ticket-lines" id="posTicketLines">
+        <!-- Lines rendered dynamically by JS or server template below -->
+        {% if cart_items %}
+        {% for it in cart_items %}
+        <div class="pos-ticket-item" data-product-id="{{ it.product.id }}" data-name="{{ it.product.name|escape }}"
+          data-price="{{ it.price }}" data-quantity="{{ it.quantity }}" data-subtotal="{{ it.subtotal }}">
+          <div class="pos-ticket-item-details">
+            <div class="pos-ticket-item-name">{{ it.product.name }}</div>
+            <div class="pos-ticket-item-price">${{ it.price|floatformat:2 }} each</div>
+          </div>
+          <div class="pos-ticket-item-controls">
+            <div class="pos-qty-stepper">
+              <button type="button" class="pos-stepper-btn btn-dec" data-action="decrease" data-id="{{ it.product.id }}"
+                aria-label="Decrease quantity">−</button>
+              <span class="pos-stepper-val">{{ it.quantity }}</span>
+              <button type="button" class="pos-stepper-btn btn-inc" data-action="increase" data-id="{{ it.product.id }}"
+                aria-label="Increase quantity">+</button>
+            </div>
+            <div class="pos-ticket-item-subtotal">${{ it.subtotal|floatformat:2 }}</div>
+            <button type="button" class="pos-ticket-item-del" data-action="remove" data-id="{{ it.product.id }}"
+              title="Remove item" aria-label="Remove item">
+              <i class="bi bi-x"></i>
+            </button>
+          </div>
+        </div>
+        {% endfor %}
+        {% else %}
+        <div class="pos-ticket-empty" id="posTicketEmpty">
+          <div class="pos-ticket-empty-icon"><i class="bi bi-cart3"></i></div>
+          <h4>Order ticket is empty</h4>
+          <p>Tap menu items on the left to start building this walk-in order.</p>
+        </div>
+        {% endif %}
+      </div>
+
+      <!-- Order Summary Breakdown -->
+      <div class="pos-ticket-breakdown">
+        <div class="pos-breakdown-row">
+          <span>Items count</span>
+          <strong id="posSummaryCount">{{ cart_count|default:0 }} items</strong>
+        </div>
+        <div class="pos-breakdown-row">
+          <span>Subtotal</span>
+          <strong id="posSummarySubtotal">${{ cart_total|floatformat:2 }}</strong>
+        </div>
+        <div class="pos-breakdown-row text-muted small">
+          <span>Tax &amp; Service</span>
+          <span class="badge bg-success-subtle text-success-emphasis">Included</span>
+        </div>
+        <div class="pos-breakdown-total">
+          <span>Total Due</span>
+          <strong id="posSummaryTotal">${{ cart_total|floatformat:2 }}</strong>
+        </div>
+      </div>
+
+      <!-- Payment Method Selector -->
+      <div class="pos-payment-section">
+        <label class="pos-section-label">PAYMENT METHOD</label>
+        <div class="pos-payment-grid">
+          <label class="pos-pay-tile">
+            <input type="radio" name="payment_method_toggle" value="cash" checked id="payCash">
+            <div class="pos-pay-card">
+              <i class="bi bi-cash-stack"></i>
+              <span>Cash</span>
+              <small>Counter</small>
+            </div>
+          </label>
+          <label class="pos-pay-tile">
+            <input type="radio" name="payment_method_toggle" value="card" id="payCard">
+            <div class="pos-pay-card">
+              <i class="bi bi-credit-card-2-front"></i>
+              <span>Card</span>
+              <small>Terminal</small>
+            </div>
+          </label>
+          <label class="pos-pay-tile">
+            <input type="radio" name="payment_method_toggle" value="qr" id="payQr">
+            <div class="pos-pay-card">
+              <i class="bi bi-qr-code-scan"></i>
+              <span>Scan QR</span>
+              <small>Mobile Pay</small>
+            </div>
+          </label>
+        </div>
+      </div>
+
+      <!-- Checkout Action Button -->
+      <div class="pos-ticket-footer">
+        <form method="post" action="{% url 'checkout' %}" id="posCheckoutForm" class="m-0">
+          {% csrf_token %}
+          <input type="hidden" name="order_type" id="hiddenOrderType" value="dine_in">
+          <input type="hidden" name="customer_name" id="hiddenCustomerName" value="Walk-in Guest">
+          <input type="hidden" name="table_number" id="hiddenTableNumber" value="">
+          <input type="hidden" name="payment_method" id="hiddenPaymentMethod" value="cash">
+
+          <button type="button" id="posCompleteOrderBtn"
+            class="btn btn-primary pos-btn-checkout w-100 {% if not cart_items %}disabled{% endif %}" {% if not
+            cart_items %}disabled{% endif %}>
+            <span class="pos-btn-text">
+              <i class="bi {% if cart_items %}bi-check-circle-fill{% else %}bi-bag-plus{% endif %} me-1"
+                id="posBtnIcon"></i>
+              <span id="posBtnLabel">{% if cart_items %}Complete Walk-in Order • <span id="posBtnTotal">${{
+                  cart_total|floatformat:2 }}</span>{% else %}Select Items to Order{% endif %}</span>
+            </span>
+            <span class="pos-btn-spinner spinner-border spinner-border-sm d-none" role="status"
+              aria-hidden="true"></span>
+          </button>
+        </form>
+      </div>
     </div>
-  </form>
-</article>
-{% empty %}<div class="shop-empty"><i class="bi bi-box-seam"></i><h2>No products found</h2><p>{% if q %}Try a different search term.{% else %}Products will appear here when available.{% endif %}</p>{% if q %}<a class="btn btn-outline-primary" href="{% url 'catalog' %}">View all products</a>{% endif %}</div>{% endfor %}
-</div>
-{% endblock %}
+  </aside>
+  <!-- SCRIM FOR MOBILE DRAWER -->
+  <div class="pos-drawer-backdrop" id="posDrawerBackdrop"></div>
+  {% endblock %}
+
+  {% block modals %}
+  <!-- DIGITAL WALK-IN RECEIPT MODAL -->
+  <div class="modal fade pos-receipt-modal" id="posReceiptModal" tabindex="-1" aria-labelledby="posReceiptModalLabel"
+    aria-hidden="true" {% if receipt_order %}data-auto-open="true" {% endif %}>
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+      <div class="modal-content pos-receipt-content shadow-lg">
+        <div class="modal-header pos-receipt-modal-header d-flex justify-content-between align-items-center">
+          <div class="d-flex align-items-center gap-2">
+            <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1">
+              <i class="bi bi-check-circle-fill me-1"></i> Order Placed
+            </span>
+            <span class="text-muted small">Digital Receipt</span>
+          </div>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"
+            id="posReceiptCloseBtn"></button>
+        </div>
+
+        <div class="modal-body pos-receipt-body px-3 py-2">
+          <!-- Thermal Receipt Paper -->
+          <div class="pos-receipt-paper">
+            <div class="pos-receipt-top text-center">
+              <div class="pos-receipt-store-brand">
+                <i class="bi bi-cup-hot-fill text-warning"></i>
+                <span>CADENCE CAFÉ &amp; EATERY</span>
+              </div>
+              <div class="pos-receipt-tagline">Artisan Coffee Roasters • Fresh Bakery</div>
+              <div class="pos-receipt-address">124 Monivong Blvd, Phnom Penh, Cambodia</div>
+              <div class="pos-receipt-taxid">Tel: +855 23 888 999 • VAT ID: KH-84920412</div>
+            </div>
+
+            <div class="pos-receipt-divider-line"></div>
+
+            <div class="pos-receipt-ticket-box">
+              <div class="pos-receipt-ticket-label">WALK-IN ORDER TICKET</div>
+              <div class="pos-receipt-ticket-num" id="receiptTicketNum">
+                {% if receipt_order %}{{ receipt_order.ticket_number|default:receipt_order.id }}{% else %}W-101{% endif
+                %}
+              </div>
+              <div class="pos-receipt-badge" id="receiptOrderType">
+                {% if receipt_order %}
+                {{ receipt_order.get_order_type_display|upper }}{% if receipt_order.table_number %} • {{
+                receipt_order.table_number|upper }}{% endif %}
+                {% else %}
+                DINE IN • TABLE 01
+                {% endif %}
+              </div>
+            </div>
+
+            <div class="pos-receipt-meta">
+              <div class="pos-receipt-meta-row">
+                <span class="meta-label">Date/Time:</span>
+                <strong class="meta-val" id="receiptDateTime">{% if receipt_order %}{{ receipt_order.created_at|date:"M
+                  d, Y • H:i" }}{% else %}Sep 30, 2026 • 21:30{% endif %}</strong>
+              </div>
+              <div class="pos-receipt-meta-row">
+                <span class="meta-label">Customer:</span>
+                <strong class="meta-val" id="receiptCustomerName">{% if receipt_order %}{{ receipt_order.customer_name
+                  }}{% else %}Walk-in Guest{% endif %}</strong>
+              </div>
+              <div class="pos-receipt-meta-row">
+                <span class="meta-label">Cashier:</span>
+                <strong class="meta-val">Counter POS #01</strong>
+              </div>
+              <div class="pos-receipt-meta-row">
+                <span class="meta-label">Payment:</span>
+                <strong class="meta-val" id="receiptPayment">{% if receipt_order %}{{
+                  receipt_order.get_payment_method_display }}{% else %}Cash at Counter{% endif %}</strong>
+              </div>
+            </div>
+
+            <div class="pos-receipt-divider-line"></div>
+            <div class="pos-receipt-table-head">
+              <span>ITEM DESCRIPTION</span>
+              <span class="text-end">AMOUNT</span>
+            </div>
+            <div class="pos-receipt-divider-dashed"></div>
+
+            <!-- Items Table -->
+            <div class="pos-receipt-items" id="receiptItemsList">
+              {% if receipt_order %}
+              {% for it in receipt_order.items.all %}
+              <div class="pos-receipt-item-row">
+                <div class="pos-receipt-item-main">
+                  <div class="pos-receipt-item-name">{{ it.product.name }}</div>
+                  <div class="pos-receipt-item-calc">{{ it.quantity }} × ${{ it.price|floatformat:2 }}</div>
+                </div>
+                <div class="pos-receipt-item-amt">${{ it.subtotal|floatformat:2 }}</div>
+              </div>
+              {% endfor %}
+              {% endif %}
+            </div>
+
+            <div class="pos-receipt-divider-dashed"></div>
+
+            <!-- Breakdown & Grand Total -->
+            <div class="pos-receipt-calc-row">
+              <span>Subtotal</span>
+              <strong id="receiptSubtotal">${% if receipt_order %}{{ receipt_order.total_amount|floatformat:2 }}{% else
+                %}0.00{% endif %}</strong>
+            </div>
+            <div class="pos-receipt-calc-row text-muted small">
+              <span>Tax / VAT (10% Included)</span>
+              <span>Included</span>
+            </div>
+            <div class="pos-receipt-divider-line"></div>
+            <div class="pos-receipt-total-row">
+              <span>TOTAL PAID</span>
+              <strong id="receiptTotalAmount">${% if receipt_order %}{{ receipt_order.total_amount|floatformat:2 }}{%
+                else %}0.00{% endif %}</strong>
+            </div>
+            <div class="pos-receipt-calc-row small text-muted">
+              <span>Amount Tendered</span>
+              <strong id="receiptTendered">${% if receipt_order %}{{ receipt_order.total_amount|floatformat:2 }}{% else
+                %}0.00{% endif %}</strong>
+            </div>
+            <div class="pos-receipt-calc-row small text-muted">
+              <span>Change Due</span>
+              <strong>$0.00</strong>
+            </div>
+
+            <!-- Barcode simulation -->
+            <div class="pos-receipt-divider-dashed"></div>
+            <div class="pos-receipt-barcode text-center">
+              <svg class="pos-barcode-svg" viewBox="0 0 200 40" preserveAspectRatio="none"
+                style="width: 190px; height: 32px;" aria-hidden="true">
+                <rect x="0" y="0" width="3" height="40" fill="currentColor" />
+                <rect x="5" y="0" width="1" height="40" fill="currentColor" />
+                <rect x="8" y="0" width="4" height="40" fill="currentColor" />
+                <rect x="14" y="0" width="2" height="40" fill="currentColor" />
+                <rect x="18" y="0" width="1" height="40" fill="currentColor" />
+                <rect x="22" y="0" width="5" height="40" fill="currentColor" />
+                <rect x="29" y="0" width="2" height="40" fill="currentColor" />
+                <rect x="33" y="0" width="1" height="40" fill="currentColor" />
+                <rect x="36" y="0" width="4" height="40" fill="currentColor" />
+                <rect x="42" y="0" width="2" height="40" fill="currentColor" />
+                <rect x="46" y="0" width="3" height="40" fill="currentColor" />
+                <rect x="51" y="0" width="1" height="40" fill="currentColor" />
+                <rect x="54" y="0" width="4" height="40" fill="currentColor" />
+                <rect x="60" y="0" width="2" height="40" fill="currentColor" />
+                <rect x="64" y="0" width="1" height="40" fill="currentColor" />
+                <rect x="68" y="0" width="3" height="40" fill="currentColor" />
+                <rect x="73" y="0" width="5" height="40" fill="currentColor" />
+                <rect x="80" y="0" width="2" height="40" fill="currentColor" />
+                <rect x="84" y="0" width="1" height="40" fill="currentColor" />
+                <rect x="87" y="0" width="4" height="40" fill="currentColor" />
+                <rect x="93" y="0" width="2" height="40" fill="currentColor" />
+                <rect x="97" y="0" width="3" height="40" fill="currentColor" />
+                <rect x="102" y="0" width="1" height="40" fill="currentColor" />
+                <rect x="105" y="0" width="4" height="40" fill="currentColor" />
+                <rect x="111" y="0" width="2" height="40" fill="currentColor" />
+                <rect x="115" y="0" width="1" height="40" fill="currentColor" />
+                <rect x="118" y="0" width="5" height="40" fill="currentColor" />
+                <rect x="125" y="0" width="2" height="40" fill="currentColor" />
+                <rect x="129" y="0" width="3" height="40" fill="currentColor" />
+                <rect x="134" y="0" width="1" height="40" fill="currentColor" />
+                <rect x="137" y="0" width="4" height="40" fill="currentColor" />
+                <rect x="143" y="0" width="2" height="40" fill="currentColor" />
+                <rect x="147" y="0" width="1" height="40" fill="currentColor" />
+                <rect x="150" y="0" width="3" height="40" fill="currentColor" />
+                <rect x="155" y="0" width="5" height="40" fill="currentColor" />
+                <rect x="162" y="0" width="2" height="40" fill="currentColor" />
+                <rect x="166" y="0" width="1" height="40" fill="currentColor" />
+                <rect x="169" y="0" width="4" height="40" fill="currentColor" />
+                <rect x="175" y="0" width="2" height="40" fill="currentColor" />
+                <rect x="179" y="0" width="3" height="40" fill="currentColor" />
+                <rect x="184" y="0" width="1" height="40" fill="currentColor" />
+                <rect x="187" y="0" width="4" height="40" fill="currentColor" />
+                <rect x="193" y="0" width="2" height="40" fill="currentColor" />
+                <rect x="197" y="0" width="3" height="40" fill="currentColor" />
+              </svg>
+              <div class="pos-barcode-text" id="receiptBarcodeText">*{% if receipt_order %}{{
+                receipt_order.ticket_number|default:receipt_order.id }}{% else %}W-101{% endif %}*</div>
+            </div>
+
+            <div class="pos-receipt-footer text-center">
+              <div class="pos-receipt-wifi">
+                <i class="bi bi-wifi me-1"></i> Free Wi-Fi: <strong>Cadence_Guest</strong> | Key:
+                <strong>coffee2026</strong>
+              </div>
+              <p class="mb-1 fw-bold text-body">Thank you for visiting Cadence Café!</p>
+              <p class="mb-1 text-muted small">សូមអរគុណសម្រាប់ការគាំទ្រ!</p>
+              <p class="pos-receipt-policy small text-muted mb-0">Please retain this receipt for table service or order
+                pickup.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-footer pos-receipt-modal-footer d-flex gap-2">
+          <button type="button" class="btn btn-outline-secondary flex-grow-1" id="posReceiptPrintBtn"
+            onclick="printReceipt()">
+            <i class="bi bi-printer me-1"></i> Print Ticket
+          </button>
+          <button type="button" class="btn btn-primary flex-grow-1" data-bs-dismiss="modal" id="posReceiptDoneBtn">
+            <i class="bi bi-plus-circle me-1"></i> Next Order
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FLOATING WORKFLOW TOAST -->
+  <div class="pos-toast" id="posWorkflowToast">
+    <i class="bi bi-check-circle-fill"></i>
+    <span id="posWorkflowToastMsg">Ready for next order</span>
+  </div>
+  {% endblock %}
+
+  {% block scripts %}
+  <script>
+    (function () {
+      const CSRF_TOKEN = '{{ csrf_token }}';
+      const ADD_URL = "{% url 'catalog' %}add/";
+      const CART_URL = "{% url 'cart' %}";
+      const CHECKOUT_URL = "{% url 'checkout' %}";
+      const CLEAR_URL = "{% url 'cart_clear' %}";
+
+      // Elements
+      const ticketPanel = document.getElementById('posTicketPanel');
+      const ticketLines = document.getElementById('posTicketLines');
+      const ticketEmpty = document.getElementById('posTicketEmpty');
+      const summaryCount = document.getElementById('posSummaryCount');
+      const summarySubtotal = document.getElementById('posSummarySubtotal');
+      const summaryTotal = document.getElementById('posSummaryTotal');
+      const btnTotal = document.getElementById('posBtnTotal');
+      const completeBtn = document.getElementById('posCompleteOrderBtn');
+      const mobileTicketCount = document.getElementById('mobileTicketCount');
+      const clearBtn = document.getElementById('posClearCartBtn');
+      const searchInput = document.getElementById('posSearchInput');
+      const visibleCountEl = document.getElementById('posVisibleCount');
+      const tableInput = document.getElementById('posTableNumber');
+      const customerNameInput = document.getElementById('posCustomerName');
+
+      // Modal elements
+      const receiptModalEl = document.getElementById('posReceiptModal');
+      if (receiptModalEl && receiptModalEl.parentElement !== document.body) {
+        document.body.appendChild(receiptModalEl);
+      }
+      const receiptModal = (receiptModalEl && typeof bootstrap !== 'undefined' && bootstrap.Modal) ? new bootstrap.Modal(receiptModalEl, {
+        backdrop: true,
+        keyboard: true,
+        focus: true
+      }) : null;
+      const receiptTicketNum = document.getElementById('receiptTicketNum');
+      const receiptOrderType = document.getElementById('receiptOrderType');
+      const receiptCustomerName = document.getElementById('receiptCustomerName');
+      const receiptDateTime = document.getElementById('receiptDateTime');
+      const receiptPayment = document.getElementById('receiptPayment');
+      const receiptTotalAmount = document.getElementById('receiptTotalAmount');
+      const receiptSubtotalEl = document.getElementById('receiptSubtotal');
+      const receiptTenderedEl = document.getElementById('receiptTendered');
+      const receiptBarcodeText = document.getElementById('receiptBarcodeText');
+
+      // If server rendered a receipt_order on reload, show it immediately
+      if (receiptModal && receiptModalEl && receiptModalEl.dataset.autoOpen === 'true') {
+        receiptModal.show();
+      }
+
+      // Sound feedback
+      function playClickAudio() {
+        try {
+          const ctx = new (window.AudioContext || window.webkitAudioContext)();
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(587.33, ctx.currentTime);
+          osc.frequency.exponentialRampToValueAtTime(880, ctx.currentTime + 0.08);
+          gain.gain.setValueAtTime(0.08, ctx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.08);
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.start();
+          osc.stop(ctx.currentTime + 0.09);
+        } catch (e) { }
+      }
+
+      function playSuccessAudio() {
+        try {
+          const ctx = new (window.AudioContext || window.webkitAudioContext)();
+          const osc1 = ctx.createOscillator();
+          const gain1 = ctx.createGain();
+          osc1.type = 'sine';
+          osc1.frequency.setValueAtTime(523.25, ctx.currentTime);
+          gain1.gain.setValueAtTime(0.12, ctx.currentTime);
+          gain1.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.2);
+          osc1.connect(gain1);
+          gain1.connect(ctx.destination);
+          osc1.start();
+          osc1.stop(ctx.currentTime + 0.2);
+
+          setTimeout(() => {
+            try {
+              const osc2 = ctx.createOscillator();
+              const gain2 = ctx.createGain();
+              osc2.type = 'sine';
+              osc2.frequency.setValueAtTime(783.99, ctx.currentTime);
+              gain2.gain.setValueAtTime(0.15, ctx.currentTime);
+              gain2.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.32);
+              osc2.connect(gain2);
+              gain2.connect(ctx.destination);
+              osc2.start();
+              osc2.stop(ctx.currentTime + 0.32);
+            } catch (e) { }
+          }, 100);
+        } catch (e) { }
+      }
+
+      // Toast notification
+      const toastEl = document.getElementById('posWorkflowToast');
+      const toastMsg = document.getElementById('posWorkflowToastMsg');
+      let toastTimer = null;
+      function showToast(msg) {
+        if (!toastEl) return;
+        if (toastMsg) toastMsg.textContent = msg;
+        toastEl.classList.add('show');
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => {
+          toastEl.classList.remove('show');
+        }, 2800);
+      }
+
+      // Quick Table Chips handler (toggle select/deselect)
+      document.querySelectorAll('.pos-chip-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const tbl = btn.dataset.table;
+          if (btn.classList.contains('active')) {
+            btn.classList.remove('active');
+            if (tableInput) tableInput.value = '';
+          } else {
+            document.querySelectorAll('.pos-chip-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            if (tableInput) tableInput.value = tbl;
+          }
+        });
+      });
+
+      // Dine In / Takeaway toggle
+      const typeDineIn = document.getElementById('typeDineIn');
+      const typeTakeaway = document.getElementById('typeTakeaway');
+      const tableWrapper = document.getElementById('posTableFieldWrapper');
+      const tableChips = document.getElementById('posTableChips');
+
+      function updateOrderTypeUI() {
+        if (typeTakeaway && typeTakeaway.checked) {
+          if (tableWrapper) tableWrapper.style.opacity = '0.45';
+          if (tableChips) tableChips.style.display = 'none';
+          if (tableInput) {
+            tableInput.disabled = true;
+            tableInput.value = '';
+            tableInput.placeholder = window.t ? window.t('Takeaway (No Table)') : 'Takeaway (No Table)';
+          }
+          document.querySelectorAll('.pos-chip-btn').forEach(b => b.classList.remove('active'));
+        } else {
+          if (tableWrapper) tableWrapper.style.opacity = '1';
+          if (tableChips) tableChips.style.display = 'flex';
+          if (tableInput) {
+            tableInput.disabled = false;
+            tableInput.placeholder = 'e.g. Table 4';
+          }
+        }
+      }
+      if (typeDineIn) typeDineIn.addEventListener('change', updateOrderTypeUI);
+      if (typeTakeaway) typeTakeaway.addEventListener('change', updateOrderTypeUI);
+      updateOrderTypeUI();
+
+      // Mobile Drawer Toggle
+      const drawerBtn = document.getElementById('posTicketDrawerBtn');
+      const drawerBackdrop = document.getElementById('posDrawerBackdrop');
+      if (drawerBtn && ticketPanel) {
+        drawerBtn.addEventListener('click', () => {
+          ticketPanel.classList.toggle('pos-drawer-open');
+          if (drawerBackdrop) drawerBackdrop.classList.toggle('is-open');
+        });
+      }
+      if (drawerBackdrop) {
+        drawerBackdrop.addEventListener('click', () => {
+          if (ticketPanel) ticketPanel.classList.remove('pos-drawer-open');
+          drawerBackdrop.classList.remove('is-open');
+        });
+      }
+
+      // Client-side instant filter on search input
+      if (searchInput) {
+        searchInput.addEventListener('input', function () {
+          const query = this.value.trim().toLowerCase();
+          let visible = 0;
+          document.querySelectorAll('.pos-card').forEach(card => {
+            const name = (card.dataset.productName || '').toLowerCase();
+            const cat = (card.dataset.productCategory || '').toLowerCase();
+            if (!query || name.includes(query) || cat.includes(query)) {
+              card.style.display = '';
+              visible++;
+            } else {
+              card.style.display = 'none';
+            }
+          });
+          if (visibleCountEl) visibleCountEl.textContent = visible;
+        });
+      }
+
+      // Update live quantity badges on menu item cards
+      function updateCardBadges(items) {
+        const qtyMap = {};
+        if (items && items.length > 0) {
+          items.forEach(it => {
+            qtyMap[it.product_id] = it.quantity;
+          });
+        }
+        document.querySelectorAll('.pos-card').forEach(card => {
+          const pid = parseInt(card.dataset.productId);
+          const badge = card.querySelector('.pos-card-qty-badge');
+          const qty = qtyMap[pid] || 0;
+          if (qty > 0) {
+            card.classList.add('pos-card-in-cart');
+            if (badge) {
+              const inTicketLabel = window.t ? window.t('in ticket') : 'in ticket';
+              badge.textContent = `${qty} ${inTicketLabel}`;
+              badge.classList.remove('d-none');
+            }
+          } else {
+            card.classList.remove('pos-card-in-cart');
+            if (badge) {
+              badge.textContent = '0';
+              badge.classList.add('d-none');
+            }
+          }
+        });
+      }
+
+      // Render cart data into ticket panel
+      let currentCartData = null;
+      function renderTicket(cart) {
+        currentCartData = cart;
+        updateCardBadges(cart ? cart.items : []);
+
+        const btnIcon = document.getElementById('posBtnIcon');
+        const btnLabel = document.getElementById('posBtnLabel');
+
+        if (!cart || !cart.items || cart.items.length === 0) {
+          ticketLines.innerHTML = `
+        <div class="pos-ticket-empty" id="posTicketEmpty">
+          <div class="pos-ticket-empty-icon"><i class="bi bi-cart3"></i></div>
+          <h4>${window.t ? window.t('Order ticket is empty') : 'Order ticket is empty'}</h4>
+          <p>${window.t ? window.t('Tap menu items on the left to start building this walk-in order.') : 'Tap menu items on the left to start building this walk-in order.'}</p>
+        </div>
+      `;
+          const zeroItemsText = window.t ? `0 ${window.t('items')}` : '0 items';
+          if (summaryCount) summaryCount.textContent = zeroItemsText;
+          if (summarySubtotal) summarySubtotal.textContent = '$0.00';
+          if (summaryTotal) summaryTotal.textContent = '$0.00';
+          if (completeBtn) {
+            completeBtn.classList.add('disabled');
+            completeBtn.disabled = true;
+          }
+          if (btnIcon) btnIcon.className = 'bi bi-bag-plus me-1';
+          if (btnLabel) btnLabel.textContent = window.t ? window.t('Select Items to Order') : 'Select Items to Order';
+          if (mobileTicketCount) mobileTicketCount.textContent = '0';
+          if (clearBtn) {
+            clearBtn.disabled = true;
+            clearBtn.style.opacity = '0.35';
+            clearBtn.style.pointerEvents = 'none';
+          }
+          return;
+        }
+
+        let html = '';
+        const eachText = window.t ? window.t('each') : 'each';
+        cart.items.forEach(it => {
+          html += `
+        <div class="pos-ticket-item" data-product-id="${it.product_id}">
+          <div class="pos-ticket-item-details">
+            <div class="pos-ticket-item-name">${it.name}</div>
+            <div class="pos-ticket-item-price">$${it.price.toFixed(2)} ${eachText}</div>
+          </div>
+          <div class="pos-ticket-item-controls">
+            <div class="pos-qty-stepper">
+              <button type="button" class="pos-stepper-btn btn-dec" data-action="decrease" data-id="${it.product_id}" aria-label="Decrease quantity">−</button>
+              <span class="pos-stepper-val">${it.quantity}</span>
+              <button type="button" class="pos-stepper-btn btn-inc" data-action="increase" data-id="${it.product_id}" aria-label="Increase quantity">+</button>
+            </div>
+            <div class="pos-ticket-item-subtotal">$${it.subtotal.toFixed(2)}</div>
+            <button type="button" class="pos-ticket-item-del" data-action="remove" data-id="${it.product_id}" title="Remove item" aria-label="Remove item">
+              <i class="bi bi-x"></i>
+            </button>
+          </div>
+        </div>
+      `;
+        });
+        ticketLines.innerHTML = html;
+
+        const itemLabel = window.t ? (cart.count === 1 ? window.t('item') : window.t('items')) : (cart.count === 1 ? 'item' : 'items');
+        if (summaryCount) summaryCount.textContent = `${cart.count} ${itemLabel}`;
+        if (summarySubtotal) summarySubtotal.textContent = `$${cart.total.toFixed(2)}`;
+        if (summaryTotal) summaryTotal.textContent = `$${cart.total.toFixed(2)}`;
+        if (completeBtn) {
+          completeBtn.classList.remove('disabled');
+          completeBtn.disabled = false;
+        }
+        if (btnIcon) btnIcon.className = 'bi bi-check-circle-fill me-1';
+        const completeText = window.t ? window.t('Complete Walk-in Order') : 'Complete Walk-in Order';
+        if (btnLabel) btnLabel.innerHTML = `<span>${completeText}</span> • <span id="posBtnTotal">$${cart.total.toFixed(2)}</span>`;
+        if (mobileTicketCount) mobileTicketCount.textContent = cart.count;
+        if (clearBtn) {
+          clearBtn.disabled = false;
+          clearBtn.style.opacity = '1';
+          clearBtn.style.pointerEvents = 'auto';
+        }
+      }
+
+      // Initial cart state extracted from server-rendered DOM
+      function getInitialCartData() {
+        const lines = ticketLines ? ticketLines.querySelectorAll('.pos-ticket-item') : [];
+        const items = [];
+        let count = parseInt(ticketPanel?.dataset.cartCount || '0', 10);
+        let total = parseFloat(ticketPanel?.dataset.cartTotal || '0');
+
+        lines.forEach(el => {
+          const pid = parseInt(el.dataset.productId || '0', 10);
+          const name = el.dataset.name || (el.querySelector('.pos-ticket-item-name') ? el.querySelector('.pos-ticket-item-name').textContent.trim() : '');
+          const price = parseFloat(el.dataset.price || '0');
+          const quantity = parseInt(el.dataset.quantity || (el.querySelector('.pos-stepper-val') ? el.querySelector('.pos-stepper-val').textContent.trim() : '0'), 10);
+          const subtotal = parseFloat(el.dataset.subtotal || (price * quantity).toFixed(2));
+          if (pid > 0 && quantity > 0) {
+            items.push({ product_id: pid, name, price, quantity, subtotal });
+          }
+        });
+
+        if (items.length > 0 && count === 0) {
+          count = items.reduce((acc, it) => acc + it.quantity, 0);
+          total = items.reduce((acc, it) => acc + it.subtotal, 0);
+        }
+
+        return { items, count, total };
+      }
+
+      currentCartData = getInitialCartData();
+      renderTicket(currentCartData);
+
+      window.addEventListener('cadence-lang-change', () => {
+        if (currentCartData) renderTicket(currentCartData);
+      });
+
+      // AJAX Cart Actions
+      async function performCartAction(url, data) {
+        playClickAudio();
+        const formData = new FormData();
+        for (const k in data) {
+          formData.append(k, data[k]);
+        }
+        formData.append('csrfmiddlewaretoken', CSRF_TOKEN);
+
+        try {
+          const resp = await fetch(url, {
+            method: 'POST',
+            headers: {
+              'X-Requested-With': 'XMLHttpRequest',
+              'X-CSRFToken': CSRF_TOKEN,
+            },
+            body: formData,
+          });
+          const res = await resp.json();
+          if (res.success && res.cart) {
+            renderTicket(res.cart);
+          } else if (!res.success && res.message) {
+            alert(res.message);
+          }
+        } catch (err) {
+          console.error("Cart action error:", err);
+        }
+      }
+
+      // Listen for Add to Order clicks on menu cards
+      document.addEventListener('click', function (e) {
+        const addBtn = e.target.closest('[data-action="add-item"]');
+        if (addBtn && !addBtn.disabled) {
+          const pid = addBtn.dataset.id;
+          addBtn.classList.add('pos-btn-clicked');
+          setTimeout(() => addBtn.classList.remove('pos-btn-clicked'), 250);
+          performCartAction(`${ADD_URL}${pid}/`, { quantity: 1 });
+          return;
+        }
+
+        // Stepper Increase
+        const incBtn = e.target.closest('[data-action="increase"]');
+        if (incBtn) {
+          const pid = incBtn.dataset.id;
+          const row = incBtn.closest('.pos-ticket-item');
+          const curQty = parseInt(row.querySelector('.pos-stepper-val').textContent.trim()) || 1;
+          performCartAction(CART_URL, { action: 'update', product_id: pid, quantity: curQty + 1 });
+          return;
+        }
+
+        // Stepper Decrease
+        const decBtn = e.target.closest('[data-action="decrease"]');
+        if (decBtn) {
+          const pid = decBtn.dataset.id;
+          const row = decBtn.closest('.pos-ticket-item');
+          const curQty = parseInt(row.querySelector('.pos-stepper-val').textContent.trim()) || 1;
+          if (curQty > 1) {
+            performCartAction(CART_URL, { action: 'update', product_id: pid, quantity: curQty - 1 });
+          } else {
+            performCartAction(CART_URL, { action: 'remove', product_id: pid });
+          }
+          return;
+        }
+
+        // Stepper Remove
+        const remBtn = e.target.closest('[data-action="remove"]');
+        if (remBtn) {
+          const pid = remBtn.dataset.id;
+          performCartAction(CART_URL, { action: 'remove', product_id: pid });
+          return;
+        }
+      });
+
+      // Clear Ticket Button
+      if (clearBtn) {
+        clearBtn.addEventListener('click', function () {
+          const msg = window.t ? window.t('Clear the current walk-in order ticket?') : 'Clear the current walk-in order ticket?';
+          if (confirm(msg)) {
+            performCartAction(CLEAR_URL, {});
+          }
+        });
+      }
+
+      // Next Order & Reset Workflow
+      function resetForNextOrder() {
+        if (typeDineIn) {
+          typeDineIn.checked = true;
+          updateOrderTypeUI();
+        }
+        if (tableInput) tableInput.value = '';
+        document.querySelectorAll('.pos-chip-btn').forEach(b => b.classList.remove('active'));
+        const payCash = document.getElementById('payCash');
+        if (payCash) payCash.checked = true;
+
+        if (window.history && window.history.replaceState) {
+          window.history.replaceState({}, document.title, window.location.pathname);
+        }
+        playSuccessAudio();
+        showToast(window.t ? window.t('Ready for next order') : 'Ready for next order');
+        if (searchInput) searchInput.focus();
+      }
+
+      const receiptDoneBtn = document.getElementById('posReceiptDoneBtn');
+      if (receiptDoneBtn) {
+        receiptDoneBtn.addEventListener('click', function (e) {
+          e.preventDefault();
+          e.stopPropagation();
+          if (receiptModal) receiptModal.hide();
+          resetForNextOrder();
+        });
+      }
+
+      const receiptCloseBtn = document.getElementById('posReceiptCloseBtn');
+      if (receiptCloseBtn) {
+        receiptCloseBtn.addEventListener('click', function (e) {
+          e.preventDefault();
+          e.stopPropagation();
+          if (receiptModal) receiptModal.hide();
+          resetForNextOrder();
+        });
+      }
+
+      if (receiptModalEl) {
+        receiptModalEl.addEventListener('click', function (e) {
+          if (e.target === receiptModalEl) {
+            if (receiptModal) receiptModal.hide();
+            resetForNextOrder();
+          }
+        });
+        receiptModalEl.addEventListener('hidden.bs.modal', function () {
+          resetForNextOrder();
+        });
+      }
+
+      // Dedicated receipt printing via hidden isolated iframe
+      window.printReceipt = function printReceipt() {
+        const receiptEl = document.querySelector('.pos-receipt-paper');
+        if (!receiptEl) {
+          window.print();
+          return;
+        }
+
+        let oldFrame = document.getElementById('receiptPrintFrame');
+        if (oldFrame) oldFrame.remove();
+
+        const printFrame = document.createElement('iframe');
+        printFrame.id = 'receiptPrintFrame';
+        printFrame.style.position = 'fixed';
+        printFrame.style.right = '0';
+        printFrame.style.bottom = '0';
+        printFrame.style.width = '0';
+        printFrame.style.height = '0';
+        printFrame.style.border = '0';
+        printFrame.style.visibility = 'hidden';
+        document.body.appendChild(printFrame);
+
+        const receiptClone = receiptEl.cloneNode(true);
+
+        const frameDoc = printFrame.contentWindow.document;
+        frameDoc.open();
+        frameDoc.write(`<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Receipt - Cadence Café</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700;900&family=Kantumruy+Pro:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    @page {
+      size: 80mm auto;
+      margin: 4mm 2mm 6mm 2mm;
+    }
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Roboto', 'Kantumruy Pro', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
+      -webkit-print-color-adjust: exact !important;
+      print-color-adjust: exact !important;
+    }
+    body {
+      width: 74mm;
+      margin: 0 auto;
+      padding: 4px;
+      background: #ffffff !important;
+      color: #000000 !important;
+      font-family: 'Roboto', 'Kantumruy Pro', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
+      font-size: 11px;
+      line-height: 1.35;
+    }
+    .pos-receipt-paper, .pos-receipt-paper * {
+      font-family: 'Roboto', 'Kantumruy Pro', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
+    }
+    .pos-receipt-paper {
+      width: 100% !important;
+      background: #ffffff !important;
+      color: #000000 !important;
+      border: none !important;
+      padding: 0 !important;
+      box-shadow: none !important;
+    }
+    .pos-receipt-store-brand {
+      text-align: center;
+      font-size: 14px;
+      font-weight: 800;
+      letter-spacing: 0.05em;
+      margin-bottom: 2px;
+      color: #000000 !important;
+    }
+    .pos-receipt-tagline, .pos-receipt-address, .pos-receipt-taxid {
+      text-align: center;
+      font-size: 9px;
+      color: #222222 !important;
+      line-height: 1.25;
+    }
+    .pos-receipt-divider-line {
+      border-top: 1.5px solid #000000;
+      margin: 6px 0;
+    }
+    .pos-receipt-divider-dashed {
+      border-top: 1px dashed #444444;
+      margin: 6px 0;
+    }
+    .pos-receipt-ticket-box {
+      text-align: center;
+      border: 1.5px dashed #000000;
+      padding: 6px 4px;
+      margin: 6px 0;
+      background: #ffffff !important;
+    }
+    .pos-receipt-ticket-label {
+      font-size: 8.5px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      color: #000000 !important;
+    }
+    .pos-receipt-ticket-num {
+      font-size: 26px;
+      font-weight: 900;
+      letter-spacing: 0.05em;
+      line-height: 1.1;
+      margin: 2px 0;
+      color: #000000 !important;
+    }
+    .pos-receipt-badge {
+      display: inline-block;
+      font-size: 9px;
+      font-weight: 700;
+      padding: 2px 6px;
+      border: 1px solid #000000;
+      background: #ffffff !important;
+      color: #000000 !important;
+      margin-top: 2px;
+    }
+    .pos-receipt-meta {
+      font-size: 10px;
+      margin: 6px 0;
+    }
+    .pos-receipt-meta-row {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 2px;
+    }
+    .pos-receipt-meta-row .meta-label {
+      color: #333333 !important;
+    }
+    .pos-receipt-meta-row .meta-val {
+      font-weight: 700;
+      color: #000000 !important;
+    }
+    .pos-receipt-table-head {
+      display: flex;
+      justify-content: space-between;
+      font-size: 9.5px;
+      font-weight: 800;
+      color: #000000 !important;
+    }
+    .pos-receipt-items {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+    .pos-receipt-item-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      font-size: 11px;
+    }
+    .pos-receipt-item-main {
+      flex: 1;
+      padding-right: 6px;
+    }
+    .pos-receipt-item-name {
+      font-weight: 700;
+      line-height: 1.2;
+      color: #000000 !important;
+    }
+    .pos-receipt-item-calc {
+      font-size: 9.5px;
+      color: #333333 !important;
+      margin-top: 1px;
+    }
+    .pos-receipt-item-amt {
+      font-weight: 800;
+      white-space: nowrap;
+      font-variant-numeric: tabular-nums;
+      color: #000000 !important;
+    }
+    .pos-receipt-calc-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 10px;
+      margin-bottom: 2px;
+      color: #000000 !important;
+    }
+    .pos-receipt-calc-row strong {
+      color: #000000 !important;
+    }
+    .pos-receipt-total-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 15px;
+      font-weight: 900;
+      padding: 4px 0;
+      color: #000000 !important;
+    }
+    .pos-receipt-total-row strong {
+      font-size: 18px;
+      color: #000000 !important;
+    }
+    .pos-receipt-barcode {
+      text-align: center;
+      margin-top: 8px;
+    }
+    .pos-barcode-svg rect {
+      fill: #000000 !important;
+    }
+    .pos-barcode-text {
+      font-size: 9px;
+      letter-spacing: 0.15em;
+      font-weight: 700;
+      color: #000000 !important;
+    }
+    .pos-receipt-footer {
+      text-align: center;
+      font-size: 9px;
+      color: #222222 !important;
+      margin-top: 8px;
+      line-height: 1.35;
+    }
+    .pos-receipt-wifi {
+      font-size: 8.5px;
+      margin-bottom: 4px;
+      padding: 2px 4px;
+      border: 1px solid #444444;
+      display: inline-block;
+    }
+  </style>
+</head>
+<body>
+  ${receiptClone.outerHTML}
+</body>
+</html>`);
+        frameDoc.close();
+
+        const doPrint = () => {
+          try {
+            printFrame.contentWindow.focus();
+            printFrame.contentWindow.print();
+          } catch (err) {
+            console.warn("Iframe print error, falling back to window.print():", err);
+            window.print();
+          }
+        };
+
+        if (printFrame.contentWindow && printFrame.contentWindow.document && printFrame.contentWindow.document.fonts && printFrame.contentWindow.document.fonts.ready) {
+          printFrame.contentWindow.document.fonts.ready.then(() => {
+            setTimeout(doPrint, 120);
+          }).catch(() => setTimeout(doPrint, 250));
+        } else {
+          setTimeout(doPrint, 250);
+        }
+      };
+
+      // Complete Order Action
+      if (completeBtn) {
+        completeBtn.addEventListener('click', async function (e) {
+          e.preventDefault();
+          if (completeBtn.disabled || completeBtn.classList.contains('disabled')) return;
+
+          const hasItems = currentCartData && currentCartData.items && currentCartData.items.length > 0;
+          if (!hasItems) return;
+
+          const orderTypeVal = document.querySelector('input[name="order_type_toggle"]:checked')?.value || 'dine_in';
+          const custNameVal = customerNameInput?.value.trim() || 'Walk-in Guest';
+          const tableNumVal = tableInput?.value.trim() || '';
+          const payMethodVal = document.querySelector('input[name="payment_method_toggle"]:checked')?.value || 'cash';
+
+          // Show spinner
+          const btnText = completeBtn.querySelector('.pos-btn-text');
+          const btnSpinner = completeBtn.querySelector('.pos-btn-spinner');
+          if (btnText) btnText.classList.add('d-none');
+          if (btnSpinner) btnSpinner.classList.remove('d-none');
+          completeBtn.disabled = true;
+
+          const formData = new FormData();
+          formData.append('csrfmiddlewaretoken', CSRF_TOKEN);
+          formData.append('order_type', orderTypeVal);
+          formData.append('customer_name', custNameVal);
+          formData.append('table_number', tableNumVal);
+          formData.append('payment_method', payMethodVal);
+
+          try {
+            const resp = await fetch(CHECKOUT_URL, {
+              method: 'POST',
+              headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRFToken': CSRF_TOKEN,
+              },
+              body: formData,
+            });
+
+            const res = await resp.json();
+            if (res.success) {
+              // Reset UI
+              renderTicket({ items: [], count: 0, total: 0 });
+
+              // Populate receipt modal
+              if (receiptTicketNum) receiptTicketNum.textContent = res.ticket_number;
+              if (receiptOrderType) {
+                let label = res.order_type_display.toUpperCase();
+                if (res.table_number) label += ` • ${res.table_number.toUpperCase()}`;
+                receiptOrderType.textContent = label;
+              }
+              if (receiptCustomerName) receiptCustomerName.textContent = res.customer_name;
+              if (receiptDateTime) receiptDateTime.textContent = res.created_at;
+              if (receiptPayment) receiptPayment.textContent = res.payment_method_display;
+              if (receiptTotalAmount) receiptTotalAmount.textContent = `$${res.total.toFixed(2)}`;
+              if (receiptSubtotalEl) receiptSubtotalEl.textContent = `$${res.total.toFixed(2)}`;
+              if (receiptTenderedEl) receiptTenderedEl.textContent = `$${res.total.toFixed(2)}`;
+              if (receiptBarcodeText) receiptBarcodeText.textContent = `*${res.ticket_number}*`;
+
+              if (receiptItemsList && res.items) {
+                let itemsHtml = '';
+                res.items.forEach(it => {
+                  const unitPrice = (typeof it.price === 'number') ? it.price.toFixed(2) : (it.subtotal / (it.quantity || 1)).toFixed(2);
+                  itemsHtml += `
+                <div class="pos-receipt-item-row">
+                  <div class="pos-receipt-item-main">
+                    <div class="pos-receipt-item-name">${it.name}</div>
+                    <div class="pos-receipt-item-calc">${it.quantity} × $${unitPrice}</div>
+                  </div>
+                  <div class="pos-receipt-item-amt">$${it.subtotal.toFixed(2)}</div>
+                </div>
+              `;
+                });
+                receiptItemsList.innerHTML = itemsHtml;
+              }
+
+              // Close mobile drawer if open
+              if (ticketPanel) ticketPanel.classList.remove('pos-drawer-open');
+              if (drawerBackdrop) drawerBackdrop.classList.remove('is-open');
+
+              // Open receipt modal!
+              if (receiptModal) {
+                receiptModal.show();
+              }
+              playSuccessAudio();
+            } else {
+              alert(res.message || "Failed to place order. Please try again.");
+            }
+          } catch (err) {
+            console.error("Checkout error:", err);
+            // Fallback to standard form submission
+            const hType = document.getElementById('hiddenOrderType');
+            const hName = document.getElementById('hiddenCustomerName');
+            const hTable = document.getElementById('hiddenTableNumber');
+            const hPay = document.getElementById('hiddenPaymentMethod');
+            const f = document.getElementById('posCheckoutForm');
+            if (f && hType && hName && hTable && hPay) {
+              hType.value = orderTypeVal;
+              hName.value = custNameVal;
+              hTable.value = tableNumVal;
+              hPay.value = payMethodVal;
+              f.submit();
+            } else {
+              alert("Could not complete order. Please check your network connection and try again.");
+            }
+          } finally {
+            if (btnText) btnText.classList.remove('d-none');
+            if (btnSpinner) btnSpinner.classList.add('d-none');
+            const activeItems = currentCartData && currentCartData.items && currentCartData.items.length > 0;
+            completeBtn.disabled = !activeItems;
+            completeBtn.classList.toggle('disabled', !activeItems);
+          }
+        });
+      }
+    })();
+  </script>
+  {% endblock %}

@@ -31,7 +31,8 @@ def register(request):
 
 
 def home(request):
-    """Root URL: route each visitor to their role's landing page."""
+    """Root URL: route each visitor to their role's landing page.
+    Unauthenticated visitors land directly on the Walk-in ordering kiosk."""
     if not request.user.is_authenticated:
-        return redirect("login")
+        return redirect("catalog")
     return redirect(_landing_url(request.user))

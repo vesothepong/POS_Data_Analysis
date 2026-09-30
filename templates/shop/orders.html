@@ -1,5 +1,86 @@
-{% extends 'shop/base_shop.html' %}{% block title %}My Orders{% endblock %}
+{% extends 'shop/base_shop.html' %}
+{% block title %}Recent Walk-in Tickets{% endblock %}
+
 {% block content %}
-<div class="page-heading"><div><span class="eyebrow">Account / Orders</span><h1>My Orders</h1><p>All your purchases in one place.</p></div><a class="btn btn-outline-secondary" href="{% url 'catalog' %}"><i class="bi bi-grid"></i> Browse products</a></div>
-{% for o in orders %}<section class="card table-panel shop-order"><div class="panel-head panel-head-table"><div><span class="shop-order-label">ORDER #{{ o.id }}</span><h2>{{ o.created_at|date:"M d, Y" }}</h2><p>{{ o.created_at|date:"H:i" }}</p></div><div class="shop-order-total"><span>Total</span><strong class="numeric">${{ o.total_amount|floatformat:2 }}</strong></div></div><div class="table-responsive"><table class="table align-middle mb-0"><thead><tr><th>Product</th><th class="text-end">Qty</th><th class="text-end">Price</th><th class="text-end">Subtotal</th></tr></thead><tbody>{% for it in o.items.all %}<tr><td class="shop-product-name">{{ it.product.name }}</td><td class="text-end numeric">{{ it.quantity }}</td><td class="text-end numeric">${{ it.price|floatformat:2 }}</td><td class="text-end numeric emphasis">${{ it.subtotal|floatformat:2 }}</td></tr>{% endfor %}</tbody></table></div></section>{% empty %}<div class="shop-empty"><i class="bi bi-receipt"></i><h2>No orders yet</h2><p>Your order history will appear here after checkout.</p><a class="btn btn-primary" href="{% url 'catalog' %}">Shop products <i class="bi bi-arrow-right"></i></a></div>{% endfor %}
+<div class="pos-page-header mb-4">
+  <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
+    <div>
+      <span class="eyebrow"><i class="bi bi-clock-history me-1"></i>Counter Activity</span>
+      <h1 class="h2 mb-1">Recent Walk-in Tickets</h1>
+      <p class="text-muted mb-0">Review receipts and tickets placed at the walk-in counter or kiosk.</p>
+    </div>
+    <a class="btn btn-primary" href="{% url 'catalog' %}">
+      <i class="bi bi-grid-3x3-gap-fill me-1"></i> Back to Walk-in Menu
+    </a>
+  </div>
+</div>
+
+{% if orders %}
+  <div class="row g-4">
+    {% for o in orders %}
+      <div class="col-lg-6">
+        <section class="card pos-order-ticket-card shadow-sm h-100">
+          <div class="card-header pos-order-card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
+            <div>
+              <span class="pos-ticket-tag">{{ o.ticket_number|default:o.id }}</span>
+              <h2 class="h5 mb-0 mt-1">{{ o.customer_name|default:"Walk-in Guest" }}</h2>
+              <small class="text-muted">{{ o.created_at|date:"M d, Y • H:i" }}</small>
+            </div>
+            <div class="text-end">
+              <span class="badge {% if o.order_type == 'dine_in' %}bg-primary-subtle text-primary-emphasis border border-primary-subtle{% else %}bg-warning-subtle text-warning-emphasis border border-warning-subtle{% endif %} mb-1">
+                <i class="bi {% if o.order_type == 'dine_in' %}bi-cup-hot{% else %}bi-bag-check{% endif %} me-1"></i>
+                {{ o.get_order_type_display|upper }} {% if o.table_number %}• {{ o.table_number|upper }}{% endif %}
+              </span>
+              <div class="small text-muted">
+                <i class="bi bi-credit-card me-1"></i>{{ o.get_payment_method_display }}
+              </div>
+            </div>
+          </div>
+
+          <div class="table-responsive flex-grow-1">
+            <table class="table table-hover align-middle mb-0 pos-ticket-table">
+              <thead>
+                <tr>
+                  <th>Product</th>
+                  <th class="text-center">Qty</th>
+                  <th class="text-end">Price</th>
+                  <th class="text-end">Subtotal</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for it in o.items.all %}
+                  <tr>
+                    <td class="fw-medium">{{ it.product.name }}</td>
+                    <td class="text-center"><span class="badge bg-secondary-subtle text-secondary-emphasis">{{ it.quantity }}</span></td>
+                    <td class="text-end text-muted numeric">${{ it.price|floatformat:2 }}</td>
+                    <td class="text-end numeric fw-semibold">${{ it.subtotal|floatformat:2 }}</td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+
+          <div class="card-footer pos-order-card-footer d-flex justify-content-between align-items-center">
+            <div>
+              <span class="text-muted small d-block">Order Total</span>
+              <strong class="fs-5 numeric">${{ o.total_amount|floatformat:2 }}</strong>
+            </div>
+            <button type="button" class="btn btn-outline-secondary btn-sm" onclick="window.print()">
+              <i class="bi bi-printer me-1"></i> Print Ticket
+            </button>
+          </div>
+        </section>
+      </div>
+    {% endfor %}
+  </div>
+{% else %}
+  <div class="pos-empty-state">
+    <div class="pos-empty-icon"><i class="bi bi-receipt"></i></div>
+    <h3>No recent walk-in tickets yet</h3>
+    <p>Placed walk-in orders from this session or account will appear here.</p>
+    <a class="btn btn-primary" href="{% url 'catalog' %}">
+      <i class="bi bi-grid-3x3-gap-fill me-1"></i> Start Walk-in Order
+    </a>
+  </div>
+{% endif %}
 {% endblock %}

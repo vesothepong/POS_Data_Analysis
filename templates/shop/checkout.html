@@ -1,6 +1,135 @@
-{% extends 'shop/base_shop.html' %}{% block title %}Checkout{% endblock %}
+{% extends 'shop/base_shop.html' %}
+{% block title %}Complete Walk-in Order{% endblock %}
+
 {% block content %}
-<div class="page-heading"><div><span class="eyebrow">Shopping / Checkout</span><h1>Review your order</h1><p>Confirm the items and total before placing your order.</p></div><a class="btn btn-outline-secondary" href="{% url 'cart' %}"><i class="bi bi-arrow-left"></i> Back to cart</a></div>
-{% if items %}<div class="card table-panel"><div class="panel-head panel-head-table"><div><h2>Order summary</h2><p>{{ items|length }} product{{ items|length|pluralize }}</p></div></div><div class="table-responsive"><table class="table align-middle mb-0"><thead><tr><th>Product</th><th class="text-end">Qty</th><th class="text-end">Price</th><th class="text-end">Subtotal</th></tr></thead><tbody>{% for it in items %}<tr><td class="shop-product-name">{{ it.product.name }}</td><td class="text-end numeric">{{ it.quantity }}</td><td class="text-end numeric">${{ it.price|floatformat:2 }}</td><td class="text-end numeric emphasis">${{ it.subtotal|floatformat:2 }}</td></tr>{% endfor %}</tbody></table></div></div><div class="shop-total-bar"><div><span>Order total</span><strong>${{ total|floatformat:2 }}</strong></div><form method="post">{% csrf_token %}<button class="btn btn-primary" type="submit"><i class="bi bi-check2-circle"></i> Place order</button></form></div>
-{% else %}<div class="shop-empty"><i class="bi bi-bag"></i><h2>Nothing to check out yet</h2><p>Add products to your cart first.</p><a class="btn btn-primary" href="{% url 'catalog' %}">Browse products <i class="bi bi-arrow-right"></i></a></div>{% endif %}
+<div class="pos-page-header mb-4">
+  <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
+    <div>
+      <span class="eyebrow"><i class="bi bi-receipt me-1"></i>Checkout</span>
+      <h1 class="h2 mb-1">Finalize Walk-in Order</h1>
+      <p class="text-muted mb-0">Confirm dining option, customer details, and payment method.</p>
+    </div>
+    <a class="btn btn-outline-secondary" href="{% url 'catalog' %}">
+      <i class="bi bi-arrow-left me-1"></i> Back to Menu
+    </a>
+  </div>
+</div>
+
+{% if items %}
+  <form method="post" class="row g-4">
+    {% csrf_token %}
+    <div class="col-lg-7">
+      <div class="card table-panel shadow-sm mb-4">
+        <div class="panel-head panel-head-table">
+          <h2 class="h5 mb-0">Order Summary ({{ items|length }} item{{ items|length|pluralize }})</h2>
+        </div>
+        <div class="table-responsive">
+          <table class="table align-middle mb-0">
+            <thead>
+              <tr>
+                <th>Product</th>
+                <th class="text-center">Qty</th>
+                <th class="text-end">Price</th>
+                <th class="text-end">Subtotal</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for it in items %}
+                <tr>
+                  <td class="fw-semibold">{{ it.product.name }}</td>
+                  <td class="text-center"><span class="badge bg-secondary-subtle text-secondary-emphasis">{{ it.quantity }}</span></td>
+                  <td class="text-end text-muted numeric">${{ it.price|floatformat:2 }}</td>
+                  <td class="text-end numeric fw-bold">${{ it.subtotal|floatformat:2 }}</td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-5">
+      <div class="card p-4 shadow-sm">
+        <h3 class="h5 mb-3">Order Options</h3>
+
+        <!-- Dining Option -->
+        <label class="form-label fw-bold">Dining Option</label>
+        <div class="pos-order-type-picker mb-3">
+          <label class="pos-type-option">
+            <input type="radio" name="order_type" value="dine_in" checked>
+            <div class="pos-type-card">
+              <i class="bi bi-cup-hot-fill"></i>
+              <strong>Dine In</strong>
+            </div>
+          </label>
+          <label class="pos-type-option">
+            <input type="radio" name="order_type" value="takeaway">
+            <div class="pos-type-card">
+              <i class="bi bi-bag-check-fill"></i>
+              <strong>Takeaway</strong>
+            </div>
+          </label>
+        </div>
+
+        <!-- Guest Name & Table -->
+        <div class="mb-3">
+          <label class="form-label" for="coCustName">Guest / Customer Name</label>
+          <input type="text" id="coCustName" name="customer_name" class="form-control" value="{% if request.user.is_authenticated %}{{ request.user.username }}{% else %}Walk-in Guest{% endif %}">
+        </div>
+        <div class="mb-3">
+          <label class="form-label" for="coTableNum">Table or Buzzer # (optional)</label>
+          <input type="text" id="coTableNum" name="table_number" class="form-control" placeholder="e.g. Table 4">
+        </div>
+
+        <!-- Payment Method -->
+        <label class="form-label fw-bold">Payment Method</label>
+        <div class="pos-payment-grid mb-4">
+          <label class="pos-pay-tile">
+            <input type="radio" name="payment_method" value="cash" checked>
+            <div class="pos-pay-card">
+              <i class="bi bi-cash-stack"></i>
+              <span>Cash</span>
+              <small>Counter</small>
+            </div>
+          </label>
+          <label class="pos-pay-tile">
+            <input type="radio" name="payment_method" value="card">
+            <div class="pos-pay-card">
+              <i class="bi bi-credit-card-2-front"></i>
+              <span>Card</span>
+              <small>Terminal</small>
+            </div>
+          </label>
+          <label class="pos-pay-tile">
+            <input type="radio" name="payment_method" value="qr">
+            <div class="pos-pay-card">
+              <i class="bi bi-qr-code-scan"></i>
+              <span>Scan QR</span>
+              <small>Mobile Pay</small>
+            </div>
+          </label>
+        </div>
+
+        <!-- Total and submit -->
+        <div class="border-top pt-3 mb-3 d-flex justify-content-between align-items-center">
+          <span class="fs-5 fw-semibold">Total Due</span>
+          <strong class="fs-2 text-primary numeric">${{ total|floatformat:2 }}</strong>
+        </div>
+
+        <button class="btn btn-primary w-100 py-2 fs-6 fw-bold" type="submit">
+          <i class="bi bi-check-circle-fill me-1"></i> Place Walk-in Order
+        </button>
+      </div>
+    </div>
+  </form>
+{% else %}
+  <div class="pos-empty-state">
+    <div class="pos-empty-icon"><i class="bi bi-cart3"></i></div>
+    <h3>Nothing to check out yet</h3>
+    <p>Add food or beverage items from the walk-in menu first.</p>
+    <a class="btn btn-primary" href="{% url 'catalog' %}">
+      <i class="bi bi-grid-3x3-gap-fill me-1"></i> Browse Walk-in Menu
+    </a>
+  </div>
+{% endif %}
 {% endblock %}

@@ -32,10 +32,10 @@ python -m unittest forecasting.test_calc products.test_calc analytics.test_calc 
 ```
 
 ## Roles
-- **Admin** (`is_staff`): dashboard, products, sales, inventory, forecasting, analytics, reports, and Customer Orders. Created with `createsuperuser` or `seed_demo`.
-- **Customer** (default for anyone who registers): the storefront only — browse products, cart, checkout, order history. New accounts are never staff, so registration can't create an admin.
+- **Admin** (`is_staff`): dashboard, products, sales, inventory, forecasting, analytics, reports, and Walk-in Customer Orders. Created with `createsuperuser` or `seed_demo`.
+- **Walk-in Customer / Guest**: streamlined walk-in ordering kiosk — direct access without login, Dine In / Takeaway options, payment method selection (Cash, Card, QR), live POS order ticket, digital thermal receipt generation, and recent ticket history.
 
-Logging in sends each role to its own home page (admin -> Dashboard, customer -> Shop) — see `accounts.views.home`. A customer who checks out immediately creates a `SalesRecord` for each line, so **Sales Data, Data Analytics and Demand Forecast update live from real purchases**, with no XLSX upload needed. The XLSX upload is still there for bulk/historical data.
+Unauthenticated visitors land directly on the Walk-in Kiosk (`/shop/`), while logged-in admins go straight to their Dashboard. Placing a walk-in order immediately creates a `SalesRecord` for each line, so **Sales Data, Data Analytics, and Demand Forecast update live in real-time from walk-in purchases**, with no manual upload required. The XLSX upload remains available for bulk/historical data.
 
 `python manage.py seed_demo` creates both a demo admin and a demo customer:
 | Role | Username | Password |
@@ -54,9 +54,9 @@ Logging in sends each role to its own home page (admin -> Dashboard, customer ->
 | Demand Forecast | Forecast one product or all products; chart with actual, trend line and forecast |
 | Data Analytics | **Comprehensive Statistical Suite**: Monthly trends, ABC Pareto analysis (80/20 rule), descriptive stats (Mean, Std Dev, Variance, Skewness, CV), prescriptive optimization (EOQ, Safety Stock, ROP), and product OLS regression ($y = mx + b$, $R^2$, 95% CI) |
 | Forecast Accuracy | Train/test split, MAE / RMSE / MAPE, comparison with a plain-average baseline |
-| Shop / Cart / Checkout / My Orders | Customer-facing storefront with food & drink photo cards; checkout creates an Order and mirrors each line into SalesRecord |
+| Walk-in POS Kiosk (`/shop/`) | Modern split-screen POS for walk-in counter ordering with category pills, live sticky order ticket, Dine-In/Takeaway, payment selector, and digital thermal receipt |
 | Reports | Sales, Inventory, ABC & Statistical Inventory, Product Performance, Demand Forecast, Reorder, Revenue; export to Excel (.xlsx) or CSV |
-| Customer Orders (admin) | Every storefront order, newest first |
+| Walk-in Customer Orders (admin) | Every walk-in order, newest first, displaying ticket number, dining option, table #, guest name, payment method, and line breakdown |
 
 ## Business rules
 - Forecast: monthly units per product, x = month number, y = units; predicts the next month (needs >= 2 months).
