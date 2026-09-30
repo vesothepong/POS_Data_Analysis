@@ -1,0 +1,662 @@
+{% extends 'base.html' %}
+{% block title %}Data Analytics & Statistical Insights · Cadence{% endblock %}
+
+{% block content %}
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-3">
+  <div>
+    <div class="d-flex align-items-center gap-2 mb-1">
+      <h2 class="mb-0">Data Analytics & Statistical Intelligence</h2>
+      <span class="badge bg-primary-subtle text-primary border border-primary-subtle">Course Showcase</span>
+    </div>
+    <p class="text-muted small mb-0">
+      Exploratory Data Analysis (EDA), ABC Pareto Classification, Ordinary Least Squares (OLS) Regression, and Prescriptive Inventory Optimization (EOQ &amp; Safety Stock).
+    </p>
+  </div>
+  <div class="d-flex gap-2">
+    <a class="btn btn-outline-secondary btn-sm d-inline-flex align-items-center gap-1" href="{% url 'reports' %}?type=abc_analytics">
+      <i class="bi bi-file-earmark-spreadsheet"></i> Full Statistical Report
+    </a>
+    <a class="btn btn-primary btn-sm d-inline-flex align-items-center gap-1" href="{% url 'forecast' %}">
+      <i class="bi bi-stars"></i> Demand Forecast
+    </a>
+  </div>
+</div>
+
+<!-- Top Statistical KPI Row -->
+<div class="row g-3 mb-4" id="kpiRow">
+  <div class="col-6 col-md-3">
+    <div class="card p-3 h-100">
+      <div class="d-flex align-items-center justify-content-between mb-1">
+        <small class="text-muted text-uppercase fw-semibold" style="font-size: 11px;">Total Revenue</small>
+        <i class="bi bi-currency-dollar text-success" style="font-size: 1.2rem;"></i>
+      </div>
+      <div class="kpi" id="kpiRevenue">$--</div>
+      <small class="text-muted" style="font-size: 11px;">Across all historical sales</small>
+    </div>
+  </div>
+  <div class="col-6 col-md-3">
+    <div class="card p-3 h-100">
+      <div class="d-flex align-items-center justify-content-between mb-1">
+        <small class="text-muted text-uppercase fw-semibold" style="font-size: 11px;">Total Volume</small>
+        <i class="bi bi-box-seam text-primary" style="font-size: 1.2rem;"></i>
+      </div>
+      <div class="kpi" id="kpiUnits">--</div>
+      <small class="text-muted" style="font-size: 11px;">Units delivered</small>
+    </div>
+  </div>
+  <div class="col-6 col-md-3">
+    <div class="card p-3 h-100">
+      <div class="d-flex align-items-center justify-content-between mb-1">
+        <small class="text-muted text-uppercase fw-semibold" style="font-size: 11px;">ABC Class A Focus</small>
+        <i class="bi bi-pie-chart text-warning" style="font-size: 1.2rem;"></i>
+      </div>
+      <div class="kpi" id="kpiClassA">-- items</div>
+      <small class="text-muted" style="font-size: 11px;">Drive top 70% of total revenue</small>
+    </div>
+  </div>
+  <div class="col-6 col-md-3">
+    <div class="card p-3 h-100">
+      <div class="d-flex align-items-center justify-content-between mb-1">
+        <small class="text-muted text-uppercase fw-semibold" style="font-size: 11px;">Price Elasticity</small>
+        <i class="bi bi-graph-down-arrow text-info" style="font-size: 1.2rem;"></i>
+      </div>
+      <div class="kpi" id="kpiCorr" style="font-size: 1.35rem;">--</div>
+      <small class="text-muted" id="kpiElasticity" style="font-size: 11px;">Pearson r (Price vs Units)</small>
+    </div>
+  </div>
+</div>
+
+<!-- Navigation Tabs -->
+<ul class="nav nav-pills mb-3 border-bottom pb-2 gap-2" id="analyticsTabs" role="tablist">
+  <li class="nav-item" role="presentation">
+    <button class="nav-link active btn-sm" id="tab-overview" data-bs-toggle="pill" data-bs-target="#content-overview" type="button" role="tab">
+      <i class="bi bi-bar-chart"></i> Trends &amp; Distribution
+    </button>
+  </li>
+  <li class="nav-item" role="presentation">
+    <button class="nav-link btn-sm" id="tab-abc" data-bs-toggle="pill" data-bs-target="#content-abc" type="button" role="tab">
+      <i class="bi bi-pie-chart-fill"></i> ABC Pareto Analysis
+    </button>
+  </li>
+  <li class="nav-item" role="presentation">
+    <button class="nav-link btn-sm" id="tab-statistics" data-bs-toggle="pill" data-bs-target="#content-statistics" type="button" role="tab">
+      <i class="bi bi-calculator"></i> Statistical Demand Profiling
+    </button>
+  </li>
+  <li class="nav-item" role="presentation">
+    <button class="nav-link btn-sm" id="tab-prescriptive" data-bs-toggle="pill" data-bs-target="#content-prescriptive" type="button" role="tab">
+      <i class="bi bi-lightning-charge"></i> Prescriptive Optimization (EOQ)
+    </button>
+  </li>
+  <li class="nav-item" role="presentation">
+    <button class="nav-link btn-sm" id="tab-deepdive" data-bs-toggle="pill" data-bs-target="#content-deepdive" type="button" role="tab">
+      <i class="bi bi-search"></i> Product Deep-Dive &amp; OLS
+    </button>
+  </li>
+</ul>
+
+<!-- Tab Contents -->
+<div class="tab-content" id="analyticsTabContent">
+
+  <!-- TAB 1: OVERVIEW & DISTRIBUTION -->
+  <div class="tab-pane fade show active" id="content-overview" role="tabpanel">
+    <div class="row g-3 mb-3">
+      <div class="col-lg-6">
+        <div class="card p-3 h-100">
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <h5 class="mb-0">Monthly Demand &amp; Revenue Trend</h5>
+            <small class="text-muted">Time-series trajectory</small>
+          </div>
+          <div class="chart-box"><canvas id="cMonthly"></canvas></div>
+        </div>
+      </div>
+      <div class="col-lg-6">
+        <div class="card p-3 h-100">
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <h5 class="mb-0">Product Sales Volume</h5>
+            <small class="text-muted">Total units sold</small>
+          </div>
+          <div class="chart-box"><canvas id="cProducts"></canvas></div>
+        </div>
+      </div>
+      <div class="col-lg-6">
+        <div class="card p-3 h-100">
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <h5 class="mb-0">Category Revenue Breakdown</h5>
+            <small class="text-muted">Portfolio distribution</small>
+          </div>
+          <div class="chart-box"><canvas id="cCategory"></canvas></div>
+        </div>
+      </div>
+      <div class="col-lg-6">
+        <div class="card p-3 h-100">
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <h5 class="mb-0">Top 5 Revenue Drivers</h5>
+            <small class="text-muted">Gross sales value ($)</small>
+          </div>
+          <div class="chart-box"><canvas id="cTop"></canvas></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB 2: ABC PARETO ANALYSIS -->
+  <div class="tab-pane fade" id="content-abc" role="tabpanel">
+    <div class="card p-3 mb-3">
+      <div class="d-flex flex-wrap justify-content-between align-items-center mb-3">
+        <div>
+          <h5 class="mb-1">Pareto Analysis Curve (ABC Classification)</h5>
+          <p class="text-muted small mb-0">
+            Categorizes items by cumulative revenue contribution: Class A (&le; 70%), Class B (70% - 90%), Class C (&gt; 90%).
+          </p>
+        </div>
+        <div class="d-flex gap-2">
+          <span class="badge bg-danger">Class A (&le;70%)</span>
+          <span class="badge bg-warning text-dark">Class B (70-90%)</span>
+          <span class="badge bg-secondary">Class C (&gt;90%)</span>
+        </div>
+      </div>
+      <div class="chart-box mb-3" style="height: 320px;"><canvas id="cPareto"></canvas></div>
+      <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0" id="abcTable">
+          <thead class="table-light">
+            <tr>
+              <th>Priority Class</th>
+              <th>Product</th>
+              <th>Revenue ($)</th>
+              <th>Units Sold</th>
+              <th>Revenue Share (%)</th>
+              <th>Cumulative Revenue (%)</th>
+              <th>Management Policy</th>
+            </tr>
+          </thead>
+          <tbody id="abcTableBody">
+            <tr><td colspan="7" class="text-muted text-center py-3">Loading ABC analysis...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB 3: STATISTICAL DEMAND PROFILING -->
+  <div class="tab-pane fade" id="content-statistics" role="tabpanel">
+    <div class="card p-3 mb-3">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+          <h5 class="mb-1">Descriptive Demand Statistics (Summary Table)</h5>
+          <p class="text-muted small mb-0">
+            Comprehensive exploratory metrics: Mean (&mu;), Standard Deviation (&sigma;), Variance (&sigma;&sup2;), Skewness, and Coefficient of Variation (CV).
+          </p>
+        </div>
+      </div>
+      <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0" id="statsTable">
+          <thead class="table-light">
+            <tr>
+              <th style="width: 50px;"></th>
+              <th>Product</th>
+              <th>Category</th>
+              <th>Mean (&mu;)</th>
+              <th>Median</th>
+              <th>Std Dev (&sigma;)</th>
+              <th>Variance (&sigma;&sup2;)</th>
+              <th>Skewness</th>
+              <th>Min - Max</th>
+              <th>CV (&sigma;/&mu;)</th>
+              <th>Demand Volatility</th>
+            </tr>
+          </thead>
+          <tbody id="statsTableBody">
+            <tr><td colspan="11" class="text-muted text-center py-3">Loading statistics...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB 4: PRESCRIPTIVE SUPPLY CHAIN OPTIMIZATION -->
+  <div class="tab-pane fade" id="content-prescriptive" role="tabpanel">
+    <div class="card p-3 mb-3">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+          <h5 class="mb-1">Operations Research &amp; Prescriptive Inventory Parameters</h5>
+          <p class="text-muted small mb-0">
+            Automated calculations for Economic Order Quantity (EOQ = &radic;(2DS/H)), Safety Stock (Z = 1.65 for 95% service level), and Recommended Reorder Point (ROP).
+          </p>
+        </div>
+      </div>
+      <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0" id="prescriptiveTable">
+          <thead class="table-light">
+            <tr>
+              <th style="width: 50px;"></th>
+              <th>Product</th>
+              <th>Unit Price</th>
+              <th>Current Stock</th>
+              <th>Reorder Level</th>
+              <th>EOQ (Batch Size)</th>
+              <th>Safety Stock (95%)</th>
+              <th>Recommended ROP</th>
+              <th>Inventory Turnover</th>
+              <th>Days Sales Inv (DSI)</th>
+            </tr>
+          </thead>
+          <tbody id="prescriptiveTableBody">
+            <tr><td colspan="10" class="text-muted text-center py-3">Loading prescriptive data...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB 5: DEEP-DIVE & OLS REGRESSION -->
+  <div class="tab-pane fade" id="content-deepdive" role="tabpanel">
+    <div class="card p-3 mb-3">
+      <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+        <div>
+          <h5 class="mb-0">Product Deep-Dive &amp; Ordinary Least Squares (OLS) Regression</h5>
+          <small class="text-muted">Inspect regression equation, goodness-of-fit (R&sup2;), and 95% confidence intervals.</small>
+        </div>
+        <div class="d-flex align-items-center gap-2">
+          <label for="productSelect" class="form-label mb-0 small fw-semibold">Select Product:</label>
+          <select id="productSelect" class="form-select form-select-sm" style="min-width: 220px;">
+            <option value="">-- Choose a product --</option>
+            {% for p in products %}
+              <option value="{{ p.id }}">{{ p.name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+      </div>
+
+      <!-- Selected Product Profile Card -->
+      <div id="selectedProductCard" class="card bg-body-tertiary p-3 mb-3" style="display: none;">
+        <div class="row align-items-center g-3">
+          <div class="col-auto">
+            <div id="selImgContainer" style="width: 75px; height: 75px; border-radius: 10px; overflow: hidden; background: rgba(148,163,184,0.15); display: flex; align-items: center; justify-content: center; border: 1px solid rgba(148,163,184,0.25);">
+              <img id="selImg" src="" alt="" style="width: 100%; height: 100%; object-fit: cover; display: none;">
+              <i id="selImgPlaceholder" class="bi bi-image text-muted" style="font-size: 1.8rem;"></i>
+            </div>
+          </div>
+          <div class="col">
+            <div class="d-flex align-items-center gap-2">
+              <h4 class="mb-0" id="selName">Product Name</h4>
+              <span class="badge bg-secondary" id="selCategory">Category</span>
+              <span class="badge bg-danger" id="selAbcBadge">Class A</span>
+            </div>
+            <div class="text-muted small mt-1 d-flex gap-3 flex-wrap">
+              <span>Price: <strong id="selPrice">$0.00</strong></span>
+              <span>Stock: <strong id="selStock">0</strong></span>
+              <span>Reorder Level: <strong id="selReorder">0</strong></span>
+              <span>Demand Mean: <strong id="selMean">0</strong>/mo</span>
+              <span>Std Dev: <strong id="selStd">0</strong></span>
+              <span>EOQ: <strong id="selEoq">0</strong></span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Regression Metrics Row -->
+      <div id="regMetricsRow" class="row g-2 mb-3" style="display: none;">
+        <div class="col-md-3">
+          <div class="card p-2 text-center">
+            <small class="text-muted" style="font-size: 11px;">Regression Formula</small>
+            <strong class="font-monospace text-primary" id="regFormula">y = mx + b</strong>
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="card p-2 text-center">
+            <small class="text-muted" style="font-size: 11px;">R&sup2; (Variance Explained)</small>
+            <strong class="text-success" id="regR2">0.000</strong>
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="card p-2 text-center">
+            <small class="text-muted" style="font-size: 11px;">Standard Error (S_e)</small>
+            <strong class="text-info" id="regSe">&plusmn;0.0</strong>
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="card p-2 text-center">
+            <small class="text-muted" style="font-size: 11px;">95% Confidence Interval</small>
+            <strong class="text-warning" id="regCi">[0 - 0] units</strong>
+          </div>
+        </div>
+      </div>
+
+      <!-- Regression Chart -->
+      <div class="chart-box" style="height: 340px;"><canvas id="cPredict"></canvas></div>
+      <p class="text-muted small mt-2 mb-0" id="predictNote">
+        Select a product from the dropdown above to view its monthly sales trajectory and next month's forecast.
+      </p>
+    </div>
+  </div>
+
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+const API = "{% url 'api_analytics' %}";
+const charts = {};
+const palette = ['#19c3ce','#60a5fa','#34d399','#fbbf24','#fb7185','#a78bfa','#22d3ee','#84cc16','#f97316','#94a3b8'];
+
+function draw(id, config) {
+  if (charts[id]) charts[id].destroy();
+  charts[id] = new Chart(document.getElementById(id), config);
+}
+
+const opts = {
+  responsive: true,
+  maintainAspectRatio: false,
+  plugins: {
+    legend: { labels: { color: '#8190a8', boxWidth: 10, boxHeight: 10 } }
+  },
+  scales: {
+    x: { grid: { color: 'rgba(148,163,184,.08)' }, ticks: { color: '#8190a8' } },
+    y: { grid: { color: 'rgba(148,163,184,.08)' }, ticks: { color: '#8190a8' }, border: { display: false } }
+  }
+};
+
+let cachedData = null;
+
+async function load(productId) {
+  const url = API + (productId ? '?product=' + productId : '');
+  const res = await fetch(url, { credentials: 'same-origin' });
+  if (!res.ok) {
+    document.getElementById('predictNote').textContent = 'Could not load analytics (' + res.status + ').';
+    return;
+  }
+  const d = await res.json();
+
+  if (!productId) {
+    cachedData = d;
+    // 1. Update Executive KPIs
+    if (d.kpis) {
+      document.getElementById('kpiRevenue').textContent = '$' + d.kpis.total_revenue.toLocaleString();
+      document.getElementById('kpiUnits').textContent = d.kpis.total_units.toLocaleString();
+      document.getElementById('kpiClassA').textContent = d.kpis.class_a_count + ' items';
+    }
+    if (d.correlation) {
+      document.getElementById('kpiCorr').textContent = 'r = ' + d.correlation.correlation;
+      document.getElementById('kpiElasticity').textContent = d.correlation.elasticity;
+    }
+
+    // 2. Render Overview Charts
+    draw('cMonthly', {
+      type: 'line',
+      data: {
+        labels: d.monthly.map(x => x.month),
+        datasets: [
+          { label: 'Units Sold', data: d.monthly.map(x => x.units), borderColor: '#19c3ce', backgroundColor: 'rgba(25,195,206,0.1)', tension: .3, fill: true, yAxisID: 'y' },
+          { label: 'Revenue ($)', data: d.monthly.map(x => x.revenue), borderColor: '#60a5fa', borderDash: [4, 4], pointRadius: 3, tension: .3, yAxisID: 'y1' }
+        ]
+      },
+      options: {
+        ...opts,
+        scales: {
+          x: opts.scales.x,
+          y: { ...opts.scales.y, position: 'left', title: { display: true, text: 'Units', color: '#8190a8' } },
+          y1: { ...opts.scales.y, position: 'right', grid: { display: false }, title: { display: true, text: 'Revenue ($)', color: '#8190a8' } }
+        }
+      }
+    });
+
+    draw('cProducts', {
+      type: 'bar',
+      data: {
+        labels: d.products.map(x => x.name),
+        datasets: [{ label: 'Units Sold', data: d.products.map(x => x.units), backgroundColor: palette }]
+      },
+      options: { ...opts, indexAxis: 'y' }
+    });
+
+    draw('cCategory', {
+      type: 'doughnut',
+      data: {
+        labels: d.categories.map(x => x.name),
+        datasets: [{ data: d.categories.map(x => x.units), backgroundColor: palette }]
+      },
+      options: opts
+    });
+
+    draw('cTop', {
+      type: 'bar',
+      data: {
+        labels: d.top_products.map(x => x.name),
+        datasets: [{ label: 'Revenue ($)', data: d.top_products.map(x => x.revenue), backgroundColor: '#34d399' }]
+      },
+      options: opts
+    });
+
+    // 3. Render ABC Pareto Chart & Table
+    if (d.abc && d.abc.chart) {
+      draw('cPareto', {
+        type: 'bar',
+        data: {
+          labels: d.abc.chart.labels,
+          datasets: [
+            {
+              type: 'line',
+              label: 'Cumulative Revenue (%)',
+              data: d.abc.chart.cum_pct,
+              borderColor: '#fb7185',
+              backgroundColor: '#fb7185',
+              borderWidth: 2.5,
+              tension: 0.2,
+              yAxisID: 'yPct'
+            },
+            {
+              type: 'bar',
+              label: 'Revenue ($)',
+              data: d.abc.chart.revenue,
+              backgroundColor: '#60a5fa',
+              yAxisID: 'yRev'
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { labels: { color: '#8190a8' } },
+            tooltip: {
+              callbacks: {
+                label: function(ctx) {
+                  return ctx.dataset.label + ': ' + (ctx.dataset.yAxisID === 'yPct' ? ctx.raw + '%' : '$' + ctx.raw.toLocaleString());
+                }
+              }
+            }
+          },
+          scales: {
+            x: opts.scales.x,
+            yRev: { ...opts.scales.y, position: 'left', title: { display: true, text: 'Revenue ($)', color: '#8190a8' } },
+            yPct: { ...opts.scales.y, position: 'right', min: 0, max: 100, grid: { display: false }, title: { display: true, text: 'Cumulative %', color: '#8190a8' } }
+          }
+        }
+      });
+
+      const abcBody = document.getElementById('abcTableBody');
+      abcBody.innerHTML = '';
+      d.abc.items.forEach(it => {
+        const tr = document.createElement('tr');
+        const badgeColor = it.abc_class === 'A' ? 'bg-danger' : (it.abc_class === 'B' ? 'bg-warning text-dark' : 'bg-secondary');
+        const policy = it.abc_class === 'A' ? 'Tight control, weekly review, low safety stock' : (it.abc_class === 'B' ? 'Moderate control, periodic review' : 'Bulk order, relaxed controls, minimal monitoring');
+        tr.innerHTML = `
+          <td><span class="badge ${badgeColor}">Class ${it.abc_class}</span></td>
+          <td><strong>${it.product}</strong></td>
+          <td>$${it.revenue.toLocaleString()}</td>
+          <td>${it.units.toLocaleString()}</td>
+          <td>${it.pct_revenue}%</td>
+          <td><strong>${it.cumulative_pct}%</strong></td>
+          <td><small class="text-muted">${policy}</small></td>
+        `;
+        abcBody.appendChild(tr);
+      });
+    }
+
+    // 4. Render Statistical Demand Profiling Table
+    if (d.statistical_profiles) {
+      const statsBody = document.getElementById('statsTableBody');
+      statsBody.innerHTML = '';
+      d.statistical_profiles.forEach(p => {
+        const tr = document.createElement('tr');
+        const imgHtml = p.image_url 
+          ? `<img src="${p.image_url}" alt="${p.product_name}" style="width:36px;height:36px;object-fit:cover;border-radius:6px;border:1px solid rgba(148,163,184,0.25);">`
+          : `<div style="width:36px;height:36px;border-radius:6px;background:rgba(148,163,184,0.12);display:flex;align-items:center;justify-content:center;color:#94a3b8;"><i class="bi bi-box-seam"></i></div>`;
+        tr.innerHTML = `
+          <td class="pe-0">${imgHtml}</td>
+          <td><strong>${p.product_name}</strong></td>
+          <td><span class="badge bg-light text-dark border">${p.category}</span></td>
+          <td><strong>${p.mean}</strong></td>
+          <td>${p.median}</td>
+          <td>${p.std_dev}</td>
+          <td>${p.variance}</td>
+          <td>${p.skewness}</td>
+          <td>${p.min} - ${p.max}</td>
+          <td><strong>${p.cv}</strong></td>
+          <td><span class="badge ${p.volatility_badge}">${p.volatility}</span></td>
+        `;
+        statsBody.appendChild(tr);
+      });
+
+      // 5. Render Prescriptive Supply Chain Table
+      const presBody = document.getElementById('prescriptiveTableBody');
+      presBody.innerHTML = '';
+      d.statistical_profiles.forEach(p => {
+        const tr = document.createElement('tr');
+        const imgHtml = p.image_url 
+          ? `<img src="${p.image_url}" alt="${p.product_name}" style="width:36px;height:36px;object-fit:cover;border-radius:6px;border:1px solid rgba(148,163,184,0.25);">`
+          : `<div style="width:36px;height:36px;border-radius:6px;background:rgba(148,163,184,0.12);display:flex;align-items:center;justify-content:center;color:#94a3b8;"><i class="bi bi-box-seam"></i></div>`;
+        tr.innerHTML = `
+          <td class="pe-0">${imgHtml}</td>
+          <td><strong>${p.product_name}</strong></td>
+          <td>$${p.price}</td>
+          <td>${p.stock_quantity}</td>
+          <td>${p.reorder_level}</td>
+          <td><strong class="text-primary">${p.eoq} units</strong></td>
+          <td>${p.safety_stock} units</td>
+          <td><strong class="text-warning">${p.recommended_rop} units</strong></td>
+          <td>${p.turnover}x / yr</td>
+          <td>${p.dsi} days</td>
+        `;
+        presBody.appendChild(tr);
+      });
+    }
+
+    // Default select first product for deep-dive if available
+    const selElem = document.getElementById('productSelect');
+    if (selElem && selElem.options.length > 1 && !selElem.value) {
+      selElem.selectedIndex = 1;
+      load(selElem.value);
+    }
+  }
+
+  // 6. Handle Selected Product Deep-Dive
+  const s = d.selected;
+  const note = document.getElementById('predictNote');
+  const card = document.getElementById('selectedProductCard');
+  const regRow = document.getElementById('regMetricsRow');
+
+  if (s) {
+    card.style.display = 'block';
+    regRow.style.display = 'flex';
+
+    document.getElementById('selName').textContent = s.product;
+    document.getElementById('selCategory').textContent = s.category;
+    document.getElementById('selPrice').textContent = '$' + s.price.toFixed(2);
+    document.getElementById('selStock').textContent = s.stock_quantity;
+    document.getElementById('selReorder').textContent = s.reorder_level;
+
+    if (s.profile) {
+      document.getElementById('selMean').textContent = s.profile.mean;
+      document.getElementById('selStd').textContent = s.profile.std_dev;
+      document.getElementById('selEoq').textContent = s.profile.eoq + ' units';
+      document.getElementById('selAbcBadge').textContent = 'Class ' + s.profile.abc_class;
+      document.getElementById('selAbcBadge').className = 'badge ' + (s.profile.abc_class === 'A' ? 'bg-danger' : (s.profile.abc_class === 'B' ? 'bg-warning text-dark' : 'bg-secondary'));
+    }
+
+    const img = document.getElementById('selImg');
+    const ph = document.getElementById('selImgPlaceholder');
+    if (s.image_url) {
+      img.src = s.image_url;
+      img.style.display = 'block';
+      ph.style.display = 'none';
+    } else {
+      img.style.display = 'none';
+      ph.style.display = 'block';
+    }
+
+    const labels = s.history.map(x => x.month);
+    const n = labels.length;
+
+    if (s.forecast) {
+      labels.push(s.forecast.month);
+
+      document.getElementById('regFormula').textContent = s.forecast.formula || 'y = mx + b';
+      document.getElementById('regR2').textContent = s.forecast.r2 !== undefined ? s.forecast.r2 : 'N/A';
+      document.getElementById('regSe').textContent = s.forecast.std_err ? ('±' + s.forecast.std_err) : 'N/A';
+      document.getElementById('regCi').textContent = (s.forecast.ci_lower !== undefined && s.forecast.ci_upper !== undefined) 
+        ? `[${s.forecast.ci_lower} - ${s.forecast.ci_upper}] units`
+        : 'N/A';
+
+      draw('cPredict', {
+        type: 'line',
+        data: {
+          labels: labels,
+          datasets: [
+            {
+              label: 'Actual Sales',
+              data: s.history.map(x => x.actual).concat([null]),
+              borderColor: '#19c3ce',
+              backgroundColor: 'rgba(25,195,206,0.1)',
+              tension: .3,
+              fill: true,
+              pointRadius: 4
+            },
+            {
+              label: 'OLS Regression Trend',
+              data: s.forecast.fitted.concat([null]),
+              borderColor: '#94a3b8',
+              borderDash: [6, 4],
+              pointRadius: 0
+            },
+            {
+              label: 'Predicted Next Month',
+              data: new Array(n - 1).fill(null).concat([s.history[n - 1].actual, s.forecast.predicted]),
+              borderColor: '#fbbf24',
+              backgroundColor: '#fbbf24',
+              borderDash: [3, 3],
+              pointRadius: 6,
+              pointHoverRadius: 8
+            }
+          ]
+        },
+        options: opts
+      });
+
+      note.innerHTML = `<strong>${s.product}</strong>: Linear Regression predicts <strong>${s.forecast.predicted} units</strong> for <strong>${s.forecast.month}</strong> with 95% Confidence Interval [${s.forecast.ci_lower} - ${s.forecast.ci_upper}] units. Goodness-of-fit R&sup2; = ${s.forecast.r2}.`;
+    } else {
+      regRow.style.display = 'none';
+      draw('cPredict', {
+        type: 'line',
+        data: {
+          labels: labels,
+          datasets: [{ label: 'Actual Sales', data: s.history.map(x => x.actual), borderColor: '#19c3ce' }]
+        },
+        options: opts
+      });
+      note.textContent = s.product + ' needs at least 2 months of sales history to calculate regression trends.';
+    }
+  }
+}
+
+document.getElementById('productSelect').addEventListener('change', e => {
+  if (e.target.value) {
+    load(e.target.value);
+  }
+});
+
+// Initial load
+load('');
+</script>
+{% endblock %}

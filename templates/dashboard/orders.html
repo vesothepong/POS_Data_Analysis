@@ -1,0 +1,9 @@
+{% extends 'base.html' %}{% block title %}Customer Orders{% endblock %}
+{% block content %}
+<div class="page-heading"><div><span class="eyebrow">Storefront activity</span><h1>Customer Orders</h1><p>Every order placed in the storefront, newest first. Each line is also recorded as a sale for analytics and forecasting.</p></div></div>
+{% for o in orders %}
+<div class="card table-panel mb-3"><div class="panel-head panel-head-table"><div><h2>Order #{{ o.id }} &middot; {{ o.customer.username }}</h2><p>{{ o.created_at|date:"M d, Y H:i" }}</p></div><strong class="numeric">${{ o.total_amount|floatformat:2 }}</strong></div>
+<div class="table-responsive"><table class="table align-middle mb-0"><thead><tr><th>Product</th><th class="text-end">Qty</th><th class="text-end">Price</th><th class="text-end">Subtotal</th></tr></thead>
+<tbody>{% for it in o.items.all %}<tr><td>{{ it.product.name }}</td><td class="text-end">{{ it.quantity }}</td><td class="text-end">${{ it.price|floatformat:2 }}</td><td class="text-end">${{ it.subtotal|floatformat:2 }}</td></tr>{% endfor %}</tbody></table></div></div>
+{% empty %}<p class="empty-state">No customer orders yet. Log in as a customer on the storefront to place one.</p>{% endfor %}
+{% endblock %}

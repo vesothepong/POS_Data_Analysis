@@ -1,0 +1,57 @@
+{% extends 'base.html' %}{% block title %}{{ row.product.name }} stock{% endblock %}
+{% block content %}
+<a href="{% url 'inventory' %}" class="small text-decoration-none mb-2 d-inline-flex align-items-center gap-1">
+  <i class="bi bi-arrow-left"></i> Back to inventory
+</a>
+
+<div class="card p-3 mb-3 mt-2">
+  <div class="row align-items-center g-3">
+    <div class="col-auto">
+      {% if row.product.image %}
+        <img src="{{ row.product.image.url }}" alt="{{ row.product.name }}" style="width: 72px; height: 72px; object-fit: cover; border-radius: 12px; border: 1px solid rgba(148,163,184,0.25);">
+      {% else %}
+        <div style="width: 72px; height: 72px; border-radius: 12px; background: rgba(148,163,184,0.12); display: flex; align-items: center; justify-content: center; color: #94a3b8; font-size: 1.8rem; border: 1px dashed rgba(148,163,184,0.3);">
+          <i class="bi bi-box-seam"></i>
+        </div>
+      {% endif %}
+    </div>
+    <div class="col">
+      <div class="d-flex align-items-center gap-2 flex-wrap">
+        <h2 class="mb-0">{{ row.product.name }}</h2>
+        <span class="badge {{ row.badge }}">{{ row.status }}</span>
+        <span class="badge bg-light text-dark border">{{ row.product.category|default:"Uncategorized" }}</span>
+      </div>
+      <div class="text-muted small mt-1 d-flex gap-3 flex-wrap">
+        <span>Unit Price: <strong>${{ row.product.price }}</strong></span>
+        <span>Current Stock: <strong>{{ row.stock }} units</strong></span>
+        <span>Reorder Level: <strong>{{ row.reorder_level }}</strong></span>
+      </div>
+    </div>
+    <div class="col-auto d-flex gap-2">
+      <a class="btn btn-outline-primary btn-sm" href="{% url 'product_edit' row.product.id %}">
+        <i class="bi bi-pencil"></i> Edit Product
+      </a>
+      <a class="btn btn-outline-secondary btn-sm" href="{% url 'analytics' %}">
+        <i class="bi bi-graph-up"></i> Data Analytics
+      </a>
+    </div>
+  </div>
+</div>
+
+<div class="row g-3 mb-3">
+  <div class="col-md-3"><div class="card p-3"><small class="text-muted">Current Stock</small><div class="kpi">{{ row.stock }}</div></div></div>
+  <div class="col-md-3"><div class="card p-3"><small class="text-muted">Reorder Level Threshold</small><div class="kpi">{{ row.reorder_level }}</div></div></div>
+  <div class="col-md-3"><div class="card p-3"><small class="text-muted">Predicted Demand{% if row.forecast_month %} ({{ row.forecast_month|date:"M Y" }}){% endif %}</small><div class="kpi">{{ row.predicted|default_if_none:"-" }}</div></div></div>
+  <div class="col-md-3"><div class="card p-3"><small class="text-muted">Recommended Reorder Qty</small><div class="kpi text-warning">{{ row.reorder_qty }}</div></div></div>
+</div>
+<div class="row g-3">
+  <div class="col-lg-4"><div class="card p-3"><h5>Update stock</h5>
+    <form method="post" action="{% url 'inventory_update' row.product.id %}">{% csrf_token %}<input type="hidden" name="next" value="detail">{{ form.as_p }}<button class="btn btn-primary">Save</button></form></div></div>
+  <div class="col-lg-8"><div class="card p-3"><h5>Last 12 months of sales</h5><div class="chart-box"><canvas id="hist"></canvas></div></div></div>
+</div>
+{{ history|json_script:"hist-data" }}
+{% endblock %}
+{% block scripts %}<script>
+const h = JSON.parse(document.getElementById('hist-data').textContent);
+new Chart(document.getElementById('hist'), {type:'bar', data:{labels:h.map(x=>x.month), datasets:[{label:'Units sold', data:h.map(x=>x.actual)}]}, options:{responsive:true, maintainAspectRatio:false}});
+</script>{% endblock %}

@@ -1,0 +1,26 @@
+{% extends 'base.html' %}{% block title %}Inventory{% endblock %}
+{% block content %}
+<h2>Inventory Management</h2>
+<p class="text-muted">Current stock compared with predicted demand. Status priority: Out of Stock, Low Stock (below reorder level), Need Reorder (below forecast), Sufficient Stock.</p>
+<div class="card p-3 mb-3"><form class="row g-2" method="get">
+  <div class="col-md-4"><input class="form-control" name="q" placeholder="Search name or category" value="{{ q }}"></div>
+  <div class="col-md-3"><select class="form-select" name="status"><option value="">All statuses</option>{% for s in statuses %}<option value="{{ s }}" {% if status == s %}selected{% endif %}>{{ s }}</option>{% endfor %}</select></div>
+  <div class="col-auto"><button class="btn btn-primary">Filter</button> <a class="btn btn-outline-secondary" href="{% url 'inventory' %}">Reset</a></div>
+</form></div>
+<div class="card p-3"><div class="table-responsive"><table class="table align-middle">
+<thead><tr><th style="width: 50px;"></th><th>Product</th><th>Category</th><th style="width:210px">Stock (update)</th><th>Reorder Level</th><th>Predicted</th><th>Reorder Qty</th><th>Status</th></tr></thead>
+<tbody>{% for r in rows %}<tr>
+<td class="pe-0">
+  {% if r.product.image %}
+    <img src="{{ r.product.image.url }}" alt="{{ r.product.name }}" style="width: 38px; height: 38px; object-fit: cover; border-radius: 6px; border: 1px solid rgba(148,163,184,0.25);" loading="lazy">
+  {% else %}
+    <div style="width: 38px; height: 38px; border-radius: 6px; background: rgba(148,163,184,0.12); display: flex; align-items: center; justify-content: center; color: #94a3b8; font-size: 1rem;">
+      <i class="bi bi-box-seam"></i>
+    </div>
+  {% endif %}
+</td>
+<td><a href="{% url 'inventory_detail' r.product.id %}" class="fw-semibold text-decoration-none">{{ r.product.name }}</a></td><td>{{ r.product.category|default:"-" }}</td>
+<td><form method="post" action="{% url 'inventory_update' r.product.id %}" class="d-flex gap-1">{% csrf_token %}<input type="number" min="0" name="stock_quantity" value="{{ r.stock }}" class="form-control form-control-sm" required><button class="btn btn-sm btn-outline-primary">Save</button></form></td>
+<td>{{ r.reorder_level }}</td><td>{{ r.predicted|default_if_none:"-" }}</td><td>{{ r.reorder_qty }}</td><td><span class="badge {{ r.badge }}">{{ r.status }}</span></td></tr>
+{% empty %}<tr><td colspan="8" class="text-muted text-center py-4">No products match.</td></tr>{% endfor %}</tbody></table></div></div>
+{% endblock %}
