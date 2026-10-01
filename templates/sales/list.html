@@ -1,33 +1,185 @@
 {% extends 'base.html' %}{% block title %}Sales Data{% endblock %}
 {% block content %}
-<div class="d-flex justify-content-between mb-3"><h2>Sales Data</h2><a class="btn btn-primary" href="{% url 'upload_sales' %}">Upload XLSX</a></div>
+<div class="d-flex justify-content-between mb-3">
+  <h2>Sales Data</h2><a class="btn btn-primary" href="{% url 'upload_sales' %}">Upload XLSX</a>
+</div>
 <div class="card p-3 mb-3">
-<form class="row g-2" method="get">
-  <div class="col-md-3"><label class="form-label small">Product</label><select class="form-select" name="product"><option value="">All products</option>{% for p in products %}<option value="{{ p.id }}" {% if filters.product == p.id|stringformat:'s' %}selected{% endif %}>{{ p.name }}</option>{% endfor %}</select></div>
-  <div class="col-md-3"><label class="form-label small">Category</label><select class="form-select" name="category"><option value="">All categories</option>{% for c in categories %}<option value="{{ c }}" {% if filters.category == c %}selected{% endif %}>{{ c }}</option>{% endfor %}</select></div>
-  <div class="col-md-3"><label class="form-label small">From date</label><input type="date" class="form-control" name="date_from" value="{{ filters.date_from }}"></div>
-  <div class="col-md-3"><label class="form-label small">To date</label><input type="date" class="form-control" name="date_to" value="{{ filters.date_to }}"></div>
-  <div class="col-md-3"><label class="form-label small">Month</label><input type="month" class="form-control" name="month" value="{{ filters.month }}"></div>
-  <div class="col-md-3"><label class="form-label small">Year</label><input class="form-control" name="year" placeholder="e.g. 2025" value="{{ filters.year }}"></div>
-  <div class="col-md-6 align-self-end"><button class="btn btn-primary">Filter</button> <a class="btn btn-outline-secondary" href="{% url 'sales' %}">Reset</a></div>
-</form></div>
-
-<div class="row g-3 mb-3">
-  <div class="col-md-3"><div class="card p-3"><small class="text-muted">Records</small><div class="kpi-sm">{{ count }}</div></div></div>
-  <div class="col-md-3"><div class="card p-3"><small class="text-muted">Total units sold</small><div class="kpi-sm">{{ total_units }}</div></div></div>
-  <div class="col-md-3"><div class="card p-3"><small class="text-muted">Total revenue</small><div class="kpi-sm">${{ total_revenue|floatformat:2 }}</div></div></div>
-  <div class="col-md-3"><div class="card p-3"><small class="text-muted">Best seller</small><div class="kpi-sm">{% if best_sellers %}{{ best_sellers.0.name }}{% else %}-{% endif %}</div></div></div>
+  <form class="row g-2" method="get">
+    <div class="col-md-3"><label class="form-label small">Product</label><select class="form-select" name="product">
+        <option value="">All products</option>{% for p in products %}<option value="{{ p.id }}" {% if filters.product == p.id|stringformat:'s' %}selected{% endif %}>{{ p.name }}</option>{% endfor %}
+      </select></div>
+    <div class="col-md-3"><label class="form-label small">Category</label><select class="form-select" name="category">
+        <option value="">All categories</option>{% for c in categories %}<option value="{{ c }}" {% if filters.category == c %}selected{% endif %}>{{ c }}</option>{% endfor %}
+      </select></div>
+    <div class="col-md-3"><label class="form-label small">From date</label><input type="date" class="form-control" name="date_from" value="{{ filters.date_from }}"></div>
+    <div class="col-md-3"><label class="form-label small">To date</label><input type="date" class="form-control" name="date_to" value="{{ filters.date_to }}"></div>
+    <div class="col-md-3"><label class="form-label small">Month</label><input type="month" class="form-control" name="month" value="{{ filters.month }}"></div>
+    <div class="col-md-3"><label class="form-label small">Year</label><input class="form-control" name="year" placeholder="e.g. 2025" value="{{ filters.year }}"></div>
+    <div class="col-md-6 align-self-end"><button class="btn btn-primary">Filter</button> <a class="btn btn-outline-secondary" href="{% url 'sales' %}">Reset</a></div>
+  </form>
 </div>
 
 <div class="row g-3 mb-3">
-  <div class="col-lg-4"><div class="card p-3 h-100"><h6>Best-selling products</h6><table class="table table-sm mb-0"><thead><tr><th>Product</th><th>Units</th><th>Revenue</th></tr></thead><tbody>{% for r in best_sellers %}<tr><td>{{ r.name }}</td><td>{{ r.units }}</td><td>${{ r.revenue|floatformat:2 }}</td></tr>{% empty %}<tr><td colspan="3" class="text-muted">No data.</td></tr>{% endfor %}</tbody></table></div></div>
-  <div class="col-lg-4"><div class="card p-3 h-100"><h6>Sales by category</h6><table class="table table-sm mb-0"><thead><tr><th>Category</th><th>Units</th><th>Revenue</th></tr></thead><tbody>{% for r in by_category %}<tr><td>{{ r.name }}</td><td>{{ r.units }}</td><td>${{ r.revenue|floatformat:2 }}</td></tr>{% empty %}<tr><td colspan="3" class="text-muted">No data.</td></tr>{% endfor %}</tbody></table></div></div>
-  <div class="col-lg-4"><div class="card p-3 h-100"><h6>Monthly sales</h6><div style="max-height:220px;overflow:auto"><table class="table table-sm mb-0"><thead><tr><th>Month</th><th>Units</th><th>Revenue</th></tr></thead><tbody>{% for r in by_month %}<tr><td>{{ r.month }}</td><td>{{ r.units }}</td><td>${{ r.revenue|floatformat:2 }}</td></tr>{% empty %}<tr><td colspan="3" class="text-muted">No data.</td></tr>{% endfor %}</tbody></table></div></div></div>
+  <div class="col-md-3">
+    <div class="card p-3"><small class="text-muted">Records</small>
+      <div class="kpi-sm">{{ count }}</div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="card p-3"><small class="text-muted">Total units sold</small>
+      <div class="kpi-sm">{{ total_units }}</div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="card p-3"><small class="text-muted">Total revenue</small>
+      <div class="kpi-sm">${{ total_revenue|floatformat:2 }}</div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="card p-3"><small class="text-muted">Best seller</small>
+      <div class="kpi-sm">{% if best_sellers %}{{ best_sellers.0.name }}{% else %}-{% endif %}</div>
+    </div>
+  </div>
+</div>
+
+<div class="row g-3 mb-3">
+  <div class="col-lg-4">
+    <div class="card p-3 h-100">
+      <h6>Best-selling products</h6>
+      <table class="table table-sm mb-0">
+        <thead>
+          <tr>
+            <th>Product</th>
+            <th>Units</th>
+            <th>Revenue</th>
+          </tr>
+        </thead>
+        <tbody>{% for r in best_sellers %}<tr>
+            <td>{{ r.name }}</td>
+            <td>{{ r.units }}</td>
+            <td>${{ r.revenue|floatformat:2 }}</td>
+          </tr>{% empty %}<tr>
+            <td colspan="3" class="text-muted">No data.</td>
+          </tr>{% endfor %}</tbody>
+      </table>
+    </div>
+  </div>
+  <div class="col-lg-4">
+    <div class="card p-3 h-100">
+      <h6>Sales by category</h6>
+      <table class="table table-sm mb-0">
+        <thead>
+          <tr>
+            <th>Category</th>
+            <th>Units</th>
+            <th>Revenue</th>
+          </tr>
+        </thead>
+        <tbody>{% for r in by_category %}<tr>
+            <td>{{ r.name }}</td>
+            <td>{{ r.units }}</td>
+            <td>${{ r.revenue|floatformat:2 }}</td>
+          </tr>{% empty %}<tr>
+            <td colspan="3" class="text-muted">No data.</td>
+          </tr>{% endfor %}</tbody>
+      </table>
+    </div>
+  </div>
+  <div class="col-lg-4">
+    <div class="card p-3 h-100">
+      <div class="d-flex justify-content-between align-items-center mb-1">
+        <h6 class="mb-0">Monthly sales</h6>
+        <small class="text-muted" style="font-size:11px;">Newest first</small>
+      </div>
+      <div style="max-height:220px;overflow:auto">
+        <table class="table table-sm mb-0" id="monthlySalesTable">
+          <thead>
+            <tr>
+              <th role="button" class="user-select-none" onclick="toggleTableSort('monthlySalesTable', 0, 'date')" title="Click to sort">Month <i class="bi bi-arrow-down-up small text-muted"></i></th>
+              <th role="button" class="user-select-none text-end" onclick="toggleTableSort('monthlySalesTable', 1, 'num')" title="Click to sort">Units <i class="bi bi-arrow-down-up small text-muted"></i></th>
+              <th role="button" class="user-select-none text-end" onclick="toggleTableSort('monthlySalesTable', 2, 'currency')" title="Click to sort">Revenue <i class="bi bi-arrow-down-up small text-muted"></i></th>
+            </tr>
+          </thead>
+          <tbody>{% for r in by_month %}<tr>
+              <td>{{ r.month }}</td>
+              <td class="text-end">{{ r.units }}</td>
+              <td class="text-end">${{ r.revenue|floatformat:2 }}</td>
+            </tr>{% empty %}<tr>
+              <td colspan="3" class="text-muted">No data.</td>
+            </tr>{% endfor %}</tbody>
+        </table>
+      </div>
+    </div>
+  </div>
 </div>
 
 <div class="card p-3">
-  <h6>Sales records {% if count > 500 %}<small class="text-muted">(latest 500 of {{ count }})</small>{% endif %}</h6>
-  <div class="table-responsive"><table class="table"><thead><tr><th>Date</th><th>Product</th><th>Qty</th><th>Price</th><th>Total</th></tr></thead>
-  <tbody>{% for s in sales %}<tr><td>{{ s.sale_date }}</td><td>{{ s.product.name }}</td><td>{{ s.quantity_sold }}</td><td>${{ s.price }}</td><td>${{ s.total_amount }}</td></tr>{% empty %}<tr><td colspan="5">No sales records.</td></tr>{% endfor %}</tbody></table></div>
+  <div class="d-flex justify-content-between align-items-center mb-2">
+    <h6 class="mb-0">Sales records {% if count > 500 %}<small class="text-muted">(latest 500 of {{ count }})</small>{% endif %}</h6>
+    <small class="text-muted" style="font-size:11px;">Newest first</small>
+  </div>
+  <div class="table-responsive">
+    <table class="table" id="salesRecordsTable">
+      <thead>
+        <tr>
+          <th role="button" class="user-select-none" onclick="toggleTableSort('salesRecordsTable', 0, 'date')" title="Click to sort">Date <i class="bi bi-arrow-down-up small text-muted"></i></th>
+          <th role="button" class="user-select-none" onclick="toggleTableSort('salesRecordsTable', 1, 'str')" title="Click to sort">Product <i class="bi bi-arrow-down-up small text-muted"></i></th>
+          <th role="button" class="user-select-none text-end" onclick="toggleTableSort('salesRecordsTable', 2, 'num')" title="Click to sort">Qty <i class="bi bi-arrow-down-up small text-muted"></i></th>
+          <th role="button" class="user-select-none text-end" onclick="toggleTableSort('salesRecordsTable', 3, 'currency')" title="Click to sort">Price <i class="bi bi-arrow-down-up small text-muted"></i></th>
+          <th role="button" class="user-select-none text-end" onclick="toggleTableSort('salesRecordsTable', 4, 'currency')" title="Click to sort">Total <i class="bi bi-arrow-down-up small text-muted"></i></th>
+        </tr>
+      </thead>
+      <tbody>{% for s in sales %}<tr>
+          <td>{{ s.sale_date }}</td>
+          <td>{{ s.product.name }}</td>
+          <td class="text-end">{{ s.quantity_sold }}</td>
+          <td class="text-end">${{ s.price }}</td>
+          <td class="text-end">${{ s.total_amount }}</td>
+        </tr>{% empty %}<tr>
+          <td colspan="5">No sales records.</td>
+        </tr>{% endfor %}</tbody>
+    </table>
+  </div>
 </div>
+{% endblock %}
+{% block scripts %}
+<script>
+  const sortStates = {};
+  function toggleTableSort(tableId, colIdx, type) {
+    const table = document.getElementById(tableId);
+    if (!table) return;
+    const tbody = table.querySelector('tbody');
+    if (!tbody) return;
+    const rows = Array.from(tbody.querySelectorAll('tr'));
+    if (rows.length <= 1) return;
+
+    const key = tableId + '_' + colIdx;
+    const asc = !sortStates[key];
+    sortStates[key] = asc;
+
+    rows.sort((a, b) => {
+      const aCell = a.children[colIdx]?.innerText.trim() || '';
+      const bCell = b.children[colIdx]?.innerText.trim() || '';
+      if (type === 'num' || type === 'currency') {
+        const aNum = parseFloat(aCell.replace(/[^0-9.-]+/g, '')) || 0;
+        const bNum = parseFloat(bCell.replace(/[^0-9.-]+/g, '')) || 0;
+        return asc ? aNum - bNum : bNum - aNum;
+      }
+      return asc ? aCell.localeCompare(bCell) : bCell.localeCompare(aCell);
+    });
+
+    rows.forEach(r => tbody.appendChild(r));
+
+    const ths = table.querySelectorAll('thead th');
+    ths.forEach((th, idx) => {
+      const icon = th.querySelector('i');
+      if (!icon) return;
+      if (idx === colIdx) {
+        icon.className = asc ? 'bi bi-sort-up small text-primary' : 'bi bi-sort-down small text-primary';
+      } else {
+        icon.className = 'bi bi-arrow-down-up small text-muted';
+      }
+    });
+  }
+</script>
 {% endblock %}

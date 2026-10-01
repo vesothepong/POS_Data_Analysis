@@ -22,7 +22,7 @@ def _parse_day(value):
 def sales(request):
     g = request.GET
     f = {k: g.get(k, "").strip() for k in ("product", "category", "date_from", "date_to", "month", "year")}
-    qs = SalesRecord.objects.select_related("product").order_by("-sale_date", "product__name")
+    qs = SalesRecord.objects.select_related("product").order_by("-sale_date", "-id")
     if f["product"].isdigit():
         qs = qs.filter(product_id=int(f["product"]))
     if f["category"]:
@@ -47,7 +47,7 @@ def sales(request):
         "categories": sorted({c or "Uncategorized" for c in Product.objects.values_list("category", flat=True)}),
         "total_units": int(df["units"].sum()) if len(df) else 0,
         "total_revenue": float(df["revenue"].sum()) if len(df) else 0,
-        "by_month": agg.monthly_totals(df), "by_product": agg.group_totals(df, "product"),
+        "by_month": agg.monthly_totals(df, ascending=False), "by_product": agg.group_totals(df, "product"),
         "by_category": agg.group_totals(df, "category"),
     }
     ctx["best_sellers"] = ctx["by_product"][:5]

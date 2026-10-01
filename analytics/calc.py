@@ -9,10 +9,10 @@ def monthly_series(df):
     return df.set_index("sale_date")["units"].resample("MS").sum().astype(float)
 
 
-def monthly_totals(df):
+def monthly_totals(df, ascending=True):
     if df is None or len(df) == 0:
         return []
-    g = df.groupby("month").agg(units=("units", "sum"), revenue=("revenue", "sum")).reset_index().sort_values("month")
+    g = df.groupby("month").agg(units=("units", "sum"), revenue=("revenue", "sum")).reset_index().sort_values("month", ascending=ascending)
     return [{"month": r.month.strftime("%Y-%m"), "units": int(r.units), "revenue": round(float(r.revenue), 2)} for r in g.itertuples()]
 
 
