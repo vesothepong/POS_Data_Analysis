@@ -354,11 +354,11 @@ async function load(productId) {
     if (d.kpis) {
       document.getElementById('kpiRevenue').textContent = '$' + d.kpis.total_revenue.toLocaleString();
       document.getElementById('kpiUnits').textContent = d.kpis.total_units.toLocaleString();
-      document.getElementById('kpiClassA').textContent = d.kpis.class_a_count + ' items';
+      document.getElementById('kpiClassA').textContent = d.kpis.class_a_count + ' ' + (window.t ? window.t('items') : 'items');
     }
     if (d.correlation) {
       document.getElementById('kpiCorr').textContent = 'r = ' + d.correlation.correlation;
-      document.getElementById('kpiElasticity').textContent = d.correlation.elasticity;
+      document.getElementById('kpiElasticity').textContent = window.t ? window.t(d.correlation.elasticity) : d.correlation.elasticity;
     }
 
     // 2. Render Overview Charts
@@ -461,14 +461,16 @@ async function load(productId) {
         const tr = document.createElement('tr');
         const badgeColor = it.abc_class === 'A' ? 'bg-danger' : (it.abc_class === 'B' ? 'bg-warning text-dark' : 'bg-secondary');
         const policy = it.abc_class === 'A' ? 'Tight control, weekly review, low safety stock' : (it.abc_class === 'B' ? 'Moderate control, periodic review' : 'Bulk order, relaxed controls, minimal monitoring');
+        const classLabel = window.t ? window.t('Class ' + it.abc_class) : 'Class ' + it.abc_class;
+        const policyLabel = window.t ? window.t(policy) : policy;
         tr.innerHTML = `
-          <td><span class="badge ${badgeColor}">Class ${it.abc_class}</span></td>
+          <td><span class="badge ${badgeColor}">${classLabel}</span></td>
           <td><strong>${it.product}</strong></td>
           <td>$${it.revenue.toLocaleString()}</td>
           <td>${it.units.toLocaleString()}</td>
           <td>${it.pct_revenue}%</td>
           <td><strong>${it.cumulative_pct}%</strong></td>
-          <td><small class="text-muted">${policy}</small></td>
+          <td><small class="text-muted">${policyLabel}</small></td>
         `;
         abcBody.appendChild(tr);
       });
@@ -483,10 +485,12 @@ async function load(productId) {
         const imgHtml = p.image_url 
           ? `<img src="${p.image_url}" alt="${p.product_name}" style="width:36px;height:36px;object-fit:cover;border-radius:6px;border:1px solid rgba(148,163,184,0.25);">`
           : `<div style="width:36px;height:36px;border-radius:6px;background:rgba(148,163,184,0.12);display:flex;align-items:center;justify-content:center;color:#94a3b8;"><i class="bi bi-box-seam"></i></div>`;
+        const catLabel = window.t ? window.t(p.category) : p.category;
+        const volLabel = window.t ? window.t(p.volatility) : p.volatility;
         tr.innerHTML = `
           <td class="pe-0">${imgHtml}</td>
           <td><strong>${p.product_name}</strong></td>
-          <td><span class="badge bg-light text-dark border">${p.category}</span></td>
+          <td><span class="badge bg-light text-dark border">${catLabel}</span></td>
           <td><strong>${p.mean}</strong></td>
           <td>${p.median}</td>
           <td>${p.std_dev}</td>
@@ -494,7 +498,7 @@ async function load(productId) {
           <td>${p.skewness}</td>
           <td>${p.min} - ${p.max}</td>
           <td><strong>${p.cv}</strong></td>
-          <td><span class="badge ${p.volatility_badge}">${p.volatility}</span></td>
+          <td><span class="badge ${p.volatility_badge}">${volLabel}</span></td>
         `;
         statsBody.appendChild(tr);
       });
@@ -502,6 +506,9 @@ async function load(productId) {
       // 5. Render Prescriptive Supply Chain Table
       const presBody = document.getElementById('prescriptiveTableBody');
       presBody.innerHTML = '';
+      const uLabel = window.t ? window.t('units') : 'units';
+      const yrLabel = window.t ? window.t('yr') : 'yr';
+      const dLabel = window.t ? window.t('days') : 'days';
       d.statistical_profiles.forEach(p => {
         const tr = document.createElement('tr');
         const imgHtml = p.image_url 
@@ -513,11 +520,11 @@ async function load(productId) {
           <td>$${p.price}</td>
           <td>${p.stock_quantity}</td>
           <td>${p.reorder_level}</td>
-          <td><strong class="text-primary">${p.eoq} units</strong></td>
-          <td>${p.safety_stock} units</td>
-          <td><strong class="text-warning">${p.recommended_rop} units</strong></td>
-          <td>${p.turnover}x / yr</td>
-          <td>${p.dsi} days</td>
+          <td><strong class="text-primary">${p.eoq} ${uLabel}</strong></td>
+          <td>${p.safety_stock} ${uLabel}</td>
+          <td><strong class="text-warning">${p.recommended_rop} ${uLabel}</strong></td>
+          <td>${p.turnover}x / ${yrLabel}</td>
+          <td>${p.dsi} ${dLabel}</td>
         `;
         presBody.appendChild(tr);
       });
@@ -542,7 +549,7 @@ async function load(productId) {
     regRow.style.display = 'flex';
 
     document.getElementById('selName').textContent = s.product;
-    document.getElementById('selCategory').textContent = s.category;
+    document.getElementById('selCategory').textContent = window.t ? window.t(s.category) : s.category;
     document.getElementById('selPrice').textContent = '$' + s.price.toFixed(2);
     document.getElementById('selStock').textContent = s.stock_quantity;
     document.getElementById('selReorder').textContent = s.reorder_level;
@@ -550,8 +557,8 @@ async function load(productId) {
     if (s.profile) {
       document.getElementById('selMean').textContent = s.profile.mean;
       document.getElementById('selStd').textContent = s.profile.std_dev;
-      document.getElementById('selEoq').textContent = s.profile.eoq + ' units';
-      document.getElementById('selAbcBadge').textContent = 'Class ' + s.profile.abc_class;
+      document.getElementById('selEoq').textContent = s.profile.eoq + ' ' + (window.t ? window.t('units') : 'units');
+      document.getElementById('selAbcBadge').textContent = window.t ? window.t('Class ' + s.profile.abc_class) : ('Class ' + s.profile.abc_class);
       document.getElementById('selAbcBadge').className = 'badge ' + (s.profile.abc_class === 'A' ? 'bg-danger' : (s.profile.abc_class === 'B' ? 'bg-warning text-dark' : 'bg-secondary'));
     }
 
@@ -576,7 +583,7 @@ async function load(productId) {
       document.getElementById('regR2').textContent = s.forecast.r2 !== undefined ? s.forecast.r2 : 'N/A';
       document.getElementById('regSe').textContent = s.forecast.std_err ? ('±' + s.forecast.std_err) : 'N/A';
       document.getElementById('regCi').textContent = (s.forecast.ci_lower !== undefined && s.forecast.ci_upper !== undefined) 
-        ? `[${s.forecast.ci_lower} - ${s.forecast.ci_upper}] units`
+        ? `[${s.forecast.ci_lower} - ${s.forecast.ci_upper}] ${window.t ? window.t('units') : 'units'}`
         : 'N/A';
 
       draw('cPredict', {

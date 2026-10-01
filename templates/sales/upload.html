@@ -2,7 +2,7 @@
 {% block content %}
 <h2>Upload Sales Data</h2>
 <div class="card p-4 mt-3">
-  <p class="text-muted small mb-3">Columns: <code>Date, Product, Quantity Sold, Price</code> (optional: <code>Category, Stock Quantity</code>).</p>
+  <p class="text-muted small mb-3"><span>Columns:</span> <code>Date, Product, Quantity Sold, Price</code> <span>(optional:</span> <code>Category, Stock Quantity</code><span>).</span></p>
   <form method="post" enctype="multipart/form-data">{% csrf_token %}{{ form.as_p }}<button class="btn btn-primary">Upload &amp; Clean Data</button></form>
 </div>
 <div class="card p-3 mt-3"><h6>Recent uploads</h6>

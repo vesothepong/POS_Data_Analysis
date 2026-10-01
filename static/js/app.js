@@ -525,6 +525,70 @@ const DICT_EN_TO_KM = {
   "Create an account": "បង្កើតគណនី",
   "Close": "បិទ",
 
+  // Upload and Data Processing
+  "Columns:": "ជួរឈរ:",
+  "(optional:": "(មិនបង្ខំ:",
+  ").": ")។",
+  "Optional:": "មិនបង្ខំ:",
+  "Partial": "មួយផ្នែក",
+  "Only .xlsx files are supported.": "គាំទ្រតែឯកសារ .xlsx ប៉ុណ្ណោះ។",
+  "File must be 10 MB or smaller.": "ឯកសារត្រូវតែមានទំហំ 10 MB ឬតូចជាងនេះ។",
+  "The file could not be read. Please upload a valid .xlsx workbook.": "មិនអាចអានឯកសារបានទេ។ សូមបញ្ចូលសៀវភៅការងារ .xlsx ដែលត្រឹមត្រូវ។",
+  "No new valid rows to import.": "គ្មានជួរទិន្នន័យត្រឹមត្រូវថ្មីសម្រាប់បញ្ចូលទេ។",
+  "No new valid rows to import": "គ្មានជួរទិន្នន័យត្រឹមត្រូវថ្មីសម្រាប់បញ្ចូលទេ",
+
+  // Analytics Volatility & Statistical Profiling
+  "Stable": "ស្ថិរភាព",
+  "Moderate": "មធ្យម",
+  "Erratic": "មិនទៀងទាត់",
+  "STABLE": "ស្ថិរភាព",
+  "MODERATE": "មធ្យម",
+  "ERRATIC": "មិនទៀងទាត់",
+  "Mean (μ)": "មធ្យមភាគ (μ)",
+  "Mean (&mu;)": "មធ្យមភាគ (μ)",
+  "Mean": "មធ្យមភាគ",
+  "MEAN (Μ)": "មធ្យមភាគ (μ)",
+  "MEAN (M)": "មធ្យមភាគ (μ)",
+  "Median": "មេដ្យាន",
+  "MEDIAN": "មេដ្យាន",
+  "Std Dev (σ)": "គម្លាតស្តង់ដារ (σ)",
+  "Std Dev (&sigma;)": "គម្លាតស្តង់ដារ (σ)",
+  "Std Dev": "គម្លាតស្តង់ដារ",
+  "Std Dev:": "គម្លាតស្តង់ដារ:",
+  "STD DEV (Σ)": "គម្លាតស្តង់ដារ (σ)",
+  "Variance (σ²)": "វ៉ារ្យង់ (σ²)",
+  "Variance (&sigma;&sup2;)": "វ៉ារ្យង់ (σ²)",
+  "Variance": "វ៉ារ្យង់",
+  "VARIANCE (Σ²)": "វ៉ារ្យង់ (σ²)",
+  "Skewness": "កម្រិតទ្រេត (Skewness)",
+  "SKEWNESS": "កម្រិតទ្រេត (Skewness)",
+  "Min - Max": "ទាបបំផុត - ខ្ពស់បំផុត",
+  "MIN - MAX": "ទាបបំផុត - ខ្ពស់បំផុត",
+  "CV (σ/μ)": "CV (σ/μ)",
+  "CV (&sigma;/&mu;)": "CV (σ/μ)",
+  "CV (Σ/Μ)": "CV (σ/μ)",
+  "CV (Σ/M)": "CV (σ/μ)",
+  "Priority Class": "លំដាប់អាទិភាព",
+  "Revenue Share (%)": "ចំណែកចំណូល (%)",
+  "Management Policy": "គោលការណ៍គ្រប់គ្រង",
+  "Tight control, weekly review, low safety stock": "ការគ្រប់គ្រងតឹងរ៉ឹង ត្រួតពិនិត្យប្រចាំសប្តាហ៍ ស្តុកសុវត្ថិភាពទាប",
+  "Moderate control, periodic review": "ការគ្រប់គ្រងកម្រិតមធ្យម ត្រួតពិនិត្យតាមកាលកំណត់",
+  "Bulk order, relaxed controls, minimal monitoring": "ការបញ្ជាទិញច្រើន ត្រួតពិនិត្យធូររលុង តាមដានតិចតួច",
+  "Regression Formula": "រូបមន្តតំរែតំរង់ (Regression)",
+  "R² (Variance Explained)": "R² (កម្រិតពន្យល់វ៉ារ្យង់)",
+  "Standard Error (S_e)": "កំហុសស្តង់ដារ (S_e)",
+  "95% Confidence Interval": "ចន្លោះជឿជាក់ 95%",
+  "Demand Mean:": "មធ្យមភាគតម្រូវការ:",
+  "Product Sales Volume": "បរិមាណលក់តាមផលិតផល",
+  "Price Sensitive (Elastic: Higher price reduces volume)": "ប្រែប្រួលតាមតម្លៃ (តម្លៃខ្ពស់កាត់បន្ថយបរិមាណលក់)",
+  "Inelastic / Premium demand pattern": "មិនប្រែប្រួលតាមតម្លៃ / តម្រូវការទំនិញកម្រិតខ្ពស់",
+  "Relatively Inelastic / Stable across prices": "មិនសូវប្រែប្រួល / មានស្ថិរភាពតាមកម្រិតតម្លៃ",
+  "Insufficient data": "ទិន្នន័យមិនគ្រប់គ្រាន់",
+  "Neutral": "អព្យាក្រឹត",
+  "units": "ឯកតា",
+  "days": "ថ្ងៃ",
+  "yr": "ឆ្នាំ",
+
   // Page Titles
   "Dashboard · Cadence": "ផ្ទាំងគ្រប់គ្រង · Cadence",
   "Products · Cadence": "ផលិតផល · Cadence",
@@ -555,6 +619,87 @@ window.t = function(str) {
   return str;
 };
 
+function translateSampleDetails(sample) {
+  return sample
+    .replace(/\brow\s+(\d+):/gi, 'ជួរ $1:')
+    .replace(/invalid or missing date/gi, 'កាលបរិច្ឆេទមិនត្រឹមត្រូវ ឬបាត់')
+    .replace(/missing product name/gi, 'បាត់ឈ្មោះផលិតផល')
+    .replace(/invalid or missing quantity/gi, 'បរិមាណមិនត្រឹមត្រូវ ឬបាត់')
+    .replace(/negative quantity/gi, 'បរិមាណអវិជ្ជមាន')
+    .replace(/invalid or missing price/gi, 'តម្លៃមិនត្រឹមត្រូវ ឬបាត់')
+    .replace(/negative price/gi, 'តម្លៃអវិជ្ជមាន')
+    .replace(/;\s*\.\.\.\s*and\s+(\d+)\s+more/gi, '; ... និង $1 ទៀត');
+}
+
+function restoreSampleDetails(sample) {
+  return sample
+    .replace(/ជួរ\s+(\d+):/g, 'row $1:')
+    .replace(/កាលបរិច្ឆេទមិនត្រឹមត្រូវ ឬបាត់/g, 'invalid or missing date')
+    .replace(/បាត់ឈ្មោះផលិតផល/g, 'missing product name')
+    .replace(/បរិមាណមិនត្រឹមត្រូវ ឬបាត់/g, 'invalid or missing quantity')
+    .replace(/បរិមាណអវិជ្ជមាន/g, 'negative quantity')
+    .replace(/តម្លៃមិនត្រឹមត្រូវ ឬបាត់/g, 'invalid or missing price')
+    .replace(/តម្លៃអវិជ្ជមាន/g, 'negative price')
+    .replace(/;\s*\.\.\.\s*និង\s+(\d+)\s+ទៀត/g, '; ... and $1 more');
+}
+
+function translateUploadMessage(text, lang) {
+  if (!text) return null;
+  if (lang === 'km') {
+    if (!/(?:No new valid rows|duplicate rows|clean rows|invalid rows|could not be read|required columns|\binvalid\b)/i.test(text)) {
+      return null;
+    }
+    let res = text;
+    res = res.replace(/No new valid rows to import\.?/gi, 'គ្មានជួរទិន្នន័យត្រឹមត្រូវថ្មីសម្រាប់បញ្ចូលទេ។');
+    res = res.replace(/Imported\s+(\d+)\s+clean\s+rows\.?/gi, 'បានបញ្ចូលទិន្នន័យត្រឹមត្រូវ $1 ជួរ។');
+    res = res.replace(/Skipped\s+(\d+)\s+duplicate\s+rows\s+in\s+the\s+file\s+and\s+(\d+)\s+already\s+in\s+the\s+database\.?/gi,
+      'បានរំលងទិន្នន័យស្ទួនក្នុងឯកសារ $1 ជួរ និងមានក្នុងមូលដ្ឋានទិន្នន័យរួចហើយ $2 ជួរ។');
+    res = res.replace(/(?:Skipped\s+(\d+)\s+duplicate\s+rows|\b(\d+)\s+duplicate\s+rows\s+skipped)\.?/gi, (m, p1, p2) => {
+      const count = p1 || p2;
+      return 'បានរំលងទិន្នន័យស្ទួន ' + count + ' ជួរ។';
+    });
+    res = res.replace(/Rejected\s+(\d+)\s+invalid\s+rows(?:\s*\((.*?)\))?\.?/gi, (m, count, sample) => {
+      if (sample) {
+        return 'បានបដិសេធ ' + count + ' ជួរមិនត្រឹមត្រូវ (' + translateSampleDetails(sample) + ')។';
+      }
+      return 'បានបដិសេធ ' + count + ' ជួរមិនត្រឹមត្រូវ។';
+    });
+    res = res.replace(/\b(\d+)\s+invalid(?:\s*\((.*?)\))?\.?/gi, (m, count, sample) => {
+      if (sample) {
+        return count + ' ជួរមិនត្រឹមត្រូវ (' + translateSampleDetails(sample) + ')។';
+      }
+      return count + ' ជួរមិនត្រឹមត្រូវ។';
+    });
+    res = res.replace(/The file could not be read\. Please upload a valid \.xlsx workbook\.?/gi,
+      'មិនអាចអានឯកសារបានទេ។ សូមបញ្ចូលសៀវភៅការងារ .xlsx ដែលត្រឹមត្រូវ។');
+    res = res.replace(/Missing required columns:\s*(.*?)\.\s*Required:\s*(.*?)\.?/gi,
+      'ខ្វះជួរឈរដែលត្រូវការ: $1។ ត្រូវការ: $2។');
+    res = res.replace(/([។])\s+/g, '$1 ').trim();
+    return res;
+  } else {
+    if (!/(?:គ្មានជួរទិន្នន័យត្រឹមត្រូវ|បានបញ្ចូលទិន្នន័យត្រឹមត្រូវ|បានរំលងទិន្នន័យស្ទួន|បានបដិសេធ|មិនអាចអានឯកសារបានទេ|ខ្វះជួរឈរដែលត្រូវការ)/.test(text)) {
+      return null;
+    }
+    let res = text;
+    res = res.replace(/គ្មានជួរទិន្នន័យត្រឹមត្រូវថ្មីសម្រាប់បញ្ចូលទេ។/g, 'No new valid rows to import.');
+    res = res.replace(/បានបញ្ចូលទិន្នន័យត្រឹមត្រូវ\s+(\d+)\s+ជួរ។/g, 'Imported $1 clean rows.');
+    res = res.replace(/បានរំលងទិន្នន័យស្ទួនក្នុងឯកសារ\s+(\d+)\s+ជួរ\s+និងមានក្នុងមូលដ្ឋានទិន្នន័យរួចហើយ\s+(\d+)\s+ជួរ។/g,
+      'Skipped $1 duplicate rows in the file and $2 already in the database.');
+    res = res.replace(/បានរំលងទិន្នន័យស្ទួន\s+(\d+)\s+ជួរ។/g, '$1 duplicate rows skipped.');
+    res = res.replace(/បានបដិសេធ\s+(\d+)\s+ជួរមិនត្រឹមត្រូវ(?:\s*\((.*?)\))?។/g, (m, count, sample) => {
+      return 'Rejected ' + count + ' invalid rows' + (sample ? ' (' + restoreSampleDetails(sample) + ')' : '') + '.';
+    });
+    res = res.replace(/(\d+)\s+ជួរមិនត្រឹមត្រូវ(?:\s*\((.*?)\))?។/g, (m, count, sample) => {
+      return count + ' invalid' + (sample ? ' (' + restoreSampleDetails(sample) + ')' : '') + '.';
+    });
+    res = res.replace(/មិនអាចអានឯកសារបានទេ។ សូមបញ្ចូលសៀវភៅការងារ \.xlsx ដែលត្រឹមត្រូវ។/g,
+      'The file could not be read. Please upload a valid .xlsx workbook.');
+    res = res.replace(/ខ្វះជួរឈរដែលត្រូវការ:\s*(.*?)។\s*ត្រូវការ:\s*(.*?)។/g,
+      'Missing required columns: $1. Required: $2.');
+    return res.trim();
+  }
+}
+
 // Translate individual text string with dictionary and dynamic pattern support
 function translateText(str, targetLang) {
   if (!str) return str;
@@ -574,39 +719,62 @@ function translateText(str, targetLang) {
       return raw.replace(trimmed, DICT_EN_TO_KM[unescaped]);
     }
 
-    // 3. Pattern: "X in stock"
+    // 3. Dynamic upload messages
+    const uploadKm = translateUploadMessage(trimmed, 'km');
+    if (uploadKm) {
+      return raw.replace(trimmed, uploadKm);
+    }
+
+    // 4. Pattern: "X in stock"
     let m = trimmed.match(/^(\d+)\s+in\s+stock$/i);
     if (m) return raw.replace(trimmed, `${m[1]} មានក្នុងស្តុក`);
 
-    // 4. Pattern: "Only X left"
+    // 5. Pattern: "Only X left"
     m = trimmed.match(/^Only\s+(\d+)\s+left$/i);
     if (m) return raw.replace(trimmed, `នៅសល់តែ ${m[1]}`);
 
-    // 5. Pattern: "X items" / "X item"
+    // 6. Pattern: "X items" / "X item"
     m = trimmed.match(/^(\d+)\s+items?$/i);
     if (m) return raw.replace(trimmed, `${m[1]} មុខទំនិញ`);
 
-    // 6. Pattern: "X Items Available"
+    // 7. Pattern: "X Items Available"
     m = trimmed.match(/^(\d+)\s+items\s+available$/i);
     if (m) return raw.replace(trimmed, `${m[1]} មុខទំនិញមានក្នុងស្តុក`);
 
-    // 7. Pattern: "$X.XX each"
+    // 8. Pattern: "$X.XX each"
     m = trimmed.match(/^(\$[\d.,]+)\s+each$/i);
     if (m) return raw.replace(trimmed, `${m[1]} ក្នុងមួយមុខ`);
 
-    // 8. Pattern: "Complete Walk-in Order • $X.XX"
+    // 9. Pattern: "Complete Walk-in Order • $X.XX"
     m = trimmed.match(/^Complete\s+Walk-in\s+Order\s*•\s*(.*)$/i);
     if (m) return raw.replace(trimmed, `បញ្ជាក់ការបញ្ជាទិញ • ${m[1]}`);
 
-    // 9. Pattern: "X in ticket"
+    // 10. Pattern: "X in ticket"
     m = trimmed.match(/^(\d+)\s+in\s+ticket$/i);
     if (m) return raw.replace(trimmed, `${m[1]} ក្នុងប័ណ្ណ`);
+
+    // 11. Pattern: "X units"
+    m = trimmed.match(/^([\d.]+)\s+units$/i);
+    if (m) return raw.replace(trimmed, `${m[1]} ឯកតា`);
+
+    // 12. Pattern: "Xx / yr"
+    m = trimmed.match(/^([\d.]+)x\s*\/\s*yr$/i);
+    if (m) return raw.replace(trimmed, `${m[1]}x / ឆ្នាំ`);
+
+    // 13. Pattern: "X days"
+    m = trimmed.match(/^([\d.]+)\s+days$/i);
+    if (m) return raw.replace(trimmed, `${m[1]} ថ្ងៃ`);
 
     return raw;
   } else {
     // Reverting to English
     if (DICT_KM_TO_EN[trimmed]) {
       return raw.replace(trimmed, DICT_KM_TO_EN[trimmed]);
+    }
+
+    const uploadEn = translateUploadMessage(trimmed, 'en');
+    if (uploadEn) {
+      return raw.replace(trimmed, uploadEn);
     }
 
     let m = trimmed.match(/^(\d+)\s+មានក្នុងស្តុក$/);
@@ -629,6 +797,15 @@ function translateText(str, targetLang) {
 
     m = trimmed.match(/^(\d+)\s+ក្នុងប័ណ្ណ$/);
     if (m) return raw.replace(trimmed, `${m[1]} in ticket`);
+
+    m = trimmed.match(/^([\d.]+)\s+ឯកតា$/);
+    if (m) return raw.replace(trimmed, `${m[1]} units`);
+
+    m = trimmed.match(/^([\d.]+)x\s*\/\s*ឆ្នាំ$/);
+    if (m) return raw.replace(trimmed, `${m[1]}x / yr`);
+
+    m = trimmed.match(/^([\d.]+)\s+ថ្ងៃ$/);
+    if (m) return raw.replace(trimmed, `${m[1]} days`);
 
     return raw;
   }
@@ -716,22 +893,38 @@ function applyChartTheme() {
     const fontFamily = "'Roboto', 'Kantumruy Pro', sans-serif";
     const muted = cssColor('--muted') || '#8796aa';
     const grid = cssColor('--chart-grid') || 'rgba(148,163,184,.1)';
-    const surface = cssColor('--tooltip') || '#172235';
-    const text = cssColor('--text') || '#edf3f8';
+    const surface = cssColor('--tooltip-bg') || cssColor('--tooltip') || '#0f172a';
+    const tooltipTitle = cssColor('--tooltip-title') || '#ffffff';
+    const tooltipBody = cssColor('--tooltip-body') || '#e2e8f0';
+    const tooltipBorder = cssColor('--tooltip-border') || 'rgba(255,255,255,.14)';
 
     Chart.defaults.color = muted;
     Chart.defaults.borderColor = grid;
     Chart.defaults.font.family = fontFamily;
-    if (Chart.defaults.plugins && Chart.defaults.plugins.tooltip) {
-      Chart.defaults.plugins.tooltip.backgroundColor = surface;
-      Chart.defaults.plugins.tooltip.titleColor = text;
-      Chart.defaults.plugins.tooltip.bodyColor = muted;
-      Chart.defaults.plugins.tooltip.padding = 12;
-      Chart.defaults.plugins.tooltip.cornerRadius = 6;
-    }
+    if (!Chart.defaults.plugins) Chart.defaults.plugins = {};
+    if (!Chart.defaults.plugins.tooltip) Chart.defaults.plugins.tooltip = {};
+    Chart.defaults.plugins.tooltip.backgroundColor = surface;
+    Chart.defaults.plugins.tooltip.titleColor = tooltipTitle;
+    Chart.defaults.plugins.tooltip.bodyColor = tooltipBody;
+    Chart.defaults.plugins.tooltip.borderColor = tooltipBorder;
+    Chart.defaults.plugins.tooltip.borderWidth = 1;
+    Chart.defaults.plugins.tooltip.padding = 10;
+    Chart.defaults.plugins.tooltip.cornerRadius = 8;
+    Chart.defaults.plugins.tooltip.titleFont = { family: fontFamily, size: 13, weight: '600' };
+    Chart.defaults.plugins.tooltip.bodyFont = { family: fontFamily, size: 12, weight: '400' };
 
     Object.values(Chart.instances || {}).forEach(chart => {
       try {
+        if (!chart.options.plugins) chart.options.plugins = {};
+        if (!chart.options.plugins.tooltip) chart.options.plugins.tooltip = {};
+        chart.options.plugins.tooltip.backgroundColor = surface;
+        chart.options.plugins.tooltip.titleColor = tooltipTitle;
+        chart.options.plugins.tooltip.bodyColor = tooltipBody;
+        chart.options.plugins.tooltip.borderColor = tooltipBorder;
+        chart.options.plugins.tooltip.borderWidth = 1;
+        chart.options.plugins.tooltip.titleFont = { family: fontFamily, size: 13, weight: '600' };
+        chart.options.plugins.tooltip.bodyFont = { family: fontFamily, size: 12, weight: '400' };
+
         if (chart.options?.plugins?.legend?.labels) {
           chart.options.plugins.legend.labels.color = muted;
           chart.options.plugins.legend.labels.font = { family: fontFamily };
