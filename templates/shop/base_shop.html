@@ -20,13 +20,13 @@
     <div class="brandbar">
       <span class="brand-mark pos-pulse"></span>
       <span class="brand">Cadence</span>
-      <span class="brand-tag">WALK-IN POS</span>
+      <span class="brand-tag">POS</span>
       <button class="sidebar-close d-lg-none" type="button" aria-label="Close menu"><i class="bi bi-x-lg"></i></button>
     </div>
     <nav class="sidebar-nav" aria-label="Walk-in navigation">
-      <span class="shop-nav-label">COUNTER SERVICE</span>
+      <span class="shop-nav-label">MENU</span>
       <a href="{% url 'catalog' %}" class="{% if current == 'catalog' %}active{% endif %}">
-        <i class="bi bi-grid-3x3-gap-fill"></i><span>Walk-in Menu</span>
+        <i class="bi bi-grid-3x3-gap-fill"></i><span>Menu</span>
       </a>
       <a href="{% url 'order_history' %}" class="{% if current == 'order_history' %}active{% endif %}">
         <i class="bi bi-receipt"></i><span>Recent Tickets</span>
@@ -35,7 +35,7 @@
       {% if request.user.is_staff %}
         <span class="shop-nav-label shop-nav-label-spaced">MANAGEMENT</span>
         <a href="{% url 'dashboard' %}"><i class="bi bi-grid-1x2"></i><span>Admin Dashboard</span></a>
-        <a href="{% url 'customer_orders' %}"><i class="bi bi-receipt-cutoff"></i><span>All Walk-in Orders</span></a>
+        <a href="{% url 'customer_orders' %}"><i class="bi bi-receipt-cutoff"></i><span>Walk-in Orders</span></a>
       {% endif %}
     </nav>
     <div class="sidebar-footer">
@@ -56,7 +56,7 @@
           <span class="avatar"><i class="bi bi-person"></i></span>
           <div>
             <strong>Walk-in Guest</strong>
-            <small>Self-Service Mode</small>
+            <small>Guest</small>
           </div>
           <a href="{% url 'login' %}" class="icon-button" title="Staff Sign in" aria-label="Staff Sign in">
             <i class="bi bi-box-arrow-in-right"></i>
@@ -71,10 +71,9 @@
       <button class="icon-button d-lg-none" id="menuToggle" type="button" aria-label="Open menu"><i class="bi bi-list"></i></button>
       <div>
         <div class="workspace-title d-flex align-items-center gap-2">
-          <span>Cadence Walk-in Express</span>
+          <span>Cadence</span>
           <span class="pos-status-chip"><span class="live-dot"></span> Active</span>
         </div>
-        <div class="workspace-subtitle">Fast Table &amp; Takeaway Counter Ordering</div>
       </div>
       <div class="topbar-actions">
         <div class="pos-clock-badge d-none d-md-flex align-items-center gap-2">

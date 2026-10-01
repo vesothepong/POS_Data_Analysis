@@ -37,8 +37,7 @@
         class="pos-cat-pill {% if selected_category == cat.name %}active{% endif %}" data-category="{{ cat.name }}">
         {% if "drink" in cat.name|lower or "beverage" in cat.name|lower or "coffee" in cat.name|lower %}
         <i class="bi bi-cup-hot-fill"></i>
-        {% elif "food" in cat.name|lower or "burger" in cat.name|lower or "croissant" in cat.name|lower or "bakery" in
-        cat.name|lower %}
+        {% elif "food" in cat.name|lower or "burger" in cat.name|lower or "croissant" in cat.name|lower or "bakery" in cat.name|lower %}
         <i class="bi bi-egg-fried"></i>
         {% else %}
         <i class="bi bi-tag-fill"></i>
@@ -88,8 +87,7 @@
               <input type="hidden" name="quantity" value="1">
               <input type="hidden" name="next" value="{{ request.get_full_path }}">
               <button type="button" class="btn pos-btn-add {% if p.stock_quantity <= 0 %}disabled{% endif %}"
-                data-action="add-item" data-id="{{ p.id }}" data-name="{{ p.name }}" data-price="{{ p.price }}" {% if
-                p.stock_quantity <=0 %}disabled{% endif %}>
+                data-action="add-item" data-id="{{ p.id }}" data-name="{{ p.name }}" data-price="{{ p.price }}" {% if p.stock_quantity <= 0 %}disabled{% endif %}>
                 <i class="bi bi-plus-lg"></i>
                 <span>Add</span>
               </button>
@@ -119,8 +117,7 @@
         <div class="d-flex align-items-center gap-2">
           <div class="pos-ticket-badge-icon"><i class="bi bi-receipt"></i></div>
           <div>
-            <h2 class="pos-ticket-title">Walk-in Order Ticket</h2>
-            <div class="pos-ticket-sub">Counter Terminal #01</div>
+            <h2 class="pos-ticket-title">Order Ticket</h2>
           </div>
         </div>
         <button type="button" class="btn btn-outline-danger btn-sm pos-btn-clear" id="posClearCartBtn"
@@ -200,8 +197,8 @@
         {% else %}
         <div class="pos-ticket-empty" id="posTicketEmpty">
           <div class="pos-ticket-empty-icon"><i class="bi bi-cart3"></i></div>
-          <h4>Order ticket is empty</h4>
-          <p>Tap menu items on the left to start building this walk-in order.</p>
+          <h4>Ticket is empty</h4>
+          <p>Tap items to add.</p>
         </div>
         {% endif %}
       </div>
@@ -267,13 +264,11 @@
           <input type="hidden" name="payment_method" id="hiddenPaymentMethod" value="cash">
 
           <button type="button" id="posCompleteOrderBtn"
-            class="btn btn-primary pos-btn-checkout w-100 {% if not cart_items %}disabled{% endif %}" {% if not
-            cart_items %}disabled{% endif %}>
+            class="btn btn-primary pos-btn-checkout w-100 {% if not cart_items %}disabled{% endif %}" {% if not cart_items %}disabled{% endif %}>
             <span class="pos-btn-text">
               <i class="bi {% if cart_items %}bi-check-circle-fill{% else %}bi-bag-plus{% endif %} me-1"
                 id="posBtnIcon"></i>
-              <span id="posBtnLabel">{% if cart_items %}Complete Walk-in Order • <span id="posBtnTotal">${{
-                  cart_total|floatformat:2 }}</span>{% else %}Select Items to Order{% endif %}</span>
+              <span id="posBtnLabel">{% if cart_items %}Complete Order • <span id="posBtnTotal">${{ cart_total|floatformat:2 }}</span>{% else %}Select Items to Order{% endif %}</span>
             </span>
             <span class="pos-btn-spinner spinner-border spinner-border-sm d-none" role="status"
               aria-hidden="true"></span>
@@ -321,13 +316,11 @@
             <div class="pos-receipt-ticket-box">
               <div class="pos-receipt-ticket-label">WALK-IN ORDER TICKET</div>
               <div class="pos-receipt-ticket-num" id="receiptTicketNum">
-                {% if receipt_order %}{{ receipt_order.ticket_number|default:receipt_order.id }}{% else %}W-101{% endif
-                %}
+                {% if receipt_order %}{{ receipt_order.ticket_number|default:receipt_order.id }}{% else %}W-101{% endif %}
               </div>
               <div class="pos-receipt-badge" id="receiptOrderType">
                 {% if receipt_order %}
-                {{ receipt_order.get_order_type_display|upper }}{% if receipt_order.table_number %} • {{
-                receipt_order.table_number|upper }}{% endif %}
+                {{ receipt_order.get_order_type_display|upper }}{% if receipt_order.table_number %} • {{ receipt_order.table_number|upper }}{% endif %}
                 {% else %}
                 DINE IN • TABLE 01
                 {% endif %}
@@ -337,13 +330,11 @@
             <div class="pos-receipt-meta">
               <div class="pos-receipt-meta-row">
                 <span class="meta-label">Date/Time:</span>
-                <strong class="meta-val" id="receiptDateTime">{% if receipt_order %}{{ receipt_order.created_at|date:"M
-                  d, Y • H:i" }}{% else %}Sep 30, 2026 • 21:30{% endif %}</strong>
+                <strong class="meta-val" id="receiptDateTime">{% if receipt_order %}{{ receipt_order.created_at|date:"M d, Y • H:i" }}{% else %}Sep 30, 2026 • 21:30{% endif %}</strong>
               </div>
               <div class="pos-receipt-meta-row">
                 <span class="meta-label">Customer:</span>
-                <strong class="meta-val" id="receiptCustomerName">{% if receipt_order %}{{ receipt_order.customer_name
-                  }}{% else %}Walk-in Guest{% endif %}</strong>
+                <strong class="meta-val" id="receiptCustomerName">{% if receipt_order %}{{ receipt_order.customer_name }}{% else %}Walk-in Guest{% endif %}</strong>
               </div>
               <div class="pos-receipt-meta-row">
                 <span class="meta-label">Cashier:</span>
@@ -351,8 +342,7 @@
               </div>
               <div class="pos-receipt-meta-row">
                 <span class="meta-label">Payment:</span>
-                <strong class="meta-val" id="receiptPayment">{% if receipt_order %}{{
-                  receipt_order.get_payment_method_display }}{% else %}Cash at Counter{% endif %}</strong>
+                <strong class="meta-val" id="receiptPayment">{% if receipt_order %}{{ receipt_order.get_payment_method_display }}{% else %}Cash at Counter{% endif %}</strong>
               </div>
             </div>
 
@@ -383,8 +373,7 @@
             <!-- Breakdown & Grand Total -->
             <div class="pos-receipt-calc-row">
               <span>Subtotal</span>
-              <strong id="receiptSubtotal">${% if receipt_order %}{{ receipt_order.total_amount|floatformat:2 }}{% else
-                %}0.00{% endif %}</strong>
+              <strong id="receiptSubtotal">${% if receipt_order %}{{ receipt_order.total_amount|floatformat:2 }}{% else %}0.00{% endif %}</strong>
             </div>
             <div class="pos-receipt-calc-row text-muted small">
               <span>Tax / VAT (10% Included)</span>
@@ -393,13 +382,11 @@
             <div class="pos-receipt-divider-line"></div>
             <div class="pos-receipt-total-row">
               <span>TOTAL PAID</span>
-              <strong id="receiptTotalAmount">${% if receipt_order %}{{ receipt_order.total_amount|floatformat:2 }}{%
-                else %}0.00{% endif %}</strong>
+              <strong id="receiptTotalAmount">${% if receipt_order %}{{ receipt_order.total_amount|floatformat:2 }}{% else %}0.00{% endif %}</strong>
             </div>
             <div class="pos-receipt-calc-row small text-muted">
               <span>Amount Tendered</span>
-              <strong id="receiptTendered">${% if receipt_order %}{{ receipt_order.total_amount|floatformat:2 }}{% else
-                %}0.00{% endif %}</strong>
+              <strong id="receiptTendered">${% if receipt_order %}{{ receipt_order.total_amount|floatformat:2 }}{% else %}0.00{% endif %}</strong>
             </div>
             <div class="pos-receipt-calc-row small text-muted">
               <span>Change Due</span>
@@ -456,8 +443,7 @@
                 <rect x="193" y="0" width="2" height="40" fill="currentColor" />
                 <rect x="197" y="0" width="3" height="40" fill="currentColor" />
               </svg>
-              <div class="pos-barcode-text" id="receiptBarcodeText">*{% if receipt_order %}{{
-                receipt_order.ticket_number|default:receipt_order.id }}{% else %}W-101{% endif %}*</div>
+              <div class="pos-barcode-text" id="receiptBarcodeText">*{% if receipt_order %}{{ receipt_order.ticket_number|default:receipt_order.id }}{% else %}W-101{% endif %}*</div>
             </div>
 
             <div class="pos-receipt-footer text-center">
@@ -466,9 +452,7 @@
                 <strong>coffee2026</strong>
               </div>
               <p class="mb-1 fw-bold text-body">Thank you for visiting Cadence Café!</p>
-              <p class="mb-1 text-muted small">សូមអរគុណសម្រាប់ការគាំទ្រ!</p>
-              <p class="pos-receipt-policy small text-muted mb-0">Please retain this receipt for table service or order
-                pickup.</p>
+              <p class="mb-0 text-muted small">សូមអរគុណសម្រាប់ការគាំទ្រ!</p>
             </div>
           </div>
         </div>
@@ -727,8 +711,8 @@
           ticketLines.innerHTML = `
         <div class="pos-ticket-empty" id="posTicketEmpty">
           <div class="pos-ticket-empty-icon"><i class="bi bi-cart3"></i></div>
-          <h4>${window.t ? window.t('Order ticket is empty') : 'Order ticket is empty'}</h4>
-          <p>${window.t ? window.t('Tap menu items on the left to start building this walk-in order.') : 'Tap menu items on the left to start building this walk-in order.'}</p>
+          <h4>${window.t ? window.t('Ticket is empty') : 'Ticket is empty'}</h4>
+          <p>${window.t ? window.t('Tap items to add.') : 'Tap items to add.'}</p>
         </div>
       `;
           const zeroItemsText = window.t ? `0 ${window.t('items')}` : '0 items';
@@ -784,7 +768,7 @@
           completeBtn.disabled = false;
         }
         if (btnIcon) btnIcon.className = 'bi bi-check-circle-fill me-1';
-        const completeText = window.t ? window.t('Complete Walk-in Order') : 'Complete Walk-in Order';
+        const completeText = window.t ? window.t('Complete Order') : 'Complete Order';
         if (btnLabel) btnLabel.innerHTML = `<span>${completeText}</span> • <span id="posBtnTotal">$${cart.total.toFixed(2)}</span>`;
         if (mobileTicketCount) mobileTicketCount.textContent = cart.count;
         if (clearBtn) {

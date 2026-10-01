@@ -40,14 +40,14 @@
 
 <div class="row g-3 mb-3">
   <div class="col-md-3"><div class="card p-3"><small class="text-muted">Current Stock</small><div class="kpi">{{ row.stock }}</div></div></div>
-  <div class="col-md-3"><div class="card p-3"><small class="text-muted">Reorder Level Threshold</small><div class="kpi">{{ row.reorder_level }}</div></div></div>
+  <div class="col-md-3"><div class="card p-3"><small class="text-muted">Reorder Level</small><div class="kpi">{{ row.reorder_level }}</div></div></div>
   <div class="col-md-3"><div class="card p-3"><small class="text-muted">Predicted Demand{% if row.forecast_month %} ({{ row.forecast_month|date:"M Y" }}){% endif %}</small><div class="kpi">{{ row.predicted|default_if_none:"-" }}</div></div></div>
-  <div class="col-md-3"><div class="card p-3"><small class="text-muted">Recommended Reorder Qty</small><div class="kpi text-warning">{{ row.reorder_qty }}</div></div></div>
+  <div class="col-md-3"><div class="card p-3"><small class="text-muted">Reorder Qty</small><div class="kpi text-warning">{{ row.reorder_qty }}</div></div></div>
 </div>
 <div class="row g-3">
   <div class="col-lg-4"><div class="card p-3"><h5>Update stock</h5>
     <form method="post" action="{% url 'inventory_update' row.product.id %}">{% csrf_token %}<input type="hidden" name="next" value="detail">{{ form.as_p }}<button class="btn btn-primary">Save</button></form></div></div>
-  <div class="col-lg-8"><div class="card p-3"><h5>Last 12 months of sales</h5><div class="chart-box"><canvas id="hist"></canvas></div></div></div>
+  <div class="col-lg-8"><div class="card p-3"><h5>Sales History</h5><div class="chart-box"><canvas id="hist"></canvas></div></div></div>
 </div>
 {{ history|json_script:"hist-data" }}
 {% endblock %}

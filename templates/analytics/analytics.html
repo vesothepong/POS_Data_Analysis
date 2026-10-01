@@ -4,13 +4,7 @@
 {% block content %}
 <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-3">
   <div>
-    <div class="d-flex align-items-center gap-2 mb-1">
-      <h2 class="mb-0">Data Analytics & Statistical Intelligence</h2>
-      <span class="badge bg-primary-subtle text-primary border border-primary-subtle">Course Showcase</span>
-    </div>
-    <p class="text-muted small mb-0">
-      Exploratory Data Analysis (EDA), ABC Pareto Classification, Ordinary Least Squares (OLS) Regression, and Prescriptive Inventory Optimization (EOQ &amp; Safety Stock).
-    </p>
+    <h2 class="mb-0">Data Analytics</h2>
   </div>
   <div class="d-flex gap-2">
     <a class="btn btn-outline-secondary btn-sm d-inline-flex align-items-center gap-1" href="{% url 'reports' %}?type=abc_analytics">
@@ -51,7 +45,7 @@
         <i class="bi bi-pie-chart text-warning" style="font-size: 1.2rem;"></i>
       </div>
       <div class="kpi" id="kpiClassA">-- items</div>
-      <small class="text-muted" style="font-size: 11px;">Drive top 70% of total revenue</small>
+      <small class="text-muted" style="font-size: 11px;">Top 70% revenue</small>
     </div>
   </div>
   <div class="col-6 col-md-3">
@@ -61,7 +55,7 @@
         <i class="bi bi-graph-down-arrow text-info" style="font-size: 1.2rem;"></i>
       </div>
       <div class="kpi" id="kpiCorr" style="font-size: 1.35rem;">--</div>
-      <small class="text-muted" id="kpiElasticity" style="font-size: 11px;">Pearson r (Price vs Units)</small>
+      <small class="text-muted" id="kpiElasticity" style="font-size: 11px;">Price vs Units</small>
     </div>
   </div>
 </div>
@@ -70,27 +64,27 @@
 <ul class="nav nav-pills mb-3 border-bottom pb-2 gap-2" id="analyticsTabs" role="tablist">
   <li class="nav-item" role="presentation">
     <button class="nav-link active btn-sm" id="tab-overview" data-bs-toggle="pill" data-bs-target="#content-overview" type="button" role="tab">
-      <i class="bi bi-bar-chart"></i> Trends &amp; Distribution
+      <i class="bi bi-bar-chart"></i> Trends
     </button>
   </li>
   <li class="nav-item" role="presentation">
     <button class="nav-link btn-sm" id="tab-abc" data-bs-toggle="pill" data-bs-target="#content-abc" type="button" role="tab">
-      <i class="bi bi-pie-chart-fill"></i> ABC Pareto Analysis
+      <i class="bi bi-pie-chart-fill"></i> ABC Analysis
     </button>
   </li>
   <li class="nav-item" role="presentation">
     <button class="nav-link btn-sm" id="tab-statistics" data-bs-toggle="pill" data-bs-target="#content-statistics" type="button" role="tab">
-      <i class="bi bi-calculator"></i> Statistical Demand Profiling
+      <i class="bi bi-calculator"></i> Demand Statistics
     </button>
   </li>
   <li class="nav-item" role="presentation">
     <button class="nav-link btn-sm" id="tab-prescriptive" data-bs-toggle="pill" data-bs-target="#content-prescriptive" type="button" role="tab">
-      <i class="bi bi-lightning-charge"></i> Prescriptive Optimization (EOQ)
+      <i class="bi bi-lightning-charge"></i> Inventory Optimization
     </button>
   </li>
   <li class="nav-item" role="presentation">
     <button class="nav-link btn-sm" id="tab-deepdive" data-bs-toggle="pill" data-bs-target="#content-deepdive" type="button" role="tab">
-      <i class="bi bi-search"></i> Product Deep-Dive &amp; OLS
+      <i class="bi bi-search"></i> Product Deep-Dive
     </button>
   </li>
 </ul>
@@ -104,8 +98,7 @@
       <div class="col-lg-6">
         <div class="card p-3 h-100">
           <div class="d-flex justify-content-between align-items-center mb-2">
-            <h5 class="mb-0">Monthly Demand &amp; Revenue Trend</h5>
-            <small class="text-muted">Time-series trajectory</small>
+            <h5 class="mb-0">Monthly Demand &amp; Revenue</h5>
           </div>
           <div class="chart-box"><canvas id="cMonthly"></canvas></div>
         </div>
@@ -114,7 +107,6 @@
         <div class="card p-3 h-100">
           <div class="d-flex justify-content-between align-items-center mb-2">
             <h5 class="mb-0">Product Sales Volume</h5>
-            <small class="text-muted">Total units sold</small>
           </div>
           <div class="chart-box"><canvas id="cProducts"></canvas></div>
         </div>
@@ -122,8 +114,7 @@
       <div class="col-lg-6">
         <div class="card p-3 h-100">
           <div class="d-flex justify-content-between align-items-center mb-2">
-            <h5 class="mb-0">Category Revenue Breakdown</h5>
-            <small class="text-muted">Portfolio distribution</small>
+            <h5 class="mb-0">Category Revenue</h5>
           </div>
           <div class="chart-box"><canvas id="cCategory"></canvas></div>
         </div>
@@ -132,7 +123,6 @@
         <div class="card p-3 h-100">
           <div class="d-flex justify-content-between align-items-center mb-2">
             <h5 class="mb-0">Top 5 Revenue Drivers</h5>
-            <small class="text-muted">Gross sales value ($)</small>
           </div>
           <div class="chart-box"><canvas id="cTop"></canvas></div>
         </div>
@@ -145,10 +135,7 @@
     <div class="card p-3 mb-3">
       <div class="d-flex flex-wrap justify-content-between align-items-center mb-3">
         <div>
-          <h5 class="mb-1">Pareto Analysis Curve (ABC Classification)</h5>
-          <p class="text-muted small mb-0">
-            Categorizes items by cumulative revenue contribution: Class A (&le; 70%), Class B (70% - 90%), Class C (&gt; 90%).
-          </p>
+          <h5 class="mb-0">ABC Pareto Analysis</h5>
         </div>
         <div class="d-flex gap-2">
           <span class="badge bg-danger">Class A (&le;70%)</span>
@@ -183,10 +170,7 @@
     <div class="card p-3 mb-3">
       <div class="d-flex justify-content-between align-items-center mb-3">
         <div>
-          <h5 class="mb-1">Descriptive Demand Statistics (Summary Table)</h5>
-          <p class="text-muted small mb-0">
-            Comprehensive exploratory metrics: Mean (&mu;), Standard Deviation (&sigma;), Variance (&sigma;&sup2;), Skewness, and Coefficient of Variation (CV).
-          </p>
+          <h5 class="mb-0">Demand Statistics</h5>
         </div>
       </div>
       <div class="table-responsive">
@@ -219,10 +203,7 @@
     <div class="card p-3 mb-3">
       <div class="d-flex justify-content-between align-items-center mb-3">
         <div>
-          <h5 class="mb-1">Operations Research &amp; Prescriptive Inventory Parameters</h5>
-          <p class="text-muted small mb-0">
-            Automated calculations for Economic Order Quantity (EOQ = &radic;(2DS/H)), Safety Stock (Z = 1.65 for 95% service level), and Recommended Reorder Point (ROP).
-          </p>
+          <h5 class="mb-0">Inventory Optimization</h5>
         </div>
       </div>
       <div class="table-responsive">
@@ -254,8 +235,7 @@
     <div class="card p-3 mb-3">
       <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
         <div>
-          <h5 class="mb-0">Product Deep-Dive &amp; Ordinary Least Squares (OLS) Regression</h5>
-          <small class="text-muted">Inspect regression equation, goodness-of-fit (R&sup2;), and 95% confidence intervals.</small>
+          <h5 class="mb-0">Product Deep-Dive</h5>
         </div>
         <div class="d-flex align-items-center gap-2">
           <label for="productSelect" class="form-label mb-0 small fw-semibold">Select Product:</label>
@@ -326,7 +306,7 @@
       <!-- Regression Chart -->
       <div class="chart-box" style="height: 340px;"><canvas id="cPredict"></canvas></div>
       <p class="text-muted small mt-2 mb-0" id="predictNote">
-        Select a product from the dropdown above to view its monthly sales trajectory and next month's forecast.
+        Select a product to view forecast and trajectory.
       </p>
     </div>
   </div>

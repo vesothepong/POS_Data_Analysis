@@ -2,8 +2,7 @@
 {% block content %}
 <h2>Upload Sales Data</h2>
 <div class="card p-4 mt-3">
-  <p>Required columns: <code>Date, Product, Quantity Sold, Price</code>. Optional: <code>Category, Stock Quantity</code>.</p>
-  <p class="text-muted small">Rows with invalid dates, missing products or negative/invalid numbers are rejected; exact duplicates (in the file or already stored) are skipped.</p>
+  <p class="text-muted small mb-3">Columns: <code>Date, Product, Quantity Sold, Price</code> (optional: <code>Category, Stock Quantity</code>).</p>
   <form method="post" enctype="multipart/form-data">{% csrf_token %}{{ form.as_p }}<button class="btn btn-primary">Upload &amp; Clean Data</button></form>
 </div>
 <div class="card p-3 mt-3"><h6>Recent uploads</h6>

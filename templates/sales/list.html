@@ -26,7 +26,7 @@
 </div>
 
 <div class="card p-3">
-  <h6>Sales records {% if count > 500 %}<small class="text-muted">(showing latest 500 of {{ count }}; export the Sales Report for all)</small>{% endif %}</h6>
+  <h6>Sales records {% if count > 500 %}<small class="text-muted">(latest 500 of {{ count }})</small>{% endif %}</h6>
   <div class="table-responsive"><table class="table"><thead><tr><th>Date</th><th>Product</th><th>Qty</th><th>Price</th><th>Total</th></tr></thead>
   <tbody>{% for s in sales %}<tr><td>{{ s.sale_date }}</td><td>{{ s.product.name }}</td><td>{{ s.quantity_sold }}</td><td>${{ s.price }}</td><td>${{ s.total_amount }}</td></tr>{% empty %}<tr><td colspan="5">No sales records.</td></tr>{% endfor %}</tbody></table></div>
 </div>

@@ -31,9 +31,7 @@
         <span class="brand">Cadence</span>
         <span class="brand-tag">OPS</span>
       </div>
-      <span class="eyebrow">New account</span>
-      <h1>Create your account</h1>
-      <p>Sign up with your username, email and a password.</p>
+      <h1 class="mt-2 mb-3">Create account</h1>
       <form method="post">
         {% csrf_token %}
         {{ form.as_p }}

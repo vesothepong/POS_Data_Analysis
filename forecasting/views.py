@@ -14,8 +14,16 @@ def forecast_page(request):
     if request.method == "POST":
         if request.POST.get("product") == "all":
             done, skipped = forecast_all()
-            ctx["results"] = [{"forecast": f, "reorder": inv.reorder_quantity(f.product.stock_quantity, f.predicted_quantity),
-                               "status": inv.inventory_status(f.product.stock_quantity, f.product.reorder_level, f.predicted_quantity)} for f in done]
+            done_results = []
+            for f in done:
+                st = inv.inventory_status(f.product.stock_quantity, f.product.reorder_level, f.predicted_quantity)
+                done_results.append({
+                    "forecast": f,
+                    "reorder": inv.reorder_quantity(f.product.stock_quantity, f.predicted_quantity),
+                    "status": st,
+                    "badge": inv.STATUS_BADGES.get(st, "text-bg-secondary"),
+                })
+            ctx["results"] = done_results
             messages.success(request, f"Forecasts generated for {len(done)} products.")
             if skipped:
                 messages.warning(request, "Skipped (need at least 2 months of sales): " + ", ".join(skipped))

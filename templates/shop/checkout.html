@@ -5,9 +5,7 @@
 <div class="pos-page-header mb-4">
   <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
     <div>
-      <span class="eyebrow"><i class="bi bi-receipt me-1"></i>Checkout</span>
-      <h1 class="h2 mb-1">Finalize Walk-in Order</h1>
-      <p class="text-muted mb-0">Confirm dining option, customer details, and payment method.</p>
+      <h1 class="h2 mb-0">Checkout</h1>
     </div>
     <a class="btn btn-outline-secondary" href="{% url 'catalog' %}">
       <i class="bi bi-arrow-left me-1"></i> Back to Menu
@@ -21,7 +19,7 @@
     <div class="col-lg-7">
       <div class="card table-panel shadow-sm mb-4">
         <div class="panel-head panel-head-table">
-          <h2 class="h5 mb-0">Order Summary ({{ items|length }} item{{ items|length|pluralize }})</h2>
+          <h2 class="h5 mb-0">Order Summary</h2>
         </div>
         <div class="table-responsive">
           <table class="table align-middle mb-0">
@@ -73,11 +71,11 @@
 
         <!-- Guest Name & Table -->
         <div class="mb-3">
-          <label class="form-label" for="coCustName">Guest / Customer Name</label>
+          <label class="form-label" for="coCustName">Guest Name</label>
           <input type="text" id="coCustName" name="customer_name" class="form-control" value="{% if request.user.is_authenticated %}{{ request.user.username }}{% else %}Walk-in Guest{% endif %}">
         </div>
         <div class="mb-3">
-          <label class="form-label" for="coTableNum">Table or Buzzer # (optional)</label>
+          <label class="form-label" for="coTableNum">Table / Buzzer #</label>
           <input type="text" id="coTableNum" name="table_number" class="form-control" placeholder="e.g. Table 4">
         </div>
 
@@ -117,7 +115,7 @@
         </div>
 
         <button class="btn btn-primary w-100 py-2 fs-6 fw-bold" type="submit">
-          <i class="bi bi-check-circle-fill me-1"></i> Place Walk-in Order
+          <i class="bi bi-check-circle-fill me-1"></i> Place Order
         </button>
       </div>
     </div>
@@ -125,10 +123,10 @@
 {% else %}
   <div class="pos-empty-state">
     <div class="pos-empty-icon"><i class="bi bi-cart3"></i></div>
-    <h3>Nothing to check out yet</h3>
-    <p>Add food or beverage items from the walk-in menu first.</p>
+    <h3>Cart is empty</h3>
+    <p>Select items from the menu.</p>
     <a class="btn btn-primary" href="{% url 'catalog' %}">
-      <i class="bi bi-grid-3x3-gap-fill me-1"></i> Browse Walk-in Menu
+      <i class="bi bi-grid-3x3-gap-fill me-1"></i> Browse Menu
     </a>
   </div>
 {% endif %}

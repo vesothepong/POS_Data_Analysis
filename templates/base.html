@@ -38,7 +38,7 @@
   <div class="workspace">
     <header class="topbar">
       <button class="icon-button d-lg-none" id="menuToggle" type="button" aria-label="Open menu"><i class="bi bi-list"></i></button>
-      <div><div class="workspace-title">Inventory Forecasting</div><div class="workspace-subtitle"><span class="live-dot"></span> Operational data center</div></div>
+      <div><div class="workspace-title d-flex align-items-center gap-2"><span>Cadence</span><span class="live-dot"></span></div></div>
       <div class="topbar-actions"><div class="lang-switch-group" role="group" aria-label="Language"><button type="button" class="lang-btn active" data-lang="en" title="English" onclick="setLang('en')">EN</button><button type="button" class="lang-btn" data-lang="km" title="ភាសាខ្មែរ" onclick="setLang('km')">ខ្មែរ</button></div><button class="icon-button theme-toggle" id="themeToggle" type="button" title="Switch color theme" aria-label="Switch color theme"><i class="bi bi-sun-fill theme-sun"></i><i class="bi bi-moon-stars-fill theme-moon"></i></button><a class="btn btn-outline-light" href="{% url 'forecast' %}"><i class="bi bi-stars"></i><span class="d-none d-sm-inline">Run forecast</span></a><a class="btn btn-primary" href="{% url 'upload_sales' %}"><i class="bi bi-upload"></i><span class="d-none d-sm-inline">Upload sales</span></a></div>
     </header>
     <main class="main-content">

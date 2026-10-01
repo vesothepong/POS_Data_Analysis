@@ -5,12 +5,10 @@
 <div class="pos-page-header mb-4">
   <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
     <div>
-      <span class="eyebrow"><i class="bi bi-cart3 me-1"></i>Walk-in Ticket</span>
-      <h1 class="h2 mb-1">Current Order Items</h1>
-      <p class="text-muted mb-0">Review items before finalizing this walk-in order.</p>
+      <h1 class="h2 mb-0">Order Ticket</h1>
     </div>
     <a class="btn btn-outline-secondary" href="{% url 'catalog' %}">
-      <i class="bi bi-arrow-left me-1"></i> Back to Walk-in Menu
+      <i class="bi bi-arrow-left me-1"></i> Back to Menu
     </a>
   </div>
 </div>
@@ -19,8 +17,7 @@
   <div class="card table-panel shadow-sm mb-4">
     <div class="panel-head panel-head-table d-flex justify-content-between align-items-center">
       <div>
-        <h2 class="h5 mb-0">Order Ticket Items</h2>
-        <p class="small text-muted mb-0">{{ items|length }} unique item{{ items|length|pluralize }}</p>
+        <h2 class="h5 mb-0">Ticket Items <small class="text-muted">({{ items|length }})</small></h2>
       </div>
       <form method="post" action="{% url 'cart_clear' %}" onsubmit="return confirm('Clear all items?');">
         {% csrf_token %}

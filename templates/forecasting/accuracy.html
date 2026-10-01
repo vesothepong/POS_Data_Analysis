@@ -1,25 +1,24 @@
 {% extends 'base.html' %}{% block title %}Forecast Accuracy{% endblock %}
 {% block content %}
-<h2>Forecast Accuracy</h2>
-<p class="text-muted">Each product's monthly history is split into training months and a test period (last ~20%). The model is trained on the training months only, predicts the test months, and is compared with the actual sales. The "average baseline" column shows the error you would get by simply predicting the training average, so a lower MAE than the baseline shows the regression is learning the trend.</p>
+<h2 class="mb-3">Forecast Accuracy</h2>
 {% if not results %}
 <div class="alert alert-info">Not enough data. Each product needs at least 4 months of sales history.</div>
 {% else %}
 <div class="row g-3 mb-3">
-  <div class="col-md-4"><div class="card p-3"><small class="text-muted">Average MAE (units)</small><div class="kpi">{{ overall.mae }}</div></div></div>
-  <div class="col-md-4"><div class="card p-3"><small class="text-muted">Average baseline MAE</small><div class="kpi">{{ overall.baseline }}</div></div></div>
-  <div class="col-md-4"><div class="card p-3"><small class="text-muted">Average accuracy (100 - MAPE)</small><div class="kpi">{{ overall.accuracy }}%</div></div></div>
+  <div class="col-md-4"><div class="card p-3"><small class="text-muted">Average MAE</small><div class="kpi">{{ overall.mae }}</div></div></div>
+  <div class="col-md-4"><div class="card p-3"><small class="text-muted">Average Baseline MAE</small><div class="kpi">{{ overall.baseline }}</div></div></div>
+  <div class="col-md-4"><div class="card p-3"><small class="text-muted">Average Accuracy</small><div class="kpi">{{ overall.accuracy }}%</div></div></div>
 </div>
 <div class="card p-3 mb-3"><div class="table-responsive"><table class="table align-middle mb-0">
-<thead><tr><th>Product</th><th>Train / Test months</th><th>MAE</th><th>RMSE</th><th>MAPE</th><th>Accuracy</th><th>Average baseline MAE</th><th></th></tr></thead>
+<thead><tr><th>Product</th><th>Train / Test months</th><th>MAE</th><th>RMSE</th><th>MAPE</th><th>Accuracy</th><th>Baseline MAE</th><th></th></tr></thead>
 <tbody>{% for r in results %}<tr {% if detail.product_id == r.product_id %}class="table-active"{% endif %}><td>{{ r.product }}</td><td>{{ r.train_months }} / {{ r.test_months }}</td><td>{{ r.mae|floatformat:2 }}</td><td>{{ r.rmse|floatformat:2 }}</td>
 <td>{% if r.mape is not None %}{{ r.mape|floatformat:1 }}%{% else %}-{% endif %}</td><td>{% if r.accuracy is not None %}{{ r.accuracy|floatformat:1 }}%{% else %}-{% endif %}</td><td>{{ r.baseline_mae|floatformat:2 }}</td>
 <td><a class="btn btn-sm btn-outline-primary" href="?product={{ r.product_id }}">View</a></td></tr>{% endfor %}</tbody></table></div></div>
 {% if skipped %}<p class="small text-muted">Skipped (fewer than 4 months): {{ skipped|join:", " }}</p>{% endif %}
 {% if detail %}
 <div class="row g-3">
-  <div class="col-lg-6"><div class="card p-3"><h5>{{ detail.product }}: actual vs predicted (test period)</h5><div class="chart-box"><canvas id="accChart"></canvas></div></div></div>
-  <div class="col-lg-6"><div class="card p-3"><h5>Test period detail</h5><table class="table table-sm mb-0"><thead><tr><th>Month</th><th>Actual</th><th>Predicted</th><th>Difference</th></tr></thead>
+  <div class="col-lg-6"><div class="card p-3"><h5>{{ detail.product }}: Actual vs Predicted</h5><div class="chart-box"><canvas id="accChart"></canvas></div></div></div>
+  <div class="col-lg-6"><div class="card p-3"><h5>Test Details</h5><table class="table table-sm mb-0"><thead><tr><th>Month</th><th>Actual</th><th>Predicted</th><th>Difference</th></tr></thead>
     <tbody>{% for r in detail.rows %}<tr><td>{{ r.month }}</td><td>{{ r.actual }}</td><td>{{ r.predicted }}</td><td>{{ r.difference }}</td></tr>{% endfor %}</tbody></table></div></div>
 </div>
 {{ detail.rows|json_script:"acc-data" }}
