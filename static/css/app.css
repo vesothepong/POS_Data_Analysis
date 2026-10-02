@@ -46,11 +46,29 @@ h1,h2,h3,h4,h5,h6,.brand,.workspace-title,.page-heading h1,.metric-card strong,.
 /* ==========================================================================
    WALK-IN POS & SELF-ORDER KIOSK SYSTEM
    ========================================================================== */
+.pos-workspace {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.pos-main-content {
+  max-width: 100%;
+  width: 100%;
+  margin: 0;
+  padding: 16px 24px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
 .pos-layout {
   display: flex;
-  gap: 24px;
-  align-items: flex-start;
+  gap: 20px;
+  align-items: stretch;
   position: relative;
+  flex: 1;
+  min-height: calc(100vh - 96px);
 }
 
 .pos-menu-column {
@@ -59,11 +77,13 @@ h1,h2,h3,h4,h5,h6,.brand,.workspace-title,.page-heading h1,.metric-card strong,.
 }
 
 .pos-ticket-column {
-  width: 400px;
+  width: 420px;
   min-width: 380px;
+  flex-shrink: 0;
   position: sticky;
-  top: 76px;
-  max-height: calc(100vh - 86px);
+  top: 80px;
+  height: calc(100vh - 96px);
+  max-height: calc(100vh - 96px);
   display: flex;
   flex-direction: column;
   z-index: 15;
@@ -192,8 +212,8 @@ h1,h2,h3,h4,h5,h6,.brand,.workspace-title,.page-heading h1,.metric-card strong,.
 /* Product Grid */
 .pos-product-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 18px;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 16px;
 }
 
 .pos-card {
@@ -374,12 +394,9 @@ h1,h2,h3,h4,h5,h6,.brand,.workspace-title,.page-heading h1,.metric-card strong,.
   box-shadow: var(--shadow);
   display: flex;
   flex-direction: column;
-  max-height: calc(100vh - 86px);
   height: 100%;
-  overflow-y: auto;
-  overflow-x: hidden;
-  scrollbar-width: thin;
-  scrollbar-color: var(--line-strong) transparent;
+  max-height: 100%;
+  overflow: hidden;
 }
 
 .pos-ticket-card::-webkit-scrollbar {
@@ -546,9 +563,10 @@ h1,h2,h3,h4,h5,h6,.brand,.workspace-title,.page-heading h1,.metric-card strong,.
 .pos-ticket-lines {
   flex: 1 1 auto;
   overflow-y: auto;
-  padding: 4px 16px;
-  min-height: 52px;
-  max-height: 200px;
+  overflow-x: hidden;
+  padding: 6px 16px;
+  min-height: 100px;
+  max-height: none;
   scrollbar-width: thin;
   scrollbar-color: var(--line-strong) transparent;
   border-top: 1px solid var(--line);
@@ -566,28 +584,34 @@ h1,h2,h3,h4,h5,h6,.brand,.workspace-title,.page-heading h1,.metric-card strong,.
 }
 
 .pos-ticket-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  min-height: 160px;
   text-align: center;
-  padding: 14px 12px;
+  padding: 24px 16px;
   color: var(--muted);
 }
 
 .pos-ticket-empty-icon {
-  font-size: 28px;
+  font-size: 36px;
   color: var(--muted);
-  opacity: 0.5;
-  margin-bottom: 4px;
+  opacity: 0.55;
+  margin-bottom: 8px;
 }
 
 .pos-ticket-empty h4 {
   font-family: var(--font-heading);
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 600;
   margin: 0 0 4px;
   color: var(--text);
 }
 
 .pos-ticket-empty p {
-  font-size: 11px;
+  font-size: 12px;
   margin: 0;
   line-height: 1.4;
 }
@@ -1321,8 +1345,13 @@ h1,h2,h3,h4,h5,h6,.brand,.workspace-title,.page-heading h1,.metric-card strong,.
 }
 
 @media (max-width: 1199px) {
+  .pos-main-content {
+    padding: 12px 14px;
+  }
+
   .pos-layout {
     flex-direction: column;
+    min-height: auto;
   }
   
   .pos-ticket-column {
@@ -1330,8 +1359,8 @@ h1,h2,h3,h4,h5,h6,.brand,.workspace-title,.page-heading h1,.metric-card strong,.
     top: 0;
     right: 0;
     bottom: 0;
-    width: 380px;
-    max-width: 90vw;
+    width: 420px;
+    max-width: 92vw;
     height: 100vh;
     max-height: 100vh;
     z-index: 1050;
@@ -1347,8 +1376,7 @@ h1,h2,h3,h4,h5,h6,.brand,.workspace-title,.page-heading h1,.metric-card strong,.
     height: 100%;
     border-radius: 0;
     max-height: 100vh;
-    overflow-y: auto;
-    overflow-x: hidden;
+    overflow: hidden;
   }
 
   .pos-drawer-backdrop {
@@ -1368,7 +1396,11 @@ h1,h2,h3,h4,h5,h6,.brand,.workspace-title,.page-heading h1,.metric-card strong,.
   }
 }
 
-@media (max-width: 767px) {
+@media (max-width: 575px) {
+  .pos-ticket-column {
+    width: 100vw;
+    max-width: 100vw;
+  }
   .pos-product-grid {
     grid-template-columns: 1fr;
   }
@@ -1377,22 +1409,30 @@ h1,h2,h3,h4,h5,h6,.brand,.workspace-title,.page-heading h1,.metric-card strong,.
 /* Height-based responsive rules for laptops and small screens */
 @media (max-height: 820px) {
   .pos-ticket-column {
-    top: 68px;
-    max-height: calc(100vh - 74px);
+    top: 70px;
+    height: calc(100vh - 78px);
+    max-height: calc(100vh - 78px);
   }
   .pos-ticket-card {
-    max-height: calc(100vh - 74px);
+    max-height: 100%;
   }
   .pos-ticket-lines {
-    max-height: 140px;
-    min-height: 44px;
-    padding: 2px 14px;
+    min-height: 60px;
+    padding: 4px 14px;
+  }
+  .pos-ticket-empty {
+    min-height: 100px;
+    padding: 12px 10px;
+  }
+  .pos-ticket-empty-icon {
+    font-size: 26px;
+    margin-bottom: 4px;
   }
   .pos-ticket-header {
     padding: 8px 14px;
   }
   .pos-order-type-picker {
-    padding: 6px 14px 2px;
+    padding: 5px 14px 2px;
   }
   .pos-guest-info-row {
     padding: 2px 14px 2px;
@@ -1407,7 +1447,7 @@ h1,h2,h3,h4,h5,h6,.brand,.workspace-title,.page-heading h1,.metric-card strong,.
     padding: 2px 14px 4px;
   }
   .pos-ticket-footer {
-    padding: 6px 14px 10px;
+    padding: 4px 14px 8px;
   }
   .pos-btn-checkout {
     height: 38px;

@@ -3,6 +3,174 @@
 {% block title %}Walk-in Menu &amp; POS Kiosk{% endblock %}
 
 {% block content %}
+<style>
+  /* Full screen width & edge-to-edge layout */
+  .pos-workspace {
+    min-height: 100vh !important;
+    display: flex !important;
+    flex-direction: column !important;
+  }
+
+  .pos-main-content {
+    max-width: 100% !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 16px 24px !important;
+    flex: 1 !important;
+    display: flex !important;
+    flex-direction: column !important;
+  }
+
+  .pos-layout {
+    display: flex !important;
+    gap: 20px !important;
+    align-items: flex-start !important;
+    position: relative !important;
+    flex: 1 !important;
+    min-height: calc(100vh - 96px) !important;
+  }
+
+  .pos-menu-column {
+    flex: 1 1 0 !important;
+    min-width: 0 !important;
+  }
+
+  /* ORDER TICKET: Full-Height & Fixed/Sticky to Screen */
+  .pos-ticket-column {
+    width: 420px !important;
+    min-width: 380px !important;
+    flex: 0 0 420px !important;
+    position: sticky !important;
+    top: 76px !important;
+    height: calc(100vh - 92px) !important;
+    max-height: calc(100vh - 92px) !important;
+    display: flex !important;
+    flex-direction: column !important;
+    z-index: 15 !important;
+    align-self: flex-start !important;
+  }
+
+  .pos-ticket-card {
+    height: 100% !important;
+    max-height: 100% !important;
+    min-height: 100% !important;
+    display: flex !important;
+    flex-direction: column !important;
+    overflow: hidden !important;
+    border-radius: 16px !important;
+    border: 1px solid var(--line) !important;
+    background: var(--panel) !important;
+    box-shadow: var(--shadow) !important;
+  }
+
+  .pos-ticket-header {
+    flex-shrink: 0 !important;
+    padding: 12px 16px !important;
+    border-bottom: 1px solid var(--line) !important;
+  }
+
+  .pos-order-type-picker {
+    flex-shrink: 0 !important;
+    padding: 8px 16px 4px !important;
+  }
+
+  .pos-guest-info-row {
+    flex-shrink: 0 !important;
+    padding: 4px 16px 4px !important;
+  }
+
+  .pos-table-chips {
+    flex-shrink: 0 !important;
+    padding: 0 16px 6px !important;
+  }
+
+  /* Middle scrollable lines list expands to fill all remaining height */
+  .pos-ticket-lines {
+    flex: 1 1 0% !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    height: auto !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    display: flex !important;
+    flex-direction: column !important;
+    padding: 8px 16px !important;
+    border-top: 1px solid var(--line) !important;
+    border-bottom: 1px solid var(--line) !important;
+    background: color-mix(in srgb, var(--ink-raised) 30%, transparent) !important;
+  }
+
+  /* Centered empty state inside the full-height ticket */
+  .pos-ticket-empty {
+    flex: 1 1 auto !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    height: 100% !important;
+    min-height: 160px !important;
+    text-align: center !important;
+    padding: 24px 16px !important;
+    color: var(--muted) !important;
+    margin: auto 0 !important;
+  }
+
+  .pos-ticket-empty-icon {
+    font-size: 38px !important;
+    color: var(--muted) !important;
+    opacity: 0.55 !important;
+    margin-bottom: 8px !important;
+  }
+
+  .pos-ticket-breakdown {
+    flex-shrink: 0 !important;
+    padding: 10px 16px 6px !important;
+    margin-top: auto !important;
+  }
+
+  .pos-ticket-footer {
+    flex-shrink: 0 !important;
+    padding: 6px 16px 14px !important;
+    margin-top: 0 !important;
+  }
+
+  .pos-product-grid {
+    display: grid !important;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)) !important;
+    gap: 16px !important;
+  }
+
+  /* Responsive Drawer for tablets and mobile */
+  @media (max-width: 1199px) {
+    .pos-layout {
+      flex-direction: column !important;
+      min-height: auto !important;
+    }
+
+    .pos-ticket-column {
+      position: fixed !important;
+      top: 0 !important;
+      right: 0 !important;
+      bottom: 0 !important;
+      width: 420px !important;
+      max-width: 92vw !important;
+      height: 100vh !important;
+      max-height: 100vh !important;
+      z-index: 1050 !important;
+    }
+
+    .pos-ticket-card {
+      border-radius: 0 !important;
+    }
+  }
+
+  @media (max-width: 575px) {
+    .pos-ticket-column {
+      width: 100vw !important;
+      max-width: 100vw !important;
+    }
+  }
+</style>
 <div class="pos-layout">
   <!-- LEFT: Menu & Catalog Area -->
   <div class="pos-menu-column">
@@ -10,11 +178,9 @@
     <div class="pos-menu-topbar">
       <div class="pos-search-wrapper">
         <i class="bi bi-search"></i>
-        <input type="text" id="posSearchInput" class="form-control pos-search-input"
-          placeholder="Search artisan drinks, food, bakery..." value="{{ q }}">
+        <input type="text" id="posSearchInput" class="form-control pos-search-input" placeholder="Search artisan drinks, food, bakery..." value="{{ q }}">
         {% if q %}
-        <a href="{% url 'catalog' %}" class="pos-search-clear" title="Clear search"><i
-            class="bi bi-x-circle-fill"></i></a>
+        <a href="{% url 'catalog' %}" class="pos-search-clear" title="Clear search"><i class="bi bi-x-circle-fill"></i></a>
         {% endif %}
       </div>
       <div class="pos-quick-stats d-none d-sm-flex align-items-center gap-2">
@@ -26,15 +192,13 @@
 
     <!-- Category Pills Tabs -->
     <div class="pos-category-nav" role="tablist" aria-label="Menu categories">
-      <a href="{% url 'catalog' %}{% if q %}?q={{ q }}{% endif %}"
-        class="pos-cat-pill {% if not selected_category %}active{% endif %}" data-category="">
+      <a href="{% url 'catalog' %}{% if q %}?q={{ q }}{% endif %}" class="pos-cat-pill {% if not selected_category %}active{% endif %}" data-category="">
         <i class="bi bi-grid-fill"></i>
         <span>All Items</span>
         <span class="pos-cat-count">{{ total_products_count }}</span>
       </a>
       {% for cat in category_data %}
-      <a href="{% url 'catalog' %}?category={{ cat.name|urlencode }}{% if q %}&q={{ q }}{% endif %}"
-        class="pos-cat-pill {% if selected_category == cat.name %}active{% endif %}" data-category="{{ cat.name }}">
+      <a href="{% url 'catalog' %}?category={{ cat.name|urlencode }}{% if q %}&q={{ q }}{% endif %}" class="pos-cat-pill {% if selected_category == cat.name %}active{% endif %}" data-category="{{ cat.name }}">
         {% if "drink" in cat.name|lower or "beverage" in cat.name|lower or "coffee" in cat.name|lower %}
         <i class="bi bi-cup-hot-fill"></i>
         {% elif "food" in cat.name|lower or "burger" in cat.name|lower or "croissant" in cat.name|lower or "bakery" in cat.name|lower %}
@@ -51,9 +215,7 @@
     <!-- Product Grid -->
     <div class="pos-product-grid" id="posProductGrid">
       {% for p in products %}
-      <article class="pos-card card {% if p.stock_quantity <= 0 %}is-soldout{% endif %}" data-product-id="{{ p.id }}"
-        data-product-name="{{ p.name }}" data-product-price="{{ p.price }}"
-        data-product-category="{{ p.category|default:'Uncategorized' }}" data-product-stock="{{ p.stock_quantity }}">
+      <article class="pos-card card {% if p.stock_quantity <= 0 %}is-soldout{% endif %}" data-product-id="{{ p.id }}" data-product-name="{{ p.name }}" data-product-price="{{ p.price }}" data-product-category="{{ p.category|default:'Uncategorized' }}" data-product-stock="{{ p.stock_quantity }}">
         <div class="pos-card-media">
           {% if p.image %}
           <img src="{{ p.image.url }}" alt="{{ p.name }}" class="pos-card-img" loading="lazy">
@@ -86,8 +248,7 @@
               {% csrf_token %}
               <input type="hidden" name="quantity" value="1">
               <input type="hidden" name="next" value="{{ request.get_full_path }}">
-              <button type="button" class="btn pos-btn-add {% if p.stock_quantity <= 0 %}disabled{% endif %}"
-                data-action="add-item" data-id="{{ p.id }}" data-name="{{ p.name }}" data-price="{{ p.price }}" {% if p.stock_quantity <= 0 %}disabled{% endif %}>
+              <button type="button" class="btn pos-btn-add {% if p.stock_quantity <= 0 %}disabled{% endif %}" data-action="add-item" data-id="{{ p.id }}" data-name="{{ p.name }}" data-price="{{ p.price }}" {% if p.stock_quantity <= 0 %}disabled{% endif %}>
                 <i class="bi bi-plus-lg"></i>
                 <span>Add</span>
               </button>
@@ -101,16 +262,14 @@
         <h3>No menu items found</h3>
         <p>{% if q %}No items matched “{{ q }}”. Try searching another dish or drink.{% else %}No items available in
           this category.{% endif %}</p>
-        <a href="{% url 'catalog' %}" class="btn btn-outline-primary btn-sm"><i
-            class="bi bi-arrow-counterclockwise"></i> Reset Filters</a>
+        <a href="{% url 'catalog' %}" class="btn btn-outline-primary btn-sm"><i class="bi bi-arrow-counterclockwise"></i> Reset Filters</a>
       </div>
       {% endfor %}
     </div>
   </div>
 
   <!-- RIGHT: Sticky Walk-in Order Ticket Panel -->
-  <aside class="pos-ticket-column" id="posTicketPanel" data-cart-count="{{ cart_count|default:0 }}"
-    data-cart-total="{{ cart_total|default:0 }}">
+  <aside class="pos-ticket-column" id="posTicketPanel" data-cart-count="{{ cart_count|default:0 }}" data-cart-total="{{ cart_total|default:0 }}">
     <div class="pos-ticket-card card">
       <!-- Ticket Top -->
       <div class="pos-ticket-header">
@@ -120,9 +279,7 @@
             <h2 class="pos-ticket-title">Order Ticket</h2>
           </div>
         </div>
-        <button type="button" class="btn btn-outline-danger btn-sm pos-btn-clear" id="posClearCartBtn"
-          title="Clear Ticket" aria-label="Clear Ticket" {% if not cart_items %}disabled
-          style="opacity: 0.35; pointer-events: none;" {% endif %}>
+        <button type="button" class="btn btn-outline-danger btn-sm pos-btn-clear" id="posClearCartBtn" title="Clear Ticket" aria-label="Clear Ticket" {% if not cart_items %}disabled style="opacity: 0.35; pointer-events: none;" {% endif %}>
           <i class="bi bi-trash3"></i>
         </button>
       </div>
@@ -149,8 +306,7 @@
       <div class="pos-guest-info-row">
         <div class="pos-guest-field">
           <label for="posCustomerName"><i class="bi bi-person me-1"></i>Guest Name</label>
-          <input type="text" id="posCustomerName" class="form-control form-control-sm" placeholder="Walk-in Guest"
-            value="{% if request.user.is_authenticated %}{{ request.user.username }}{% else %}Walk-in Guest{% endif %}">
+          <input type="text" id="posCustomerName" class="form-control form-control-sm" placeholder="Walk-in Guest" value="{% if request.user.is_authenticated %}{{ request.user.username }}{% else %}Walk-in Guest{% endif %}">
         </div>
         <div class="pos-guest-field" id="posTableFieldWrapper">
           <label for="posTableNumber"><i class="bi bi-geo-alt me-1"></i>Table / Buzzer #</label>
@@ -172,23 +328,19 @@
         <!-- Lines rendered dynamically by JS or server template below -->
         {% if cart_items %}
         {% for it in cart_items %}
-        <div class="pos-ticket-item" data-product-id="{{ it.product.id }}" data-name="{{ it.product.name|escape }}"
-          data-price="{{ it.price }}" data-quantity="{{ it.quantity }}" data-subtotal="{{ it.subtotal }}">
+        <div class="pos-ticket-item" data-product-id="{{ it.product.id }}" data-name="{{ it.product.name|escape }}" data-price="{{ it.price }}" data-quantity="{{ it.quantity }}" data-subtotal="{{ it.subtotal }}">
           <div class="pos-ticket-item-details">
             <div class="pos-ticket-item-name">{{ it.product.name }}</div>
             <div class="pos-ticket-item-price">${{ it.price|floatformat:2 }} each</div>
           </div>
           <div class="pos-ticket-item-controls">
             <div class="pos-qty-stepper">
-              <button type="button" class="pos-stepper-btn btn-dec" data-action="decrease" data-id="{{ it.product.id }}"
-                aria-label="Decrease quantity">−</button>
+              <button type="button" class="pos-stepper-btn btn-dec" data-action="decrease" data-id="{{ it.product.id }}" aria-label="Decrease quantity">−</button>
               <span class="pos-stepper-val">{{ it.quantity }}</span>
-              <button type="button" class="pos-stepper-btn btn-inc" data-action="increase" data-id="{{ it.product.id }}"
-                aria-label="Increase quantity">+</button>
+              <button type="button" class="pos-stepper-btn btn-inc" data-action="increase" data-id="{{ it.product.id }}" aria-label="Increase quantity">+</button>
             </div>
             <div class="pos-ticket-item-subtotal">${{ it.subtotal|floatformat:2 }}</div>
-            <button type="button" class="pos-ticket-item-del" data-action="remove" data-id="{{ it.product.id }}"
-              title="Remove item" aria-label="Remove item">
+            <button type="button" class="pos-ticket-item-del" data-action="remove" data-id="{{ it.product.id }}" title="Remove item" aria-label="Remove item">
               <i class="bi bi-x"></i>
             </button>
           </div>
@@ -223,37 +375,6 @@
         </div>
       </div>
 
-      <!-- Payment Method Selector -->
-      <div class="pos-payment-section">
-        <label class="pos-section-label">PAYMENT METHOD</label>
-        <div class="pos-payment-grid">
-          <label class="pos-pay-tile">
-            <input type="radio" name="payment_method_toggle" value="cash" checked id="payCash">
-            <div class="pos-pay-card">
-              <i class="bi bi-cash-stack"></i>
-              <span>Cash</span>
-              <small>Counter</small>
-            </div>
-          </label>
-          <label class="pos-pay-tile">
-            <input type="radio" name="payment_method_toggle" value="card" id="payCard">
-            <div class="pos-pay-card">
-              <i class="bi bi-credit-card-2-front"></i>
-              <span>Card</span>
-              <small>Terminal</small>
-            </div>
-          </label>
-          <label class="pos-pay-tile">
-            <input type="radio" name="payment_method_toggle" value="qr" id="payQr">
-            <div class="pos-pay-card">
-              <i class="bi bi-qr-code-scan"></i>
-              <span>Scan QR</span>
-              <small>Mobile Pay</small>
-            </div>
-          </label>
-        </div>
-      </div>
-
       <!-- Checkout Action Button -->
       <div class="pos-ticket-footer">
         <form method="post" action="{% url 'checkout' %}" id="posCheckoutForm" class="m-0">
@@ -263,15 +384,11 @@
           <input type="hidden" name="table_number" id="hiddenTableNumber" value="">
           <input type="hidden" name="payment_method" id="hiddenPaymentMethod" value="cash">
 
-          <button type="button" id="posCompleteOrderBtn"
-            class="btn btn-primary pos-btn-checkout w-100 {% if not cart_items %}disabled{% endif %}" {% if not cart_items %}disabled{% endif %}>
+          <button type="button" id="posCompleteOrderBtn" class="btn btn-primary pos-btn-checkout w-100 {% if not cart_items %}disabled{% endif %}" {% if not cart_items %}disabled{% endif %}>
             <span class="pos-btn-text">
-              <i class="bi {% if cart_items %}bi-check-circle-fill{% else %}bi-bag-plus{% endif %} me-1"
-                id="posBtnIcon"></i>
               <span id="posBtnLabel">{% if cart_items %}Complete Order • <span id="posBtnTotal">${{ cart_total|floatformat:2 }}</span>{% else %}Select Items to Order{% endif %}</span>
             </span>
-            <span class="pos-btn-spinner spinner-border spinner-border-sm d-none" role="status"
-              aria-hidden="true"></span>
+            <span class="pos-btn-spinner spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
           </button>
         </form>
       </div>
@@ -283,8 +400,7 @@
 
   {% block modals %}
   <!-- DIGITAL WALK-IN RECEIPT MODAL -->
-  <div class="modal fade pos-receipt-modal" id="posReceiptModal" tabindex="-1" aria-labelledby="posReceiptModalLabel"
-    aria-hidden="true" {% if receipt_order %}data-auto-open="true" {% endif %}>
+  <div class="modal fade pos-receipt-modal" id="posReceiptModal" tabindex="-1" aria-labelledby="posReceiptModalLabel" aria-hidden="true" {% if receipt_order %}data-auto-open="true" {% endif %}>
     <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
       <div class="modal-content pos-receipt-content shadow-lg">
         <div class="modal-header pos-receipt-modal-header d-flex justify-content-between align-items-center">
@@ -294,8 +410,7 @@
             </span>
             <span class="text-muted small">Digital Receipt</span>
           </div>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"
-            id="posReceiptCloseBtn"></button>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" id="posReceiptCloseBtn"></button>
         </div>
 
         <div class="modal-body pos-receipt-body px-3 py-2">
@@ -396,8 +511,7 @@
             <!-- Barcode simulation -->
             <div class="pos-receipt-divider-dashed"></div>
             <div class="pos-receipt-barcode text-center">
-              <svg class="pos-barcode-svg" viewBox="0 0 200 40" preserveAspectRatio="none"
-                style="width: 190px; height: 32px;" aria-hidden="true">
+              <svg class="pos-barcode-svg" viewBox="0 0 200 40" preserveAspectRatio="none" style="width: 190px; height: 32px;" aria-hidden="true">
                 <rect x="0" y="0" width="3" height="40" fill="currentColor" />
                 <rect x="5" y="0" width="1" height="40" fill="currentColor" />
                 <rect x="8" y="0" width="4" height="40" fill="currentColor" />
@@ -458,8 +572,7 @@
         </div>
 
         <div class="modal-footer pos-receipt-modal-footer d-flex gap-2">
-          <button type="button" class="btn btn-outline-secondary flex-grow-1" id="posReceiptPrintBtn"
-            onclick="printReceipt()">
+          <button type="button" class="btn btn-outline-secondary flex-grow-1" id="posReceiptPrintBtn" onclick="printReceipt()">
             <i class="bi bi-printer me-1"></i> Print Ticket
           </button>
           <button type="button" class="btn btn-primary flex-grow-1" data-bs-dismiss="modal" id="posReceiptDoneBtn">
@@ -704,7 +817,6 @@
         currentCartData = cart;
         updateCardBadges(cart ? cart.items : []);
 
-        const btnIcon = document.getElementById('posBtnIcon');
         const btnLabel = document.getElementById('posBtnLabel');
 
         if (!cart || !cart.items || cart.items.length === 0) {
@@ -723,7 +835,6 @@
             completeBtn.classList.add('disabled');
             completeBtn.disabled = true;
           }
-          if (btnIcon) btnIcon.className = 'bi bi-bag-plus me-1';
           if (btnLabel) btnLabel.textContent = window.t ? window.t('Select Items to Order') : 'Select Items to Order';
           if (mobileTicketCount) mobileTicketCount.textContent = '0';
           if (clearBtn) {
@@ -767,7 +878,6 @@
           completeBtn.classList.remove('disabled');
           completeBtn.disabled = false;
         }
-        if (btnIcon) btnIcon.className = 'bi bi-check-circle-fill me-1';
         const completeText = window.t ? window.t('Complete Order') : 'Complete Order';
         if (btnLabel) btnLabel.innerHTML = `<span>${completeText}</span> • <span id="posBtnTotal">$${cart.total.toFixed(2)}</span>`;
         if (mobileTicketCount) mobileTicketCount.textContent = cart.count;
@@ -1209,7 +1319,7 @@
           const orderTypeVal = document.querySelector('input[name="order_type_toggle"]:checked')?.value || 'dine_in';
           const custNameVal = customerNameInput?.value.trim() || 'Walk-in Guest';
           const tableNumVal = tableInput?.value.trim() || '';
-          const payMethodVal = document.querySelector('input[name="payment_method_toggle"]:checked')?.value || 'cash';
+          const payMethodVal = 'cash';
 
           // Show spinner
           const btnText = completeBtn.querySelector('.pos-btn-text');
