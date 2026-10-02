@@ -154,3 +154,50 @@ class WalkInPOSTests(TestCase):
         self.assertContains(r_hist, "TABLE 7")
 
 
+class DailyOrderTicketTests(TestCase):
+    def test_same_day_sequential_tickets(self):
+        o1 = Order.objects.create(customer_name="Customer 1", total_amount="5.00")
+        o2 = Order.objects.create(customer_name="Customer 2", total_amount="5.00")
+        o3 = Order.objects.create(customer_name="Customer 3", total_amount="5.00")
+
+        self.assertEqual(o1.ticket_number, "W-001")
+        self.assertEqual(o2.ticket_number, "W-002")
+        self.assertEqual(o3.ticket_number, "W-003")
+
+    def test_daily_ticket_number_resets_next_day(self):
+        import datetime
+        from django.utils import timezone
+
+        tz = timezone.get_current_timezone()
+        day1 = timezone.make_aware(datetime.datetime(2026, 10, 1, 10, 0, 0), tz)
+        day2 = timezone.make_aware(datetime.datetime(2026, 10, 2, 8, 30, 0), tz)
+
+        # Day 1 orders
+        o1 = Order.objects.create(customer_name="Day1 Guest 1", total_amount="10.00")
+        Order.objects.filter(pk=o1.pk).update(created_at=day1, ticket_number="W-001")
+        o2 = Order.objects.create(customer_name="Day1 Guest 2", total_amount="15.00")
+        Order.objects.filter(pk=o2.pk).update(created_at=day1, ticket_number="W-002")
+
+        # Third order on Day 1 should be W-003
+        self.assertEqual(Order.get_next_ticket_number(for_datetime=day1), "W-003")
+
+        # On Day 2, it must reset to W-001 (not W-003)
+        self.assertEqual(Order.get_next_ticket_number(for_datetime=day2), "W-001")
+
+        # Create order on Day 2
+        o_day2 = Order.objects.create(customer_name="Day2 Guest 1", total_amount="20.00", created_at=day2)
+        Order.objects.filter(pk=o_day2.pk).update(created_at=day2, ticket_number="W-001")
+
+        # Next order on Day 2 should be W-002
+        self.assertEqual(Order.get_next_ticket_number(for_datetime=day2), "W-002")
+
+    def test_ticket_number_not_overwritten_on_update(self):
+        order = Order.objects.create(customer_name="Guest", total_amount="12.00")
+        orig_ticket = order.ticket_number
+        order.total_amount = "15.00"
+        order.save()
+        order.refresh_from_db()
+        self.assertEqual(order.ticket_number, orig_ticket)
+
+
+
