@@ -306,7 +306,7 @@
       <div class="pos-guest-info-row">
         <div class="pos-guest-field">
           <label for="posCustomerName"><i class="bi bi-person me-1"></i>Guest Name</label>
-          <input type="text" id="posCustomerName" class="form-control form-control-sm" placeholder="Walk-in Guest" value="{% if request.user.is_authenticated %}{{ request.user.username }}{% else %}Walk-in Guest{% endif %}">
+          <input type="text" id="posCustomerName" class="form-control form-control-sm" placeholder="Walk-in Guest" value="Walk-in Guest">
         </div>
         <div class="pos-guest-field" id="posTableFieldWrapper">
           <label for="posTableNumber"><i class="bi bi-geo-alt me-1"></i>Table / Buzzer #</label>

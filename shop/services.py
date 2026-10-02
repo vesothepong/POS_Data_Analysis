@@ -108,7 +108,7 @@ def checkout(user, session, order_type="dine_in", customer_name="Walk-in Guest",
         raise ValueError("Your cart is empty.")
     today = timezone.localdate()
     customer_user = user if (user and getattr(user, "is_authenticated", False)) else None
-    display_name = customer_name.strip() if customer_name and customer_name.strip() else ("Walk-in Guest" if not customer_user else customer_user.username)
+    display_name = customer_name.strip() if customer_name and customer_name.strip() else "Walk-in Guest"
 
     with transaction.atomic():
         order = Order.objects.create(

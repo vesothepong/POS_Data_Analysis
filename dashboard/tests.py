@@ -23,10 +23,12 @@ class DashboardTests(TestCase):
         pd.DataFrame(rows, columns=["Date", "Product", "Quantity Sold", "Price"]).to_excel(buf, index=False)
         self.client.post(reverse("upload_sales"), {"file": SimpleUploadedFile("s.xlsx", buf.getvalue())})
         self.client.post(reverse("forecast"), {"product": "all"})
-        for kind in ("sales", "inventory", "performance", "forecast", "reorder", "revenue"):
+        for kind in ("sales", "inventory", "performance", "reorder", "revenue"):
             self.assertEqual(self.client.get(reverse("reports") + f"?type={kind}").status_code, 200, kind)
             for fmt in ("csv", "xlsx"):
                 self.assertEqual(self.client.get(reverse("report_export", args=[kind, fmt])).status_code, 200, (kind, fmt))
-        self.assertEqual(self.client.get(reverse("report_export", args=["nope", "csv"])).status_code, 404)
+        for removed in ("forecast", "abc_analytics", "nope"):
+            self.assertEqual(self.client.get(reverse("reports") + f"?type={removed}").status_code, 404)
+            self.assertEqual(self.client.get(reverse("report_export", args=[removed, "csv"])).status_code, 404)
         for name in ("analytics", "accuracy", "inventory"):
             self.assertEqual(self.client.get(reverse(name)).status_code, 200, name)

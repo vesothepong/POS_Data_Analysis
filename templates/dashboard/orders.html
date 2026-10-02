@@ -1,4 +1,4 @@
-{% extends 'base.html' %}{% block title %}Walk-in Customer Orders{% endblock %}
+{% extends 'base.html' %}{% block title %}Walk-in Orders{% endblock %}
 {% block content %}
 <div class="page-heading">
   <div>
@@ -27,8 +27,7 @@
           </span>
         </div>
         <h2 class="h5 mb-0">
-          Order #{{ o.id }} &middot; {% if o.customer %}{{ o.customer.username }}{% elif o.customer_name %}{{ o.customer_name }}{% else %}Walk-in Guest{% endif %}
-          {% if o.customer %}<small class="text-muted fs-6">(@{{ o.customer.username }})</small>{% endif %}
+          Order #{{ o.id }} &middot; {{ o.customer_name|default:"Walk-in Guest" }}
         </h2>
         <p class="text-muted small mb-0">{{ o.created_at|date:"M d, Y • H:i" }}</p>
       </div>

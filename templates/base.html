@@ -37,7 +37,7 @@
       </nav>
       <div class="sidebar-footer">
         <div class="account-row"><span class="avatar">{{ request.user.username|slice:':2'|upper }}</span>
-          <div><strong>{{ request.user.username }}</strong><small>{% if request.user.is_staff %}Administrator{% else %}Customer{% endif %}</small></div>
+          <div><strong>{{ request.user.username }}</strong><small>Administrator</small></div>
           <form method="post" action="{% url 'logout' %}">{% csrf_token %}<button type="submit" class="icon-button" title="Sign out" aria-label="Sign out"><i class="bi bi-box-arrow-right"></i></button></form>
         </div>
       </div>

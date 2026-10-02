@@ -1,4 +1,6 @@
+from decimal import Decimal
 from django.contrib import messages
+from django.db.models import Sum
 from django.shortcuts import redirect, render
 from django.utils.dateparse import parse_date
 
@@ -41,8 +43,27 @@ def sales(request):
         qs = qs.filter(sale_date__year=int(f["year"]))
 
     df = sales_dataframe(qs)  # sales analysis on exactly the filtered records
+    LIMIT = 500
+    grouped_qs = (
+        qs.values("sale_date", "product__name", "price")
+        .annotate(quantity_sold=Sum("quantity_sold"), total_amount=Sum("total_amount"))
+        .order_by("-sale_date", "product__name")
+    )
+    grouped_count = grouped_qs.count()
+
+    sales_rows = [
+        {
+            "sale_date": r["sale_date"],
+            "product": {"name": r["product__name"]},
+            "quantity_sold": r["quantity_sold"],
+            "price": round(Decimal(str(r["price"])), 2),
+            "total_amount": round(Decimal(str(r["total_amount"])), 2),
+        }
+        for r in grouped_qs[:LIMIT]
+    ]
+
     ctx = {
-        "sales": qs[:500], "count": qs.count(), "filters": f,
+        "sales": sales_rows, "count": grouped_count, "limit": LIMIT, "filters": f,
         "products": Product.objects.order_by("name"),
         "categories": sorted({c or "Uncategorized" for c in Product.objects.values_list("category", flat=True)}),
         "total_units": int(df["units"].sum()) if len(df) else 0,

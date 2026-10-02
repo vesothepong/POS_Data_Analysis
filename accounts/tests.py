@@ -33,7 +33,7 @@ class RegisterTests(TestCase):
         r = self.client.post(reverse("register"), {"username": "newcust", "email": "n@example.com", "password1": "Str0ngPass!9", "password2": "Str0ngPass!9"})
         self.assertEqual(r.status_code, 302)
         u = get_user_model().objects.get(username="newcust")
-        self.assertFalse(u.is_staff)
+        self.assertTrue(u.is_staff)
         self.assertEqual(int(self.client.session["_auth_user_id"]), u.pk)
 
     def test_register_rejects_mismatch(self):

@@ -73,7 +73,7 @@
           </td>
           <td class="numeric">{{ r.baseline_mae|floatformat:2 }}</td>
           <td class="text-end">
-            <button type="button" class="btn btn-sm btn-outline-primary" onclick="showProductAccuracy({{ r.product_id }}, true)" title="View test details for {{ r.product }}">
+            <button type="button" class="btn btn-sm btn-outline-primary" onclick="showProductAccuracy({{ r.product_id }})" title="View test details for {{ r.product }}">
               <i class="bi bi-eye me-1"></i>View
             </button>
           </td>
@@ -88,66 +88,6 @@
 <p class="small text-muted mb-4"><i class="bi bi-info-circle me-1"></i>Skipped (fewer than 4 months of sales history): {{ skipped|join:", " }}</p>
 {% endif %}
 
-<!-- INLINE DETAIL SECTION BELOW TABLE -->
-<div id="detail-section" class="card p-3 p-md-4 mb-4">
-  <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
-    <div>
-      <span class="badge bg-primary mb-1">Selected Product</span>
-      <h5 class="mb-0 fw-bold" id="inlineProductTitle">{% if detail %}{{ detail.product }}{% else %}Product Details{% endif %}</h5>
-      <small class="text-muted" id="inlineTrainTestSubtitle">{% if detail %}Trained on {{ detail.train_months }} months &middot; Tested on {{ detail.test_months }} hold-out months{% endif %}</small>
-    </div>
-    <div class="d-flex align-items-center gap-2">
-      <button type="button" class="btn btn-sm btn-primary" id="openModalBtn" onclick="openCurrentModal()">
-        <i class="bi bi-arrows-fullscreen me-1"></i> Open in Popup
-      </button>
-    </div>
-  </div>
-
-  <div class="row g-3">
-    <div class="col-lg-6">
-      <div class="p-3 rounded h-100" style="background:var(--canvas);border:1px solid var(--line);">
-        <div class="d-flex justify-content-between align-items-center mb-2">
-          <h6 class="mb-0 fw-semibold">Actual vs Predicted (Hold-out Test)</h6>
-          <span class="badge bg-secondary-subtle text-secondary-emphasis" id="inlineBadge">Test Period</span>
-        </div>
-        <div class="chart-box" style="height:260px;">
-          <canvas id="accChart"></canvas>
-        </div>
-      </div>
-    </div>
-    <div class="col-lg-6">
-      <div class="p-3 rounded h-100" style="background:var(--canvas);border:1px solid var(--line);">
-        <h6 class="mb-2 fw-semibold">Test Months Breakdown</h6>
-        <div class="table-responsive">
-          <table class="table table-sm align-middle mb-0">
-            <thead>
-              <tr>
-                <th>Month</th>
-                <th class="text-end">Actual</th>
-                <th class="text-end">Predicted</th>
-                <th class="text-end">Difference</th>
-              </tr>
-            </thead>
-            <tbody id="inlineTableBody">
-              {% if detail %}
-                {% for r in detail.rows %}
-                <tr>
-                  <td class="fw-medium">{{ r.month }}</td>
-                  <td class="text-end numeric">{{ r.actual }}</td>
-                  <td class="text-end numeric">{{ r.predicted }}</td>
-                  <td class="text-end numeric {% if r.difference < 0 %}text-danger{% elif r.difference > 0 %}text-success{% endif %}">
-                    {% if r.difference > 0 %}+{% endif %}{{ r.difference }}
-                  </td>
-                </tr>
-                {% endfor %}
-              {% endif %}
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
 {% endif %}
 
 {{ results|json_script:"all-accuracy-data" }}
@@ -237,10 +177,8 @@
 {% block scripts %}
 <script>
   let accuracyModal = null;
-  let inlineChartInstance = null;
   let modalChartInstance = null;
   let allAccuracyData = [];
-  let currentSelectedId = null;
 
   document.addEventListener('DOMContentLoaded', () => {
     // Parse data
@@ -259,19 +197,13 @@
       accuracyModal = new bootstrap.Modal(modalEl);
     }
 
-    // Determine initial selected product
+    // If product query param is provided, open its modal
     const urlParams = new URLSearchParams(window.location.search);
     const paramProduct = urlParams.get('product');
-    const initialProduct = allAccuracyData.find(x => String(x.product_id) === String(paramProduct)) 
-      || allAccuracyData[0];
-
-    if (initialProduct) {
-      showProductAccuracy(initialProduct.product_id, false);
-      if (paramProduct) {
-        const detailSec = document.getElementById('detail-section');
-        if (detailSec) {
-          detailSec.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }
+    if (paramProduct) {
+      const targetProduct = allAccuracyData.find(x => String(x.product_id) === String(paramProduct));
+      if (targetProduct) {
+        showProductAccuracy(targetProduct.product_id);
       }
     }
   });
@@ -288,11 +220,9 @@
     };
   }
 
-  function showProductAccuracy(productId, openModal = true) {
+  function showProductAccuracy(productId) {
     const item = allAccuracyData.find(x => x.product_id === productId);
     if (!item) return;
-
-    currentSelectedId = productId;
 
     // 1. Highlight table row
     document.querySelectorAll('.accuracy-row').forEach(tr => tr.classList.remove('table-active'));
@@ -301,56 +231,7 @@
       activeRow.classList.add('table-active');
     }
 
-    // 2. Update inline detail section
-    const titleEl = document.getElementById('inlineProductTitle');
-    if (titleEl) titleEl.textContent = item.product;
-
-    const subtitleEl = document.getElementById('inlineTrainTestSubtitle');
-    if (subtitleEl) subtitleEl.textContent = `Trained on ${item.train_months} months · Tested on ${item.test_months} hold-out months`;
-
-    const inlineTbody = document.getElementById('inlineTableBody');
-    if (inlineTbody && item.rows) {
-      inlineTbody.innerHTML = item.rows.map(r => `
-        <tr>
-          <td class="fw-medium">${r.month}</td>
-          <td class="text-end numeric">${r.actual}</td>
-          <td class="text-end numeric">${r.predicted}</td>
-          <td class="text-end numeric ${r.difference < 0 ? 'text-danger' : (r.difference > 0 ? 'text-success' : '')}">
-            ${r.difference > 0 ? '+' : ''}${r.difference}
-          </td>
-        </tr>
-      `).join('');
-    }
-
-    // Render / update inline chart
-    const inlineCanvas = document.getElementById('accChart');
-    if (inlineCanvas && item.rows) {
-      if (inlineChartInstance) inlineChartInstance.destroy();
-      inlineChartInstance = new Chart(inlineCanvas, {
-        type: 'bar',
-        data: {
-          labels: item.rows.map(x => x.month),
-          datasets: [
-            { label: 'Actual', data: item.rows.map(x => x.actual), backgroundColor: '#19c3ce', borderRadius: 4 },
-            { label: 'Predicted', data: item.rows.map(x => x.predicted), backgroundColor: '#60a5fa', borderRadius: 4 }
-          ]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: {
-            legend: { labels: { color: '#8190a8', boxWidth: 10, boxHeight: 10 } },
-            tooltip: getTooltipConfig()
-          },
-          scales: {
-            x: { grid: { display: false }, ticks: { color: '#8190a8' } },
-            y: { grid: { color: 'rgba(148,163,184,.08)' }, ticks: { color: '#8190a8' }, border: { display: false } }
-          }
-        }
-      });
-    }
-
-    // 3. Update modal content & open if requested
+    // 2. Update modal content & open
     const modalLabel = document.getElementById('accuracyModalLabel');
     if (modalLabel) modalLabel.textContent = item.product;
 
@@ -383,9 +264,8 @@
       `).join('');
     }
 
-    if (openModal && accuracyModal) {
+    if (accuracyModal) {
       accuracyModal.show();
-      // Render modal chart after modal is shown so canvas has proper dimensions
       setTimeout(() => {
         const modalCanvas = document.getElementById('modalChart');
         if (modalCanvas && item.rows) {
@@ -414,12 +294,6 @@
           });
         }
       }, 150);
-    }
-  }
-
-  function openCurrentModal() {
-    if (currentSelectedId) {
-      showProductAccuracy(currentSelectedId, true);
     }
   }
 </script>

@@ -14,9 +14,7 @@ from sales.services import sales_dataframe
 REPORT_TITLES = {
     "sales": "Sales Report",
     "inventory": "Inventory Report",
-    "abc_analytics": "ABC & Statistical Inventory Report",
     "performance": "Product Performance Report",
-    "forecast": "Demand Forecast Report",
     "reorder": "Reorder Report",
     "revenue": "Revenue Report",
 }
@@ -47,13 +45,6 @@ def _performance():
     return cols, rows
 
 
-def _forecast():
-    cols = ["Product", "Forecast Month", "Predicted Demand", "Current Stock", "Validation MAE", "Generated"]
-    qs = Forecast.objects.select_related("product").order_by("product__name", "-forecast_month")
-    return cols, [[f.product.name, f.forecast_month.strftime("%Y-%m"), f.predicted_quantity, f.product.stock_quantity,
-                   round(f.mae, 2) if f.mae is not None else "", f.created_at.strftime("%Y-%m-%d %H:%M")] for f in qs]
-
-
 def _reorder():
     cols = ["Product", "Current Stock", "Predicted Demand", "Reorder Quantity", "Status"]
     return cols, [[r["product"].name, r["stock"], r["predicted"], r["reorder_qty"], r["status"]]
@@ -68,24 +59,8 @@ def _revenue():
     return cols, rows
 
 
-def _abc_analytics():
-    cols = ["Product", "Category", "ABC Class", "Revenue ($)", "Share (%)", "Mean Monthly", "Std Dev", "CV Volatility", "EOQ", "Safety Stock", "Reorder Point"]
-    df = sales_dataframe()
-    from products.models import Product
-    profiles = calc.statistical_profiling(df, list(Product.objects.all()))
-    rows = [
-        [
-            p["product_name"], p["category"], p["abc_class"], p["total_revenue"],
-            p["pct_revenue"], p["mean"], p["std_dev"], p["cv"],
-            p["eoq"], p["safety_stock"], p["recommended_rop"]
-        ]
-        for p in profiles
-    ]
-    return cols, rows
-
-
-BUILDERS = {"sales": _sales, "inventory": _inventory, "abc_analytics": _abc_analytics,
-            "performance": _performance, "forecast": _forecast, "reorder": _reorder, "revenue": _revenue}
+BUILDERS = {"sales": _sales, "inventory": _inventory,
+            "performance": _performance, "reorder": _reorder, "revenue": _revenue}
 
 
 def build(kind):

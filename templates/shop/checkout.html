@@ -72,7 +72,7 @@
         <!-- Guest Name & Table -->
         <div class="mb-3">
           <label class="form-label" for="coCustName">Guest Name</label>
-          <input type="text" id="coCustName" name="customer_name" class="form-control" value="{% if request.user.is_authenticated %}{{ request.user.username }}{% else %}Walk-in Guest{% endif %}">
+          <input type="text" id="coCustName" name="customer_name" class="form-control" value="Walk-in Guest">
         </div>
         <div class="mb-3">
           <label class="form-label" for="coTableNum">Table / Buzzer #</label>
