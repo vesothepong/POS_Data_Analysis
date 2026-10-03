@@ -17,13 +17,17 @@ def analytics_payload(product_id=None):
     total_units = int(df["units"].sum()) if len(df) else 0
     total_rev = round(float(df["revenue"].sum()), 2) if len(df) else 0.0
 
+    monthly_data = calc.monthly_totals(df)
+    growth = calc.sales_growth_analysis(monthly_data)
+
     payload = {
-        "monthly": calc.monthly_totals(df),
+        "monthly": monthly_data,
         "products": calc.group_totals(df, "product"),
         "categories": calc.group_totals(df, "category"),
         "abc": abc,
         "statistical_profiles": stats_list,
         "correlation": corr,
+        "sales_growth": growth,
         "kpis": {
             "total_units": total_units,
             "total_revenue": total_rev,

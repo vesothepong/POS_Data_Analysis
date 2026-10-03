@@ -51,11 +51,11 @@
   <div class="col-6 col-md-3">
     <div class="card p-3 h-100">
       <div class="d-flex align-items-center justify-content-between mb-1">
-        <small class="text-muted text-uppercase fw-semibold" style="font-size: 11px;">Price Elasticity</small>
-        <i class="bi bi-graph-down-arrow text-info" style="font-size: 1.2rem;"></i>
+        <small class="text-muted text-uppercase fw-semibold" style="font-size: 11px;" id="kpiGrowthTitle" title="Month-over-Month sales revenue change">Sales Growth</small>
+        <i class="bi bi-graph-up-arrow text-success" id="kpiGrowthIcon" style="font-size: 1.2rem;"></i>
       </div>
-      <div class="kpi" id="kpiCorr" style="font-size: 1.35rem;">--</div>
-      <small class="text-muted" id="kpiElasticity" style="font-size: 11px;">Price vs Units</small>
+      <div class="kpi" id="kpiGrowth" style="font-size: 1.25rem;">--</div>
+      <small class="text-muted" id="kpiGrowthDesc" style="font-size: 11px; line-height: 1.35;">Month-over-month trend</small>
     </div>
   </div>
 </div>
@@ -356,9 +356,47 @@ async function load(productId) {
       document.getElementById('kpiUnits').textContent = d.kpis.total_units.toLocaleString();
       document.getElementById('kpiClassA').textContent = d.kpis.class_a_count + ' ' + (window.t ? window.t('items') : 'items');
     }
-    if (d.correlation) {
-      document.getElementById('kpiCorr').textContent = 'r = ' + d.correlation.correlation;
-      document.getElementById('kpiElasticity').textContent = window.t ? window.t(d.correlation.elasticity) : d.correlation.elasticity;
+    if (d.sales_growth) {
+      const g = d.sales_growth;
+      const statusText = g.status;
+      const descText = g.desc;
+      const pct = g.pct_change;
+      const trend = g.trend; // 'up', 'stable', 'down'
+
+      const statusTranslated = window.t ? window.t(statusText) : statusText;
+      const descTranslated = window.t ? window.t(descText) : descText;
+      const momLabel = window.t ? window.t('MoM') : 'MoM';
+
+      const kpiEl = document.getElementById('kpiGrowth') || document.getElementById('kpiCorr');
+      const iconEl = document.getElementById('kpiGrowthIcon');
+      const descEl = document.getElementById('kpiGrowthDesc') || document.getElementById('kpiElasticity');
+
+      let colorClass = 'text-primary';
+      let iconClass = 'bi-arrow-right text-primary';
+      let badgeBg = 'bg-primary-subtle text-primary border border-primary-subtle';
+
+      if (trend === 'up') {
+        colorClass = 'text-success';
+        iconClass = 'bi-graph-up-arrow text-success';
+        badgeBg = 'bg-success-subtle text-success border border-success-subtle';
+      } else if (trend === 'down') {
+        colorClass = 'text-danger';
+        iconClass = 'bi-graph-down-arrow text-danger';
+        badgeBg = 'bg-danger-subtle text-danger border border-danger-subtle';
+      }
+
+      if (kpiEl) {
+        kpiEl.textContent = statusTranslated;
+        kpiEl.className = 'kpi ' + colorClass;
+      }
+      if (iconEl) {
+        iconEl.className = 'bi ' + iconClass;
+      }
+      if (descEl) {
+        const sign = pct > 0 ? '+' : '';
+        const badgeLabel = `${sign}${pct}% ${momLabel}`;
+        descEl.innerHTML = `${descTranslated} <span class="badge ${badgeBg} ms-1" style="font-size:10px; font-weight:600;">${badgeLabel}</span>`;
+      }
     }
 
     // 2. Render Overview Charts

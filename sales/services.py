@@ -90,19 +90,20 @@ def import_xlsx(uploaded_file):
     return upload
 
 
-SALES_COLUMNS = ["sale_date", "units", "revenue", "product_id", "product", "category", "month"]
+SALES_COLUMNS = ["sale_date", "units", "revenue", "price", "product_id", "product", "category", "month"]
 
 
 def sales_dataframe(qs=None):
     """Load sales records (optionally a filtered queryset) into a DataFrame for analysis."""
     qs = SalesRecord.objects.all() if qs is None else qs
-    rows = list(qs.values("sale_date", "quantity_sold", "total_amount", "product_id", "product__name", "product__category"))
+    rows = list(qs.values("sale_date", "quantity_sold", "total_amount", "price", "product_id", "product__name", "product__category"))
     if not rows:
         return pd.DataFrame(columns=SALES_COLUMNS)
     df = pd.DataFrame(rows).rename(columns={"quantity_sold": "units", "total_amount": "revenue",
                                              "product__name": "product", "product__category": "category"})
     df["sale_date"] = pd.to_datetime(df["sale_date"])
     df["revenue"] = df["revenue"].astype(float)
+    df["price"] = df["price"].astype(float)
     df["category"] = df["category"].replace("", "Uncategorized").fillna("Uncategorized")
     df["month"] = df["sale_date"].dt.to_period("M").dt.to_timestamp()
     return df

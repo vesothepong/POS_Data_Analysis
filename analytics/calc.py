@@ -186,18 +186,99 @@ def statistical_profiling(df, products):
 def correlation_analysis(df):
     """Calculates Pearson correlation between Unit Price and Monthly Quantity Sold."""
     if df is None or len(df) < 3:
-        return {"correlation": 0.0, "elasticity": "Insufficient data"}
+        return {
+            "correlation": 0.0,
+            "elasticity": "Insufficient data",
+            "simple_status": "Insufficient Data",
+            "simple_desc": "More sales history needed to analyze",
+        }
     try:
         r = float(df["price"].corr(df["units"]))
         r = round(r, 3)
         if pd.isna(r):
-            return {"correlation": 0.0, "elasticity": "Neutral"}
+            return {
+                "correlation": 0.0,
+                "elasticity": "Neutral",
+                "simple_status": "Stable Demand",
+                "simple_desc": "Price changes do not affect sales volume",
+            }
         if r < -0.3:
             elasticity = "Price Sensitive (Elastic: Higher price reduces volume)"
+            simple_status = "Price Sensitive"
+            simple_desc = "Higher prices reduce sales volume"
         elif r > 0.3:
             elasticity = "Inelastic / Premium demand pattern"
+            simple_status = "Premium Demand"
+            simple_desc = "Sales remain strong at higher prices"
         else:
             elasticity = "Relatively Inelastic / Stable across prices"
-        return {"correlation": r, "elasticity": elasticity}
+            simple_status = "Stable Demand"
+            simple_desc = "Price changes do not affect sales volume"
+        return {
+            "correlation": r,
+            "elasticity": elasticity,
+            "simple_status": simple_status,
+            "simple_desc": simple_desc,
+        }
     except Exception:
-        return {"correlation": 0.0, "elasticity": "Neutral"}
+        return {
+            "correlation": 0.0,
+            "elasticity": "Neutral",
+            "simple_status": "Stable Demand",
+            "simple_desc": "Price changes do not affect sales volume",
+        }
+
+
+def sales_growth_analysis(monthly_totals_list):
+    """
+    Calculates Month-over-Month (MoM) sales revenue growth.
+    Status rules:
+      - MoM change > +5.0%: 'Growing' (positive sales growth)
+      - MoM change between -5.0% and +5.0%: 'Steady' (normal / stable sales)
+      - MoM change < -5.0%: 'Declining' (negative sales growth)
+    """
+    if not monthly_totals_list or len(monthly_totals_list) < 2:
+        return {
+            "status": "Steady",
+            "pct_change": 0.0,
+            "trend": "stable",
+            "desc": "Baseline month (no prior period)",
+            "current_month": monthly_totals_list[-1]["month"] if monthly_totals_list else "",
+            "previous_month": "",
+        }
+
+    prev = monthly_totals_list[-2]
+    curr = monthly_totals_list[-1]
+
+    prev_rev = float(prev["revenue"])
+    curr_rev = float(curr["revenue"])
+
+    if prev_rev > 0:
+        pct = round(((curr_rev - prev_rev) / prev_rev) * 100, 1)
+    else:
+        pct = 100.0 if curr_rev > 0 else 0.0
+
+    if pct > 5.0:
+        status = "Growing"
+        trend = "up"
+        desc = f"+{pct}% revenue vs last month"
+    elif pct < -5.0:
+        status = "Declining"
+        trend = "down"
+        desc = f"{pct}% revenue vs last month"
+    else:
+        status = "Steady"
+        trend = "stable"
+        sign = "+" if pct > 0 else ""
+        desc = f"{sign}{pct}% revenue vs last month"
+
+    return {
+        "status": status,
+        "pct_change": pct,
+        "trend": trend,
+        "desc": desc,
+        "current_month": curr["month"],
+        "previous_month": prev["month"],
+    }
+
+

@@ -53,9 +53,12 @@ def _reorder():
 
 def _revenue():
     cols = ["Month", "Units Sold", "Revenue"]
-    rows = [[m["month"], m["units"], m["revenue"]] for m in calc.monthly_totals(sales_dataframe())]
+    monthly_data = calc.monthly_totals(sales_dataframe(), ascending=False)
+    rows = [[m["month"], m["units"], m["revenue"]] for m in monthly_data]
     if rows:
-        rows.append(["TOTAL", sum(r[1] for r in rows), round(sum(r[2] for r in rows), 2)])
+        total_units = sum(m["units"] for m in monthly_data)
+        total_rev = round(sum(m["revenue"] for m in monthly_data), 2)
+        rows.append(["TOTAL", total_units, total_rev])
     return cols, rows
 
 

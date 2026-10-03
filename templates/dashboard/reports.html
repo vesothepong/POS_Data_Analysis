@@ -6,7 +6,7 @@
   <div class="d-flex flex-wrap justify-content-between align-items-center mb-2"><h5 class="mb-0">{{ title }} <small class="text-muted">({{ total_rows }} rows)</small></h5>
     <div><a class="btn btn-sm btn-outline-success" href="{% url 'report_export' kind 'xlsx' %}">Export Excel</a> <a class="btn btn-sm btn-outline-secondary" href="{% url 'report_export' kind 'csv' %}">Export CSV</a></div></div>
   <div class="table-responsive" style="max-height:520px;overflow:auto"><table class="table table-sm align-middle">
-    <thead class="table-light" style="position:sticky;top:0"><tr>{% for c in columns %}<th>{{ c }}</th>{% endfor %}</tr></thead>
+    <thead style="position:sticky;top:0;z-index:2"><tr>{% for c in columns %}<th style="background:var(--ink-raised);border-bottom:1px solid var(--line-strong);">{{ c }}</th>{% endfor %}</tr></thead>
     <tbody>{% for row in rows %}<tr>{% for v in row %}<td>{{ v }}</td>{% endfor %}</tr>{% empty %}<tr><td colspan="{{ columns|length }}" class="text-muted">No data for this report yet.</td></tr>{% endfor %}</tbody></table></div>
   {% if total_rows > 300 %}<p class="small text-muted mb-0">Showing first 300 rows of {{ total_rows }}.</p>{% endif %}
 </div>

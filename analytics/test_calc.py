@@ -42,6 +42,33 @@ class AggregationTests(unittest.TestCase):
         c = calc.correlation_analysis(df)
         self.assertLess(c["correlation"], 0)
         self.assertIn("Elastic", c["elasticity"])
+        self.assertEqual(c["simple_status"], "Price Sensitive")
+
+    def test_sales_growth_analysis(self):
+        # Growing (> +5%)
+        m_grow = [{"month": "2025-01", "revenue": 100.0}, {"month": "2025-02", "revenue": 120.0}]
+        res = calc.sales_growth_analysis(m_grow)
+        self.assertEqual(res["status"], "Growing")
+        self.assertEqual(res["trend"], "up")
+        self.assertEqual(res["pct_change"], 20.0)
+
+        # Declining (< -5%)
+        m_dec = [{"month": "2025-01", "revenue": 100.0}, {"month": "2025-02", "revenue": 80.0}]
+        res_dec = calc.sales_growth_analysis(m_dec)
+        self.assertEqual(res_dec["status"], "Declining")
+        self.assertEqual(res_dec["trend"], "down")
+        self.assertEqual(res_dec["pct_change"], -20.0)
+
+        # Steady (-5% to +5%)
+        m_steady = [{"month": "2025-01", "revenue": 100.0}, {"month": "2025-02", "revenue": 102.0}]
+        res_steady = calc.sales_growth_analysis(m_steady)
+        self.assertEqual(res_steady["status"], "Steady")
+        self.assertEqual(res_steady["trend"], "stable")
+        self.assertEqual(res_steady["pct_change"], 2.0)
+
+        # Edge cases: 0 or 1 month
+        self.assertEqual(calc.sales_growth_analysis([])["status"], "Steady")
+        self.assertEqual(calc.sales_growth_analysis([{"month": "2025-01", "revenue": 100.0}])["status"], "Steady")
 
 
 if __name__ == "__main__":
