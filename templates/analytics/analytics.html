@@ -77,16 +77,6 @@
       <i class="bi bi-calculator"></i> Demand Statistics
     </button>
   </li>
-  <li class="nav-item" role="presentation">
-    <button class="nav-link btn-sm" id="tab-prescriptive" data-bs-toggle="pill" data-bs-target="#content-prescriptive" type="button" role="tab">
-      <i class="bi bi-lightning-charge"></i> Inventory Optimization
-    </button>
-  </li>
-  <li class="nav-item" role="presentation">
-    <button class="nav-link btn-sm" id="tab-deepdive" data-bs-toggle="pill" data-bs-target="#content-deepdive" type="button" role="tab">
-      <i class="bi bi-search"></i> Product Deep-Dive
-    </button>
-  </li>
 </ul>
 
 <!-- Tab Contents -->
@@ -195,119 +185,6 @@
     </div>
   </div>
 
-  <!-- TAB 4: PRESCRIPTIVE SUPPLY CHAIN OPTIMIZATION -->
-  <div class="tab-pane fade" id="content-prescriptive" role="tabpanel">
-    <div class="card p-3 mb-3">
-      <div class="d-flex justify-content-between align-items-center mb-3">
-        <div>
-          <h5 class="mb-0">Inventory Optimization</h5>
-        </div>
-      </div>
-      <div class="table-responsive">
-        <table class="table table-hover align-middle mb-0" id="prescriptiveTable">
-          <thead class="table-light">
-            <tr>
-              <th style="width: 50px;"></th>
-              <th>Product</th>
-              <th>Unit Price</th>
-              <th>Current Stock</th>
-              <th>Reorder Level</th>
-              <th>EOQ (Batch Size)</th>
-              <th>Safety Stock (95%)</th>
-              <th>Recommended ROP</th>
-              <th>Inventory Turnover</th>
-              <th>Days Sales Inv (DSI)</th>
-            </tr>
-          </thead>
-          <tbody id="prescriptiveTableBody">
-            <tr><td colspan="10" class="text-muted text-center py-3">Loading prescriptive data...</td></tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-  </div>
-
-  <!-- TAB 5: DEEP-DIVE & OLS REGRESSION -->
-  <div class="tab-pane fade" id="content-deepdive" role="tabpanel">
-    <div class="card p-3 mb-3">
-      <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
-        <div>
-          <h5 class="mb-0">Product Deep-Dive</h5>
-        </div>
-        <div class="d-flex align-items-center gap-2">
-          <label for="productSelect" class="form-label mb-0 small fw-semibold">Select Product:</label>
-          <select id="productSelect" class="form-select form-select-sm" style="min-width: 220px;">
-            <option value="">-- Choose a product --</option>
-            {% for p in products %}
-              <option value="{{ p.id }}">{{ p.name }}</option>
-            {% endfor %}
-          </select>
-        </div>
-      </div>
-
-      <!-- Selected Product Profile Card -->
-      <div id="selectedProductCard" class="card bg-body-tertiary p-3 mb-3" style="display: none;">
-        <div class="row align-items-center g-3">
-          <div class="col-auto">
-            <div id="selImgContainer" style="width: 75px; height: 75px; border-radius: 10px; overflow: hidden; background: rgba(148,163,184,0.15); display: flex; align-items: center; justify-content: center; border: 1px solid rgba(148,163,184,0.25);">
-              <img id="selImg" src="" alt="" style="width: 100%; height: 100%; object-fit: cover; display: none;">
-              <i id="selImgPlaceholder" class="bi bi-image text-muted" style="font-size: 1.8rem;"></i>
-            </div>
-          </div>
-          <div class="col">
-            <div class="d-flex align-items-center gap-2">
-              <h4 class="mb-0" id="selName">Product Name</h4>
-              <span class="badge bg-secondary" id="selCategory">Category</span>
-              <span class="badge bg-danger" id="selAbcBadge">Class A</span>
-            </div>
-            <div class="text-muted small mt-1 d-flex gap-3 flex-wrap">
-              <span>Price: <strong id="selPrice">$0.00</strong></span>
-              <span>Stock: <strong id="selStock">0</strong></span>
-              <span>Reorder Level: <strong id="selReorder">0</strong></span>
-              <span>Demand Mean: <strong id="selMean">0</strong>/mo</span>
-              <span>Std Dev: <strong id="selStd">0</strong></span>
-              <span>EOQ: <strong id="selEoq">0</strong></span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Regression Metrics Row -->
-      <div id="regMetricsRow" class="row g-2 mb-3" style="display: none;">
-        <div class="col-md-3">
-          <div class="card p-2 text-center">
-            <small class="text-muted" style="font-size: 11px;">Regression Formula</small>
-            <strong class="font-monospace text-primary" id="regFormula">y = mx + b</strong>
-          </div>
-        </div>
-        <div class="col-md-3">
-          <div class="card p-2 text-center">
-            <small class="text-muted" style="font-size: 11px;">R&sup2; (Variance Explained)</small>
-            <strong class="text-success" id="regR2">0.000</strong>
-          </div>
-        </div>
-        <div class="col-md-3">
-          <div class="card p-2 text-center">
-            <small class="text-muted" style="font-size: 11px;">Standard Error (S_e)</small>
-            <strong class="text-info" id="regSe">&plusmn;0.0</strong>
-          </div>
-        </div>
-        <div class="col-md-3">
-          <div class="card p-2 text-center">
-            <small class="text-muted" style="font-size: 11px;">95% Confidence Interval</small>
-            <strong class="text-warning" id="regCi">[0 - 0] units</strong>
-          </div>
-        </div>
-      </div>
-
-      <!-- Regression Chart -->
-      <div class="chart-box" style="height: 340px;"><canvas id="cPredict"></canvas></div>
-      <p class="text-muted small mt-2 mb-0" id="predictNote">
-        Select a product to view forecast and trajectory.
-      </p>
-    </div>
-  </div>
-
 </div>
 {% endblock %}
 
@@ -336,16 +213,14 @@ const opts = {
 
 let cachedData = null;
 
-async function load(productId) {
-  const url = API + (productId ? '?product=' + productId : '');
-  const res = await fetch(url, { credentials: 'same-origin' });
-  if (!res.ok) {
-    document.getElementById('predictNote').textContent = 'Could not load analytics (' + res.status + ').';
-    return;
-  }
-  const d = await res.json();
-
-  if (!productId) {
+async function load() {
+  try {
+    const res = await fetch(API, { credentials: 'same-origin' });
+    if (!res.ok) {
+      console.error('Could not load analytics (' + res.status + ').');
+      return;
+    }
+    const d = await res.json();
     cachedData = d;
     // 1. Update Executive KPIs
     if (d.kpis) {
@@ -534,146 +409,11 @@ async function load(productId) {
         `;
         statsBody.appendChild(tr);
       });
-
-      // 5. Render Prescriptive Supply Chain Table
-      const presBody = document.getElementById('prescriptiveTableBody');
-      presBody.innerHTML = '';
-      const uLabel = window.t ? window.t('units') : 'units';
-      const yrLabel = window.t ? window.t('yr') : 'yr';
-      const dLabel = window.t ? window.t('days') : 'days';
-      d.statistical_profiles.forEach(p => {
-        const tr = document.createElement('tr');
-        const imgHtml = p.image_url 
-          ? `<img src="${p.image_url}" alt="${p.product_name}" style="width:36px;height:36px;object-fit:cover;border-radius:6px;border:1px solid rgba(148,163,184,0.25);">`
-          : `<div style="width:36px;height:36px;border-radius:6px;background:rgba(148,163,184,0.12);display:flex;align-items:center;justify-content:center;color:#94a3b8;"><i class="bi bi-box-seam"></i></div>`;
-        tr.innerHTML = `
-          <td class="pe-0">${imgHtml}</td>
-          <td><strong>${p.product_name}</strong></td>
-          <td>$${p.price}</td>
-          <td>${p.stock_quantity}</td>
-          <td>${p.reorder_level}</td>
-          <td><strong class="text-primary">${p.eoq} ${uLabel}</strong></td>
-          <td>${p.safety_stock} ${uLabel}</td>
-          <td><strong class="text-warning">${p.recommended_rop} ${uLabel}</strong></td>
-          <td>${p.turnover}x / ${yrLabel}</td>
-          <td>${p.dsi} ${dLabel}</td>
-        `;
-        presBody.appendChild(tr);
-      });
     }
-
-    // Default select first product for deep-dive if available
-    const selElem = document.getElementById('productSelect');
-    if (selElem && selElem.options.length > 1 && !selElem.value) {
-      selElem.selectedIndex = 1;
-      load(selElem.value);
-    }
-  }
-
-  // 6. Handle Selected Product Deep-Dive
-  const s = d.selected;
-  const note = document.getElementById('predictNote');
-  const card = document.getElementById('selectedProductCard');
-  const regRow = document.getElementById('regMetricsRow');
-
-  if (s) {
-    card.style.display = 'block';
-    regRow.style.display = 'flex';
-
-    document.getElementById('selName').textContent = s.product;
-    document.getElementById('selCategory').textContent = window.t ? window.t(s.category) : s.category;
-    document.getElementById('selPrice').textContent = '$' + s.price.toFixed(2);
-    document.getElementById('selStock').textContent = s.stock_quantity;
-    document.getElementById('selReorder').textContent = s.reorder_level;
-
-    if (s.profile) {
-      document.getElementById('selMean').textContent = s.profile.mean;
-      document.getElementById('selStd').textContent = s.profile.std_dev;
-      document.getElementById('selEoq').textContent = s.profile.eoq + ' ' + (window.t ? window.t('units') : 'units');
-      document.getElementById('selAbcBadge').textContent = window.t ? window.t('Class ' + s.profile.abc_class) : ('Class ' + s.profile.abc_class);
-      document.getElementById('selAbcBadge').className = 'badge ' + (s.profile.abc_class === 'A' ? 'bg-danger' : (s.profile.abc_class === 'B' ? 'bg-warning text-dark' : 'bg-secondary'));
-    }
-
-    const img = document.getElementById('selImg');
-    const ph = document.getElementById('selImgPlaceholder');
-    if (s.image_url) {
-      img.src = s.image_url;
-      img.style.display = 'block';
-      ph.style.display = 'none';
-    } else {
-      img.style.display = 'none';
-      ph.style.display = 'block';
-    }
-
-    const labels = s.history.map(x => x.month);
-    const n = labels.length;
-
-    if (s.forecast) {
-      labels.push(s.forecast.month);
-
-      document.getElementById('regFormula').textContent = s.forecast.formula || 'y = mx + b';
-      document.getElementById('regR2').textContent = s.forecast.r2 !== undefined ? s.forecast.r2 : 'N/A';
-      document.getElementById('regSe').textContent = s.forecast.std_err ? ('±' + s.forecast.std_err) : 'N/A';
-      document.getElementById('regCi').textContent = (s.forecast.ci_lower !== undefined && s.forecast.ci_upper !== undefined) 
-        ? `[${s.forecast.ci_lower} - ${s.forecast.ci_upper}] ${window.t ? window.t('units') : 'units'}`
-        : 'N/A';
-
-      draw('cPredict', {
-        type: 'line',
-        data: {
-          labels: labels,
-          datasets: [
-            {
-              label: 'Actual Sales',
-              data: s.history.map(x => x.actual).concat([null]),
-              borderColor: '#19c3ce',
-              backgroundColor: 'rgba(25,195,206,0.1)',
-              tension: .3,
-              fill: true,
-              pointRadius: 4
-            },
-            {
-              label: 'OLS Regression Trend',
-              data: s.forecast.fitted.concat([null]),
-              borderColor: '#94a3b8',
-              borderDash: [6, 4],
-              pointRadius: 0
-            },
-            {
-              label: 'Predicted Next Month',
-              data: new Array(n - 1).fill(null).concat([s.history[n - 1].actual, s.forecast.predicted]),
-              borderColor: '#fbbf24',
-              backgroundColor: '#fbbf24',
-              borderDash: [3, 3],
-              pointRadius: 6,
-              pointHoverRadius: 8
-            }
-          ]
-        },
-        options: opts
-      });
-
-      note.innerHTML = `<strong>${s.product}</strong>: Linear Regression predicts <strong>${s.forecast.predicted} units</strong> for <strong>${s.forecast.month}</strong> with 95% Confidence Interval [${s.forecast.ci_lower} - ${s.forecast.ci_upper}] units. Goodness-of-fit R&sup2; = ${s.forecast.r2}.`;
-    } else {
-      regRow.style.display = 'none';
-      draw('cPredict', {
-        type: 'line',
-        data: {
-          labels: labels,
-          datasets: [{ label: 'Actual Sales', data: s.history.map(x => x.actual), borderColor: '#19c3ce' }]
-        },
-        options: opts
-      });
-      note.textContent = s.product + ' needs at least 2 months of sales history to calculate regression trends.';
-    }
+  } catch (err) {
+    console.error('Failed to load analytics data:', err);
   }
 }
-
-document.getElementById('productSelect').addEventListener('change', e => {
-  if (e.target.value) {
-    load(e.target.value);
-  }
-});
 
 // Ensure tabs switch reliably and Chart.js charts resize properly when tabs change
 const tabButtons = document.querySelectorAll('#analyticsTabs button[data-bs-toggle="pill"]');
@@ -709,6 +449,6 @@ tabButtons.forEach(btn => {
 });
 
 // Initial load
-load('');
+load();
 </script>
 {% endblock %}
