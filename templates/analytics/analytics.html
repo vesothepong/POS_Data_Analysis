@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% block title %}Data Analytics & Statistical Insights · StockSight{% endblock %}
+{% block title %}Data Analytics & Statistical Insights · Smart Inventory Management{% endblock %}
 
 {% block content %}
 <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-3">
@@ -112,7 +112,7 @@
       <div class="col-lg-6">
         <div class="card p-3 h-100">
           <div class="d-flex justify-content-between align-items-center mb-2">
-            <h5 class="mb-0">Top 5 Revenue Drivers</h5>
+            <h5 class="mb-0">Revenue of Top 5 Most-Sold Items</h5>
           </div>
           <div class="chart-box"><canvas id="cTop"></canvas></div>
         </div>
@@ -313,9 +313,42 @@ async function load() {
       type: 'bar',
       data: {
         labels: d.top_products.map(x => x.name),
-        datasets: [{ label: 'Revenue ($)', data: d.top_products.map(x => x.revenue), backgroundColor: '#34d399' }]
+        datasets: [{
+          label: 'Revenue ($)',
+          data: d.top_products.map(x => x.revenue),
+          backgroundColor: '#34d399',
+          borderRadius: 4
+        }]
       },
-      options: opts
+      options: {
+        ...opts,
+        scales: {
+          x: {
+            ...opts.scales.x,
+            ticks: {
+              ...opts.scales.x.ticks,
+              autoSkip: false,
+              maxRotation: 20,
+              font: { size: 11 }
+            }
+          },
+          y: {
+            ...opts.scales.y,
+            ticks: {
+              ...opts.scales.y.ticks,
+              callback: v => '$' + Number(v).toLocaleString()
+            }
+          }
+        },
+        plugins: {
+          ...opts.plugins,
+          tooltip: {
+            callbacks: {
+              label: ctx => ` Revenue: $${Number(ctx.raw || 0).toLocaleString()}`
+            }
+          }
+        }
+      }
     });
 
     // 3. Render ABC Pareto Chart & Table

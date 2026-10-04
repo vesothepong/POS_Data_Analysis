@@ -387,7 +387,8 @@ const DICT_EN_TO_KM = {
   "Average baseline MAE": "MAE មូលដ្ឋានជាមធ្យម",
   "Best seller": "លក់ដាច់បំផុត",
   "Best-selling products": "ផលិតផលលក់ដាច់បំផុត",
-  "Top 5 Revenue Drivers": "ផលិតផលរកចំណូលបានច្រើនបំផុត 5",
+  "Revenue of Top 5 Most-Sold Items": "ចំណូលនៃផលិតផលលក់ដាច់បំផុតទាំង 5",
+  "Top 5 Revenue Drivers": "ចំណូលនៃផលិតផលលក់ដាច់បំផុតទាំង 5",
   "Category Revenue Breakdown": "ការបែងចែកចំណូលតាមប្រភេទ",
   "Choose product": "ជ្រើសរើសផលិតផល",
   "Select Product:": "ជ្រើសរើសផលិតផល:",
@@ -617,18 +618,19 @@ const DICT_EN_TO_KM = {
   "yr": "ឆ្នាំ",
 
   // Page Titles
-  "Dashboard · StockSight": "ផ្ទាំងគ្រប់គ្រង · StockSight",
-  "Products · StockSight": "ផលិតផល · StockSight",
-  "Sales Data · StockSight": "ទិន្នន័យលក់ · StockSight",
-  "Inventory · StockSight": "សារពើភ័ណ្ឌ · StockSight",
-  "Demand Forecast · StockSight": "ការព្យាករណ៍តម្រូវការ · StockSight",
-  "Forecast Accuracy · StockSight": "ភាពសុក្រឹតនៃការព្យាករណ៍ · StockSight",
-  "Data Analytics & Statistical Insights · StockSight": "ការវិភាគទិន្នន័យ & ស្ថិតិ · StockSight",
-  "Upload Sales · StockSight": "បញ្ចូលទិន្នន័យលក់ · StockSight",
-  "Sales Report · StockSight": "របាយការណ៍លក់ · StockSight",
-  "Sign in · StockSight": "ចូលគណនី · StockSight",
-  "Create account · StockSight": "បង្កើតគណនី · StockSight",
-  "Access denied · StockSight": "ការចូលប្រើត្រូវបានបដិសេធ · StockSight"
+  "Dashboard · Smart Inventory Management": "ផ្ទាំងគ្រប់គ្រង · Smart Inventory Management",
+  "Products · Smart Inventory Management": "ផលិតផល · Smart Inventory Management",
+  "Sales Data · Smart Inventory Management": "ទិន្នន័យលក់ · Smart Inventory Management",
+  "Inventory · Smart Inventory Management": "សារពើភ័ណ្ឌ · Smart Inventory Management",
+  "Demand Forecast · Smart Inventory Management": "ការព្យាករណ៍តម្រូវការ · Smart Inventory Management",
+  "Forecast Accuracy · Smart Inventory Management": "ភាពសុក្រឹតនៃការព្យាករណ៍ · Smart Inventory Management",
+  "Data Analytics & Statistical Insights · Smart Inventory Management": "ការវិភាគទិន្នន័យ & ស្ថិតិ · Smart Inventory Management",
+  "Upload Sales · Smart Inventory Management": "បញ្ចូលទិន្នន័យលក់ · Smart Inventory Management",
+  "Sales Report · Smart Inventory Management": "របាយការណ៍លក់ · Smart Inventory Management",
+  "Sign in · Smart Inventory Management": "ចូលគណនី · Smart Inventory Management",
+  "Create account · Smart Inventory Management": "បង្កើតគណនី · Smart Inventory Management",
+  "Access denied · Smart Inventory Management": "ការចូលប្រើត្រូវបានបដិសេធ · Smart Inventory Management",
+  "Smart Inventory Management": "Smart Inventory Management"
 };
 
 // Reverse dictionary for English restoration
