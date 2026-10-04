@@ -171,14 +171,13 @@
               <th>Product</th>
               <th>Category</th>
               <th>Mean (&mu;)</th>
-              <th>Median</th>
               <th>Min - Max</th>
               <th>CV (&sigma;/&mu;)</th>
               <th>Demand Volatility</th>
             </tr>
           </thead>
           <tbody id="statsTableBody">
-            <tr><td colspan="8" class="text-muted text-center py-3">Loading statistics...</td></tr>
+            <tr><td colspan="7" class="text-muted text-center py-3">Loading statistics...</td></tr>
           </tbody>
         </table>
       </div>
@@ -435,7 +434,6 @@ async function load() {
           <td><strong>${p.product_name}</strong></td>
           <td><span class="badge bg-light text-dark border">${catLabel}</span></td>
           <td><strong>${p.mean}</strong></td>
-          <td>${p.median}</td>
           <td>${p.min} - ${p.max}</td>
           <td><strong>${p.cv}</strong></td>
           <td><span class="badge ${p.volatility_badge}">${volLabel}</span></td>

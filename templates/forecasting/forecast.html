@@ -15,7 +15,7 @@
     <p class="mb-1">Current stock: <strong>{{ forecast.product.stock_quantity }}</strong></p>
     <p class="mb-1">Suggested reorder: <strong>{{ reorder }} units</strong></p>
     <p class="mb-0">Status: <span class="badge {% if status == 'Sufficient Stock' %}text-bg-success{% elif status == 'Need Reorder' %}text-bg-primary{% elif status == 'Low Stock' %}text-bg-warning{% else %}text-bg-danger{% endif %}">{{ status }}</span></p>
-    {% if forecast.mae is not None %}<p class="mb-0 mt-2 small text-muted">MAE: {{ forecast.mae|floatformat:2 }} units</p>{% endif %}
+    {% if forecast.mae is not None %}<p class="mb-0 mt-2 small text-muted">MAE: {{ forecast.mae|floatformat:0 }} units</p>{% endif %}
   </div></div>
   <div class="col-md-8"><div class="card p-3"><h5>Sales Trend &amp; Forecast</h5><div class="chart-box"><canvas id="salesChart"></canvas></div></div></div>
 </div>

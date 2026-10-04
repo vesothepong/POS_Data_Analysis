@@ -15,14 +15,14 @@
   <div class="col-md-4">
     <div class="card p-3">
       <small class="text-muted">Average MAE</small>
-      <div class="kpi">{{ overall.mae }}</div>
+      <div class="kpi">{{ overall.mae|floatformat:0 }}</div>
       <small class="text-muted">Mean absolute error (units)</small>
     </div>
   </div>
   <div class="col-md-4">
     <div class="card p-3">
       <small class="text-muted">Average Baseline MAE</small>
-      <div class="kpi">{{ overall.baseline }}</div>
+      <div class="kpi">{{ overall.baseline|floatformat:0 }}</div>
       <small class="text-muted">Naive historical average error</small>
     </div>
   </div>
@@ -48,7 +48,6 @@
           <th>Train / Test months</th>
           <th>MAE</th>
           <th>RMSE</th>
-          <th>MAPE</th>
           <th>Accuracy</th>
           <th>Baseline MAE</th>
           <th class="text-end">Action</th>
@@ -59,9 +58,8 @@
         <tr id="row-{{ r.product_id }}" class="accuracy-row {% if detail.product_id == r.product_id %}table-active{% endif %}">
           <td class="fw-medium">{{ r.product }}</td>
           <td>{{ r.train_months }} / {{ r.test_months }}</td>
-          <td class="numeric">{{ r.mae|floatformat:2 }}</td>
-          <td class="numeric">{{ r.rmse|floatformat:2 }}</td>
-          <td class="numeric">{% if r.mape is not None %}{{ r.mape|floatformat:1 }}%{% else %}-{% endif %}</td>
+          <td class="numeric">{{ r.mae|floatformat:0 }}</td>
+          <td class="numeric">{{ r.rmse|floatformat:0 }}</td>
           <td class="numeric">
             {% if r.accuracy is not None %}
               <span class="badge {% if r.accuracy >= 70 %}bg-success{% elif r.accuracy >= 40 %}bg-warning text-dark{% else %}bg-danger{% endif %}">
@@ -71,7 +69,7 @@
               -
             {% endif %}
           </td>
-          <td class="numeric">{{ r.baseline_mae|floatformat:2 }}</td>
+          <td class="numeric">{{ r.baseline_mae|floatformat:0 }}</td>
           <td class="text-end">
             <button type="button" class="btn btn-sm btn-outline-primary btn-view-accuracy" data-product-id="{{ r.product_id }}" onclick="showProductAccuracy(this.dataset.productId)" title="View test details for {{ r.product }}">
               <i class="bi bi-eye me-1"></i>View
@@ -239,16 +237,16 @@
     if (mTrainTest) mTrainTest.textContent = `Trained: ${item.train_months}m | Test: ${item.test_months}m`;
 
     const mKpiMae = document.getElementById('mKpiMae');
-    if (mKpiMae) mKpiMae.textContent = item.mae != null ? item.mae.toFixed(2) : '-';
+    if (mKpiMae) mKpiMae.textContent = item.mae != null ? Math.round(item.mae) : '-';
 
     const mKpiRmse = document.getElementById('mKpiRmse');
-    if (mKpiRmse) mKpiRmse.textContent = item.rmse != null ? item.rmse.toFixed(2) : '-';
+    if (mKpiRmse) mKpiRmse.textContent = item.rmse != null ? Math.round(item.rmse) : '-';
 
     const mKpiAcc = document.getElementById('mKpiAcc');
     if (mKpiAcc) mKpiAcc.textContent = item.accuracy != null ? item.accuracy.toFixed(1) + '%' : 'N/A';
 
     const mKpiBase = document.getElementById('mKpiBase');
-    if (mKpiBase) mKpiBase.textContent = item.baseline_mae != null ? item.baseline_mae.toFixed(2) : '-';
+    if (mKpiBase) mKpiBase.textContent = item.baseline_mae != null ? Math.round(item.baseline_mae) : '-';
 
     const modalTbody = document.getElementById('modalTableBody');
     if (modalTbody && item.rows) {
