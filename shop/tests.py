@@ -89,7 +89,7 @@ class WalkInPOSTests(TestCase):
     def setUp(self):
         self.product = Product.objects.create(
             name="Artisan Cappuccino",
-            category="Beverages",
+            category="Drink",
             price="4.50",
             stock_quantity=50,
             reorder_level=10,

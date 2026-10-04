@@ -17,10 +17,10 @@ class Command(BaseCommand):
         rng = random.Random(42)
         # name, category, price, stock, reorder level, base monthly units
         products = [
-            ("Artisan Cappuccino", "Beverages", 4.50, 180, 60, 160, "products/cappuccino.png", (53, 34, 23), (217, 119, 6), "Artisan Espresso & Foam"),
-            ("Iced Matcha Latte", "Beverages", 5.25, 140, 45, 135, "products/matcha_latte.png", (20, 48, 30), (34, 197, 94), "Ceremonial Japanese Green Tea"),
-            ("Fresh Orange Juice", "Beverages", 3.75, 90, 35, 95, "products/orange_juice.png", (67, 34, 12), (249, 115, 22), "100% Cold Pressed Citrus"),
-            ("Sparkling Berry Soda", "Beverages", 2.95, 220, 50, 110, "products/berry_soda.png", (46, 16, 42), (236, 72, 153), "Sparkling Wild Berry Fizz"),
+            ("Artisan Cappuccino", "Drink", 4.50, 180, 60, 160, "products/cappuccino.png", (53, 34, 23), (217, 119, 6), "Artisan Espresso & Foam"),
+            ("Iced Matcha Latte", "Drink", 5.25, 140, 45, 135, "products/matcha_latte.png", (20, 48, 30), (34, 197, 94), "Ceremonial Japanese Green Tea"),
+            ("Fresh Orange Juice", "Drink", 3.75, 90, 35, 95, "products/orange_juice.png", (67, 34, 12), (249, 115, 22), "100% Cold Pressed Citrus"),
+            ("Sparkling Berry Soda", "Drink", 2.95, 220, 50, 110, "products/berry_soda.png", (46, 16, 42), (236, 72, 153), "Sparkling Wild Berry Fizz"),
             ("Butter Croissant", "Food", 3.50, 75, 40, 140, "products/croissant.png", (58, 41, 19), (234, 179, 8), "Golden Flaky French Pastry"),
             ("Classic Cheeseburger", "Food", 8.95, 65, 30, 85, "products/cheeseburger.png", (60, 26, 20), (239, 68, 68), "Prime Beef & Melted Cheddar"),
             ("Chicken Caesar Wrap", "Food", 7.50, 50, 25, 70, "products/caesar_wrap.png", (27, 46, 32), (16, 185, 129), "Crispy Chicken & Caesar Greens"),
@@ -48,7 +48,7 @@ class Command(BaseCommand):
                     draw.text((300, 235), name[0], fill=accent, anchor='mm', font_size=120)
                     draw.text((300, 425), name, fill=(255, 255, 255), anchor='mm', font_size=34)
                     draw.text((300, 470), subtitle, fill=(205, 215, 228), anchor='mm', font_size=17)
-                    tag_text = 'FRESH DRINK' if cat == 'Beverages' else 'GOURMET FOOD'
+                    tag_text = 'FRESH DRINK' if cat in ['Drink', 'Beverages'] else 'GOURMET FOOD'
                     draw.rounded_rectangle([210, 510, 390, 545], radius=16, fill=(255, 255, 255, 20), outline=(255, 255, 255, 40), width=1)
                     draw.text((300, 527), tag_text, fill=accent, anchor='mm', font_size=12)
                     img.save(img_path, 'PNG', quality=95)

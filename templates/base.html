@@ -6,7 +6,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="color-scheme" content="light dark">
-  <title>{% block title %}Inventory Forecasting{% endblock %} · Cadence</title>
+  <title>{% block title %}Inventory Forecasting{% endblock %} · StockSight</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,300;0,400;0,500;0,700;0,900;1,300;1,400;1,500;1,700;1,900&family=Kantumruy+Pro:ital,wght@0,300..700;1,300..700&display=swap" rel="stylesheet">
@@ -21,7 +21,7 @@
   {% with current=request.resolver_match.url_name %}
   <div class="app-shell">
     <aside class="sidebar" id="sidebar">
-      <div class="brandbar"><span class="brand-mark"></span><span class="brand">Cadence</span><span class="brand-tag">OPS</span><button class="sidebar-close d-lg-none" type="button" aria-label="Close menu"><i class="bi bi-x-lg"></i></button></div>
+      <div class="brandbar"><span class="brand-mark"></span><span class="brand">StockSight</span><span class="brand-tag">OPS</span><button class="sidebar-close d-lg-none" type="button" aria-label="Close menu"><i class="bi bi-x-lg"></i></button></div>
       <nav class="sidebar-nav" aria-label="Primary navigation">
         <a href="{% url 'dashboard' %}" class="{% if current == 'dashboard' %}active{% endif %}"><i class="bi bi-grid-1x2"></i><span>Dashboard</span></a>
         <a href="{% url 'products' %}" class="{% if current == 'products' or current == 'product_create' or current == 'product_edit' %}active{% endif %}"><i class="bi bi-box-seam"></i><span>Products</span></a>
@@ -47,7 +47,7 @@
       <header class="topbar">
         <button class="icon-button d-lg-none" id="menuToggle" type="button" aria-label="Open menu"><i class="bi bi-list"></i></button>
         <div>
-          <div class="workspace-title d-flex align-items-center gap-2"><span>Cadence</span><span class="live-dot"></span></div>
+          <div class="workspace-title d-flex align-items-center gap-2"><span>StockSight</span><span class="live-dot"></span></div>
         </div>
         <div class="topbar-actions">
           <div class="lang-switch-group" role="group" aria-label="Language"><button type="button" class="lang-btn active" data-lang="en" title="English" onclick="setLang('en')">EN</button><button type="button" class="lang-btn" data-lang="km" title="ភាសាខ្មែរ" onclick="setLang('km')">ខ្មែរ</button></div><button class="icon-button theme-toggle" id="themeToggle" type="button" title="Switch color theme" aria-label="Switch color theme"><i class="bi bi-sun-fill theme-sun"></i><i class="bi bi-moon-stars-fill theme-moon"></i></button><a class="btn btn-outline-light" href="{% url 'forecast' %}"><i class="bi bi-stars"></i><span class="d-none d-sm-inline">Run forecast</span></a><a class="btn btn-primary" href="{% url 'upload_sales' %}"><i class="bi bi-upload"></i><span class="d-none d-sm-inline">Upload sales</span></a>

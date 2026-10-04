@@ -76,12 +76,7 @@
 
   .pos-guest-info-row {
     flex-shrink: 0 !important;
-    padding: 4px 16px 4px !important;
-  }
-
-  .pos-table-chips {
-    flex-shrink: 0 !important;
-    padding: 0 16px 6px !important;
+    padding: 4px 16px 8px !important;
   }
 
   /* Middle scrollable lines list expands to fill all remaining height */
@@ -178,7 +173,7 @@
     <div class="pos-menu-topbar">
       <div class="pos-search-wrapper">
         <i class="bi bi-search"></i>
-        <input type="text" id="posSearchInput" class="form-control pos-search-input" placeholder="Search artisan drinks, food, bakery..." value="{{ q }}">
+        <input type="text" id="posSearchInput" class="form-control pos-search-input" placeholder="Search drinks, food..." value="{{ q }}">
         {% if q %}
         <a href="{% url 'catalog' %}" class="pos-search-clear" title="Clear search"><i class="bi bi-x-circle-fill"></i></a>
         {% endif %}
@@ -314,14 +309,6 @@
         </div>
       </div>
 
-      <!-- Quick Table Chips -->
-      <div class="pos-table-chips mb-1" id="posTableChips">
-        <button type="button" class="pos-chip-btn" data-table="Table 1">T-1</button>
-        <button type="button" class="pos-chip-btn" data-table="Table 2">T-2</button>
-        <button type="button" class="pos-chip-btn" data-table="Table 3">T-3</button>
-        <button type="button" class="pos-chip-btn" data-table="Table 4">T-4</button>
-        <button type="button" class="pos-chip-btn" data-table="Counter">Counter</button>
-      </div>
 
       <!-- Scrollable Ticket Lines List -->
       <div class="pos-ticket-lines" id="posTicketLines">
@@ -418,8 +405,20 @@
           <div class="pos-receipt-paper">
             <div class="pos-receipt-top text-center">
               <div class="pos-receipt-store-brand">
-                <i class="bi bi-cup-hot-fill text-warning"></i>
-                <span>CADENCE CAFÉ &amp; EATERY</span>
+                <div class="cafe-brand-lockup cafe-brand-lockup-receipt justify-content-center">
+                  <svg class="cafe-brand-icon" width="30" height="26" viewBox="0 0 54 48" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" style="width:30px;height:26px;min-width:30px;max-width:30px;flex-shrink:0;">
+                    <path d="M25 6C23.5 9 26.5 11 25 14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                    <path d="M31 4.5C29.5 7.5 32.5 9.5 31 13" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                    <path d="M16 39C20 41.5 38 41.5 42 39C43 38.4 43 37.6 42 37C38 35 20 35 16 37C15 37.6 15 38.4 16 39Z" fill="currentColor"/>
+                    <path d="M19 17H39C39 17 39.5 29 29 29C18.5 29 19 17 19 17Z" fill="currentColor"/>
+                    <ellipse cx="29" cy="17" rx="10" ry="1.8" fill="#ffffff" fill-opacity="0.25"/>
+                    <path d="M19 17H39" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                    <path d="M38 19.5H41.5C44 19.5 45.5 21 45.5 23.5C45.5 26 44 27.5 41.5 27.5H37" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/>
+                    <path d="M7 40C6 33 13 28 19 30C20 36 15 42 7 40Z" fill="currentColor"/>
+                    <path d="M7 40C11.5 36.5 15 33.5 19 30" stroke="#ffffff" stroke-width="1.2" stroke-linecap="round" stroke-opacity="0.75"/>
+                  </svg>
+                  <span class="cafe-brand-title">២ឆ្នាំចាំស្នេហ៍</span>
+                </div>
               </div>
               <div class="pos-receipt-tagline">Artisan Coffee Roasters • Fresh Bakery</div>
               <div class="pos-receipt-address">124 Monivong Blvd, Phnom Penh, Cambodia</div>
@@ -562,11 +561,11 @@
 
             <div class="pos-receipt-footer text-center">
               <div class="pos-receipt-wifi">
-                <i class="bi bi-wifi me-1"></i> Free Wi-Fi: <strong>Cadence_Guest</strong> | Key:
+                <i class="bi bi-wifi me-1"></i> Free Wi-Fi: <strong>2ChnamChamSneh_Guest</strong> | Key:
                 <strong>coffee2026</strong>
               </div>
-              <p class="mb-1 fw-bold text-body">Thank you for visiting Cadence Café!</p>
-              <p class="mb-0 text-muted small">សូមអរគុណសម្រាប់ការគាំទ្រ!</p>
+              <p class="mb-1 fw-bold text-body">Thank you for visiting ២ឆ្នាំចាំស្នេហ៍ Café!</p>
+              <p class="mb-0 text-muted small">សូមអរគុណសម្រាប់ការគាំទ្រ ២ឆ្នាំចាំស្នេហ៍!</p>
             </div>
           </div>
         </div>
@@ -703,40 +702,21 @@
         }, 2800);
       }
 
-      // Quick Table Chips handler (toggle select/deselect)
-      document.querySelectorAll('.pos-chip-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-          const tbl = btn.dataset.table;
-          if (btn.classList.contains('active')) {
-            btn.classList.remove('active');
-            if (tableInput) tableInput.value = '';
-          } else {
-            document.querySelectorAll('.pos-chip-btn').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-            if (tableInput) tableInput.value = tbl;
-          }
-        });
-      });
-
       // Dine In / Takeaway toggle
       const typeDineIn = document.getElementById('typeDineIn');
       const typeTakeaway = document.getElementById('typeTakeaway');
       const tableWrapper = document.getElementById('posTableFieldWrapper');
-      const tableChips = document.getElementById('posTableChips');
 
       function updateOrderTypeUI() {
         if (typeTakeaway && typeTakeaway.checked) {
           if (tableWrapper) tableWrapper.style.opacity = '0.45';
-          if (tableChips) tableChips.style.display = 'none';
           if (tableInput) {
             tableInput.disabled = true;
             tableInput.value = '';
             tableInput.placeholder = window.t ? window.t('Takeaway (No Table)') : 'Takeaway (No Table)';
           }
-          document.querySelectorAll('.pos-chip-btn').forEach(b => b.classList.remove('active'));
         } else {
           if (tableWrapper) tableWrapper.style.opacity = '1';
-          if (tableChips) tableChips.style.display = 'flex';
           if (tableInput) {
             tableInput.disabled = false;
             tableInput.placeholder = 'e.g. Table 4';
@@ -1011,7 +991,6 @@
           updateOrderTypeUI();
         }
         if (tableInput) tableInput.value = '';
-        document.querySelectorAll('.pos-chip-btn').forEach(b => b.classList.remove('active'));
         const payCash = document.getElementById('payCash');
         if (payCash) payCash.checked = true;
 
@@ -1085,7 +1064,7 @@
 <html>
 <head>
   <meta charset="utf-8">
-  <title>Receipt - Cadence Café</title>
+  <title>Receipt - ២ឆ្នាំចាំស្នេហ៍ Café</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700;900&family=Kantumruy+Pro:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -1125,10 +1104,24 @@
     }
     .pos-receipt-store-brand {
       text-align: center;
-      font-size: 14px;
-      font-weight: 800;
-      letter-spacing: 0.05em;
       margin-bottom: 2px;
+      color: #000000 !important;
+    }
+    .cafe-brand-lockup-receipt {
+      display: inline-flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      gap: 6px !important;
+      margin-bottom: 4px !important;
+    }
+    .cafe-brand-lockup-receipt .cafe-brand-icon {
+      width: 26px !important;
+      height: 22px !important;
+      color: #000000 !important;
+    }
+    .cafe-brand-lockup-receipt .cafe-brand-title {
+      font-size: 13px !important;
+      font-weight: 800 !important;
       color: #000000 !important;
     }
     .pos-receipt-tagline, .pos-receipt-address, .pos-receipt-taxid {

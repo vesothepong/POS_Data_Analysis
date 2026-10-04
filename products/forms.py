@@ -9,7 +9,7 @@ class ProductForm(forms.ModelForm):
         fields = ["name", "category", "price", "stock_quantity", "reorder_level", "image"]
         widgets = {
             "name": forms.TextInput(attrs={"class": "form-control", "placeholder": "e.g. Iced Vanilla Latte, Artisan Sandwich"}),
-            "category": forms.TextInput(attrs={"class": "form-control", "placeholder": "e.g. Beverages, Food, Bakery"}),
+            "category": forms.TextInput(attrs={"class": "form-control", "placeholder": "e.g. Drink, Food, Bakery"}),
             "price": forms.NumberInput(attrs={"class": "form-control", "step": "0.01", "min": "0"}),
             "stock_quantity": forms.NumberInput(attrs={"class": "form-control", "min": "0"}),
             "reorder_level": forms.NumberInput(attrs={"class": "form-control", "min": "0"}),

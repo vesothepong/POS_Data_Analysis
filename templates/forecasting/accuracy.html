@@ -73,7 +73,7 @@
           </td>
           <td class="numeric">{{ r.baseline_mae|floatformat:2 }}</td>
           <td class="text-end">
-            <button type="button" class="btn btn-sm btn-outline-primary" onclick="showProductAccuracy({{ r.product_id }})" title="View test details for {{ r.product }}">
+            <button type="button" class="btn btn-sm btn-outline-primary btn-view-accuracy" data-product-id="{{ r.product_id }}" onclick="showProductAccuracy(this.dataset.productId)" title="View test details for {{ r.product }}">
               <i class="bi bi-eye me-1"></i>View
             </button>
           </td>
@@ -221,7 +221,7 @@
   }
 
   function showProductAccuracy(productId) {
-    const item = allAccuracyData.find(x => x.product_id === productId);
+    const item = allAccuracyData.find(x => String(x.product_id) === String(productId));
     if (!item) return;
 
     // 1. Highlight table row
