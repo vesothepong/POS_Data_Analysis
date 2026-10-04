@@ -433,7 +433,7 @@ async function load() {
           <td class="pe-0">${imgHtml}</td>
           <td><strong>${p.product_name}</strong></td>
           <td><span class="badge bg-light text-dark border">${catLabel}</span></td>
-          <td><strong>${p.mean}</strong></td>
+          <td><strong>${Math.round(p.mean)}</strong></td>
           <td>${p.min} - ${p.max}</td>
           <td><strong>${p.cv}</strong></td>
           <td><span class="badge ${p.volatility_badge}">${volLabel}</span></td>

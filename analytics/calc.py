@@ -161,7 +161,7 @@ def statistical_profiling(df, products):
             "active_months": n,
             "total_units": int(vals.sum()),
             "total_revenue": round(float(pdf["revenue"].sum()), 2),
-            "mean": round(mean, 1),
+            "mean": int(round(mean)),
             "median": round(median, 1),
             "std_dev": round(std_dev, 2),
             "variance": round(variance, 2),
