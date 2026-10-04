@@ -147,6 +147,12 @@ class WalkInPOSTests(TestCase):
         self.assertContains(r_hist, co_data["ticket_number"])
         self.assertContains(r_hist, "TABLE 7")
 
+        # 6. Subsequent visit to catalog must NOT auto-open the receipt modal
+        r_catalog = self.client.get(reverse("catalog"))
+        self.assertEqual(r_catalog.status_code, 200)
+        self.assertIsNone(r_catalog.context["receipt_order"])
+        self.assertNotContains(r_catalog, 'data-auto-open="true"')
+
 
 class DailyOrderTicketTests(TestCase):
     def test_same_day_sequential_tickets(self):

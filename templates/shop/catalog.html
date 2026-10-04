@@ -634,9 +634,11 @@
       const receiptTenderedEl = document.getElementById('receiptTendered');
       const receiptBarcodeText = document.getElementById('receiptBarcodeText');
 
-      // If server rendered a receipt_order on reload, show it immediately
+      // If server rendered a receipt_order on reload, show it immediately then clear flag
       if (receiptModal && receiptModalEl && receiptModalEl.dataset.autoOpen === 'true') {
         receiptModal.show();
+        receiptModalEl.removeAttribute('data-auto-open');
+        delete receiptModalEl.dataset.autoOpen;
       }
 
       // Sound feedback
@@ -994,6 +996,10 @@
         const payCash = document.getElementById('payCash');
         if (payCash) payCash.checked = true;
 
+        if (receiptModalEl) {
+          receiptModalEl.removeAttribute('data-auto-open');
+          delete receiptModalEl.dataset.autoOpen;
+        }
         if (window.history && window.history.replaceState) {
           window.history.replaceState({}, document.title, window.location.pathname);
         }
@@ -1030,9 +1036,26 @@
           }
         });
         receiptModalEl.addEventListener('hidden.bs.modal', function () {
+          if (receiptModalEl) {
+            receiptModalEl.removeAttribute('data-auto-open');
+            delete receiptModalEl.dataset.autoOpen;
+          }
           resetForNextOrder();
         });
       }
+
+      // Ensure back/forward cache navigation doesn't reopen dismissed receipt
+      window.addEventListener('pageshow', function (e) {
+        if (e.persisted) {
+          if (receiptModal) {
+            receiptModal.hide();
+          }
+          if (receiptModalEl) {
+            receiptModalEl.removeAttribute('data-auto-open');
+            delete receiptModalEl.dataset.autoOpen;
+          }
+        }
+      });
 
       // Dedicated receipt printing via hidden isolated iframe
       window.printReceipt = function printReceipt() {

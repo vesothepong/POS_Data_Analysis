@@ -159,11 +159,10 @@ def checkout_view(request):
                 payment_method=payment_method,
             )
 
-            # Keep track of recent walk-in orders in session for receipt display & guest history
+            # Keep track of recent walk-in orders in session for guest history
             placed = request.session.get("placed_order_ids", [])
             placed.append(order.id)
             request.session["placed_order_ids"] = placed[-20:]  # keep recent 20
-            request.session["last_walkin_order_id"] = order.id
 
             for w in warnings:
                 messages.warning(request, w)
@@ -172,6 +171,8 @@ def checkout_view(request):
             messages.success(request, f"Walk-in Order {ticket_label} placed successfully!")
 
             if _is_json_request(request):
+                # Clear any lingering receipt order in session so returning to POS doesn't re-trigger popup
+                request.session.pop("last_walkin_order_id", None)
                 items_data = [
                     {
                         "name": it.product.name,
@@ -196,6 +197,9 @@ def checkout_view(request):
                     "items": items_data,
                     "warnings": warnings,
                 })
+
+            # Non-AJAX fallback (e.g. traditional form POST): store in session so redirect shows receipt
+            request.session["last_walkin_order_id"] = order.id
             return redirect("catalog")
         except ValueError as e:
             if _is_json_request(request):
