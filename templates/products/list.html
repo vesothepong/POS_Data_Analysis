@@ -53,20 +53,20 @@
             {% endif %}
           </td>
           <td>
-            <a href="{% url 'inventory_detail' p.id %}" class="fw-semibold text-decoration-none text-body" title="View details">{{ p.name }}</a>
+            <a href="{% url 'inventory_detail' p.id %}" class="product-title-link fw-semibold text-decoration-none" title="View details">{{ p.name }}</a>
           </td>
-          <td><span class="badge bg-light text-dark border">{{ p.category|default:"Uncategorized" }}</span></td>
-          <td><strong>${{ p.price }}</strong></td>
+          <td><span class="badge product-cat-badge">{{ p.category|default:"Uncategorized" }}</span></td>
+          <td><strong>${{ p.price|floatformat:2 }}</strong></td>
           <td>
             {% if p.stock_quantity == 0 %}
               <span class="badge bg-danger">Out of stock (0)</span>
             {% elif p.stock_quantity <= p.reorder_level %}
-              <span class="badge bg-warning text-dark">{{ p.stock_quantity }} (Low)</span>
+              <span class="badge bg-warning">{{ p.stock_quantity }} (Low)</span>
             {% else %}
-              <span class="badge bg-success-subtle text-success border border-success-subtle">{{ p.stock_quantity }}</span>
+              <span class="badge bg-success">{{ p.stock_quantity }}</span>
             {% endif %}
           </td>
-          <td>{{ p.reorder_level }}</td>
+          <td><span class="text-muted-2">{{ p.reorder_level }}</span></td>
           <td class="text-nowrap" style="min-width: 130px; width: 130px;">
             <div class="d-flex align-items-center gap-1">
               <a class="btn btn-sm btn-outline-primary d-inline-flex align-items-center justify-content-center gap-1 text-nowrap" href="{% url 'product_edit' p.id %}" title="Edit product" style="height: 31px; white-space: nowrap;">

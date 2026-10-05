@@ -66,6 +66,22 @@ const DICT_EN_TO_KM = {
   "MANAGEMENT": "ការគ្រប់គ្រង",
   "OPS": "ប្រតិបត្តិការ",
   "WALK-IN POS": "បញ្ជរលក់រហ័ស",
+  "Walk In POS": "បញ្ជរលក់រហ័ស",
+  "Walk-in POS": "បញ្ជរលក់រហ័ស",
+  "Walk-in POS Kiosk": "បញ្ជរបញ្ជាទិញរហ័ស",
+  "Walk-in Order Kiosk": "បញ្ជរបញ្ជាទិញរហ័ស",
+  "Walk-in Order Kiosk · Cadence Express": "បញ្ជរបញ្ជាទិញរហ័ស · ២ឆ្នាំចាំស្នេហ៍ Express",
+  "Walk-in Order Kiosk · ២ឆ្នាំចាំស្នេហ៍ Express": "បញ្ជរបញ្ជាទិញរហ័ស · ២ឆ្នាំចាំស្នេហ៍ Express",
+  "Start Walk-in Order": "ចាប់ផ្តើមការបញ្ជាទិញ",
+  "Explore the walk-in catalog to select artisan coffee, fresh pastries, or food.": "ស្វែងរកក្នុងកាតាឡុកហាងដើម្បីជ្រើសរើសកាហ្វេប្រណិត នំស្រស់ៗ ឬអាហារ។",
+  "Placed walk-in orders from this session or account will appear here.": "ការបញ្ជាទិញផ្ទាល់ពីគណនី ឬវគ្គនេះនឹងបង្ហាញនៅទីនេះ។",
+  "Menu": "ម៉ឺនុយ",
+  "MENU": "ម៉ឺនុយ",
+  "Guest": "ភ្ញៀវ",
+  "Close menu": "បិទម៉ឺនុយ",
+  "Open menu": "បើកម៉ឺនុយ",
+  "POS": "បញ្ជរ POS",
+  "POS Kiosk": "បញ្ជរ Kiosk",
   "Operational data center": "មជ្ឈមណ្ឌលទិន្នន័យប្រតិបត្តិការ",
   "Run forecast": "ដំណើរការការព្យាករណ៍",
   "Upload sales": "បញ្ចូលទិន្នន័យលក់",
@@ -633,17 +649,24 @@ const DICT_EN_TO_KM = {
   "Smart Inventory Management": "Smart Inventory Management"
 };
 
-// Reverse dictionary for English restoration
+// Reverse dictionary for English restoration and lowercase index for robust case-insensitive matching
 const DICT_KM_TO_EN = {};
+const DICT_EN_LOWER_TO_KM = {};
 for (const [en, km] of Object.entries(DICT_EN_TO_KM)) {
   DICT_KM_TO_EN[km] = en;
+  DICT_EN_LOWER_TO_KM[en.toLowerCase()] = km;
 }
 
 // Global translate helper
 window.t = function(str) {
   const currentLang = root.dataset.lang || 'en';
-  if (currentLang === 'km' && DICT_EN_TO_KM[str]) {
-    return DICT_EN_TO_KM[str];
+  if (currentLang === 'km') {
+    if (DICT_EN_TO_KM[str]) {
+      return DICT_EN_TO_KM[str];
+    }
+    if (str && DICT_EN_LOWER_TO_KM[str.toLowerCase()]) {
+      return DICT_EN_LOWER_TO_KM[str.toLowerCase()];
+    }
   }
   return str;
 };
@@ -746,6 +769,16 @@ function translateText(str, targetLang) {
     const unescaped = trimmed.replace(/&amp;/g, '&');
     if (DICT_EN_TO_KM[unescaped]) {
       return raw.replace(trimmed, DICT_EN_TO_KM[unescaped]);
+    }
+
+    // 2b. Case-insensitive lookup fallback
+    const lowerTrimmed = trimmed.toLowerCase();
+    if (DICT_EN_LOWER_TO_KM[lowerTrimmed]) {
+      return raw.replace(trimmed, DICT_EN_LOWER_TO_KM[lowerTrimmed]);
+    }
+    const lowerUnescaped = unescaped.toLowerCase();
+    if (DICT_EN_LOWER_TO_KM[lowerUnescaped]) {
+      return raw.replace(trimmed, DICT_EN_LOWER_TO_KM[lowerUnescaped]);
     }
 
     // 3. Dynamic upload messages
