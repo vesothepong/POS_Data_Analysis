@@ -47,7 +47,6 @@
           <th>Product</th>
           <th>Train / Test months</th>
           <th>MAE</th>
-          <th>RMSE</th>
           <th>Accuracy</th>
           <th>Baseline MAE</th>
           <th class="text-end">Action</th>
@@ -59,7 +58,6 @@
           <td class="fw-medium">{{ r.product }}</td>
           <td>{{ r.train_months }} / {{ r.test_months }}</td>
           <td class="numeric">{{ r.mae|floatformat:0 }}</td>
-          <td class="numeric">{{ r.rmse|floatformat:0 }}</td>
           <td class="numeric">
             {% if r.accuracy is not None %}
               <span class="badge {% if r.accuracy >= 70 %}bg-success{% elif r.accuracy >= 40 %}bg-warning text-dark{% else %}bg-danger{% endif %}">
@@ -109,25 +107,19 @@
       <div class="modal-body p-3 p-md-4">
         <!-- Quick KPI Pills -->
         <div class="row g-2 mb-3">
-          <div class="col-6 col-sm-3">
+          <div class="col-4">
             <div class="p-2 rounded text-center" style="background:var(--canvas);border:1px solid var(--line);">
               <small class="text-muted d-block" style="font-size:10px;text-transform:uppercase;letter-spacing:.05em;">MAE</small>
               <strong class="fs-6 numeric" id="mKpiMae">-</strong>
             </div>
           </div>
-          <div class="col-6 col-sm-3">
-            <div class="p-2 rounded text-center" style="background:var(--canvas);border:1px solid var(--line);">
-              <small class="text-muted d-block" style="font-size:10px;text-transform:uppercase;letter-spacing:.05em;">RMSE</small>
-              <strong class="fs-6 numeric" id="mKpiRmse">-</strong>
-            </div>
-          </div>
-          <div class="col-6 col-sm-3">
+          <div class="col-4">
             <div class="p-2 rounded text-center" style="background:var(--canvas);border:1px solid var(--line);">
               <small class="text-muted d-block" style="font-size:10px;text-transform:uppercase;letter-spacing:.05em;">Accuracy</small>
               <strong class="fs-6 numeric text-primary" id="mKpiAcc">-</strong>
             </div>
           </div>
-          <div class="col-6 col-sm-3">
+          <div class="col-4">
             <div class="p-2 rounded text-center" style="background:var(--canvas);border:1px solid var(--line);">
               <small class="text-muted d-block" style="font-size:10px;text-transform:uppercase;letter-spacing:.05em;">Baseline MAE</small>
               <strong class="fs-6 numeric" id="mKpiBase">-</strong>
@@ -239,8 +231,6 @@
     const mKpiMae = document.getElementById('mKpiMae');
     if (mKpiMae) mKpiMae.textContent = item.mae != null ? Math.round(item.mae) : '-';
 
-    const mKpiRmse = document.getElementById('mKpiRmse');
-    if (mKpiRmse) mKpiRmse.textContent = item.rmse != null ? Math.round(item.rmse) : '-';
 
     const mKpiAcc = document.getElementById('mKpiAcc');
     if (mKpiAcc) mKpiAcc.textContent = item.accuracy != null ? item.accuracy.toFixed(1) + '%' : 'N/A';
