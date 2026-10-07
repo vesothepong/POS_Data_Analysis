@@ -9,7 +9,7 @@ from django.urls import reverse
 
 class DashboardTests(TestCase):
     def setUp(self):
-        self.client.force_login(get_user_model().objects.create_user("boss", password="pw12345!", is_staff=True))
+        self.client.force_login(get_user_model().objects.create_user("boss", password="pw12345!", is_staff=True, is_superuser=True))
 
     def test_admin_can_open_every_page_when_empty(self):
         for name in ("dashboard", "products", "sales", "upload_sales", "inventory", "forecast", "analytics", "accuracy", "reports"):

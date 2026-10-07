@@ -75,10 +75,25 @@ class Command(BaseCommand):
                     for m in range(18)
                 ])
             User = get_user_model()
-            if not User.objects.exists():
-                User.objects.create_superuser("admin", "admin@example.com", "admin12345")
-                self.stdout.write(self.style.WARNING("Created demo admin     ->  username: admin     password: admin12345  (change it!)"))
+            from accounts.models import Profile
+
+            if not User.objects.filter(username="admin").exists():
+                admin_user = User.objects.create_superuser("admin", "admin@example.com", "admin12345")
+                p, _ = Profile.objects.get_or_create(user=admin_user)
+                p.role = Profile.ROLE_ADMIN
+                p.save()
+                self.stdout.write(self.style.WARNING("Created demo admin     ->  username: admin     password: admin12345  (Full Control)"))
+
+            if not User.objects.filter(username="staff").exists():
+                staff_user = User.objects.create_user("staff", "staff@example.com", "staff12345")
+                staff_user.is_staff = True
+                staff_user.is_superuser = False
+                staff_user.save()
+                p, _ = Profile.objects.get_or_create(user=staff_user)
+                p.role = Profile.ROLE_STAFF
+                p.save()
+                self.stdout.write(self.style.WARNING("Created demo staff     ->  username: staff     password: staff12345  (POS Control)"))
+
             if not User.objects.filter(username="customer").exists():
                 User.objects.create_user("customer", "customer@example.com", "customer12345")
-                self.stdout.write(self.style.WARNING("Created demo customer  ->  username: customer  password: customer12345"))
         self.stdout.write(self.style.SUCCESS("Demo data created. Open Demand Forecast and choose 'All products'."))

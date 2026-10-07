@@ -63,7 +63,8 @@ Unauthenticated visitors land directly on the Walk-in Kiosk (`/shop/`), while lo
 - Reorder quantity = predicted demand - current stock (never below 0).
 - Status priority: **Out of Stock** (stock 0) > **Low Stock** (below reorder level) > **Need Reorder** (below forecast) > **Sufficient Stock**.
 - Accuracy needs >= 4 months (3 to train, at least 1 to test; test set is about the last 20%).
-- Access: every page and the API require an admin (`is_staff`); other logged-in users get a 403 page.
+- Access & Roles: Role-based authentication and authorization separates **Admin** (Full Control: Dashboard, Products, Inventory, Sales, Forecasts, Analytics, Reports, REST APIs, and POS) and **Staff** (Point of Sale / POS control: Catalog, Cart, Tickets, and Checkout). Staff members attempting to access restricted management areas receive HTTP 403 Access Denied.
+- Demo Accounts: Admin (`admin` / `admin12345` -> Full Control), Staff (`staff` / `staff12345` -> POS Control).
 
 ## XLSX format
 Required: `Date`, `Product`, `Quantity Sold`, `Price`. Optional: `Category`, `Stock Quantity`

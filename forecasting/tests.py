@@ -13,7 +13,7 @@ from .models import Forecast
 
 class ForecastFlowTests(TestCase):
     def setUp(self):
-        self.client.force_login(get_user_model().objects.create_user("boss", password="pw12345!", is_staff=True))
+        self.client.force_login(get_user_model().objects.create_user("boss", password="pw12345!", is_staff=True, is_superuser=True))
         rows = [[f"2025-0{m}-10", "Tee", q, 5] for m, q in zip(range(1, 6), [100, 120, 130, 150, 160])]
         buf = io.BytesIO()
         pd.DataFrame(rows, columns=["Date", "Product", "Quantity Sold", "Price"]).to_excel(buf, index=False)

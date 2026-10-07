@@ -102,13 +102,34 @@
       </div>
       <div class="access-code">403</div>
       <h1>Access denied</h1>
-      <p>{% if request.user.is_authenticated %}Your account is active, but an administrator must grant you workspace access before you can view it.{% else %}This workspace is limited to administrators.{% endif %}</p>
-      {% if request.user.is_authenticated %}
-        <form method="post" action="{% url 'logout' %}">
-          {% csrf_token %}
-          <button class="btn btn-primary w-100">Sign out and use an admin account</button>
-        </form>
+      {% if user_is_staff %}
+        <p class="text-muted mb-3">You are signed in as <strong>{{ request.user.username }}</strong> with the <span class="badge text-bg-warning">Staff</span> role, authorized for <strong>Point of Sale (POS)</strong>. Administrator privileges are required to access forecasting, inventory, and management tools.</p>
+        <div class="d-flex flex-column gap-2 mt-3">
+          <a class="btn btn-primary w-100 d-flex align-items-center justify-content-center gap-2" href="{% url 'catalog' %}">
+            <i class="bi bi-shop"></i> Go to Point of Sale (POS)
+          </a>
+          <form method="post" action="{% url 'logout' %}">
+            {% csrf_token %}
+            <button class="btn btn-outline-secondary w-100 d-flex align-items-center justify-content-center gap-2">
+              <i class="bi bi-box-arrow-right"></i> Sign out and use Admin account
+            </button>
+          </form>
+        </div>
+      {% elif request.user.is_authenticated %}
+        <p class="text-muted mb-3">Your account is active, but administrator privileges are required to view this workspace.</p>
+        <div class="d-flex flex-column gap-2 mt-3">
+          <a class="btn btn-primary w-100 d-flex align-items-center justify-content-center gap-2" href="{% url 'catalog' %}">
+            <i class="bi bi-shop"></i> Go to Point of Sale (POS)
+          </a>
+          <form method="post" action="{% url 'logout' %}">
+            {% csrf_token %}
+            <button class="btn btn-outline-secondary w-100 d-flex align-items-center justify-content-center gap-2">
+              <i class="bi bi-box-arrow-right"></i> Sign out
+            </button>
+          </form>
+        </div>
       {% else %}
+        <p class="text-muted mb-3">This workspace is limited to administrators. Please sign in with an administrator account.</p>
         <a class="btn btn-primary w-100" href="{% url 'login' %}">Return to sign in</a>
       {% endif %}
     </section>

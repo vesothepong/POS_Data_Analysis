@@ -101,14 +101,38 @@
         <span class="brand-tag">OPS</span>
       </div>
       <h1 class="mt-2 mb-3">Sign in</h1>
-      <form method="post">
+      <form method="post" id="loginForm">
         {% csrf_token %}
         {{ form.as_p }}
         <button class="btn btn-primary w-100 mt-2">Sign in</button>
       </form>
+
+      <div class="demo-accounts-box">
+        <div class="demo-accounts-title">
+          <i class="bi bi-shield-lock"></i> Quick Fill Roles
+        </div>
+        <button type="button" class="demo-pill-btn" onclick="fillDemo('admin', 'admin12345')">
+          <span><strong class="text-primary">Admin</strong> (Full Control)</span>
+          <code>admin / admin12345</code>
+        </button>
+        <button type="button" class="demo-pill-btn" onclick="fillDemo('staff', 'staff12345')">
+          <span><strong class="text-warning">Staff</strong> (POS Control)</span>
+          <code>staff / staff12345</code>
+        </button>
+      </div>
+
       <p class="auth-switch">New here? <a href="{% url 'register' %}">Create an account</a></p>
     </section>
   </main>
+  <script>
+    function fillDemo(username, password) {
+      const u = document.getElementById('id_username');
+      const p = document.getElementById('id_password');
+      if (u) u.value = username;
+      if (p) p.value = password;
+      u && u.focus();
+    }
+  </script>
   <script src="{% static 'js/app.js' %}?v=20261005_01"></script>
 </body>
 </html>

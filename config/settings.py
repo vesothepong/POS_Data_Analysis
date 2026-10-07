@@ -19,7 +19,7 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 ROOT_URLCONF = "config.urls"
-TEMPLATES = [{"BACKEND":"django.template.backends.django.DjangoTemplates", "DIRS":[BASE_DIR/"templates"], "APP_DIRS":True, "OPTIONS":{"context_processors":["django.template.context_processors.request","django.contrib.auth.context_processors.auth","django.contrib.messages.context_processors.messages","django.template.context_processors.media","shop.context_processors.cart_badge"]}}]
+TEMPLATES = [{"BACKEND":"django.template.backends.django.DjangoTemplates", "DIRS":[BASE_DIR/"templates"], "APP_DIRS":True, "OPTIONS":{"context_processors":["django.template.context_processors.request","django.contrib.auth.context_processors.auth","django.contrib.messages.context_processors.messages","django.template.context_processors.media","accounts.context_processors.auth_roles","shop.context_processors.cart_badge"]}}]
 WSGI_APPLICATION = "config.wsgi.application"
 
 DB_ENGINE = os.getenv("DB_ENGINE", "sqlite").lower()
@@ -43,5 +43,5 @@ LOGIN_REDIRECT_URL = "/"
 LOGOUT_REDIRECT_URL = "/login/"
 from django.contrib.messages import constants as message_constants
 MESSAGE_TAGS = {message_constants.ERROR: "danger"}  # Bootstrap has alert-danger, not alert-error
-# The API is admin-only (is_staff), matching the web pages.
-REST_FRAMEWORK = {"DEFAULT_PERMISSION_CLASSES": ["rest_framework.permissions.IsAdminUser"]}
+# The API is admin-only (Admin role), matching the web pages.
+REST_FRAMEWORK = {"DEFAULT_PERMISSION_CLASSES": ["accounts.permissions.IsAdminRole"]}

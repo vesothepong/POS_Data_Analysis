@@ -17,7 +17,7 @@ def xlsx(rows, cols=("Date", "Product", "Quantity Sold", "Price")):
 
 class UploadTests(TestCase):
     def setUp(self):
-        self.client.force_login(get_user_model().objects.create_user("boss", password="pw12345!", is_staff=True))
+        self.client.force_login(get_user_model().objects.create_user("boss", password="pw12345!", is_staff=True, is_superuser=True))
 
     def test_upload_dedupes_and_rejects(self):
         rows = [["2025-01-05", "Tee", 10, 5], ["2025-01-05", "Tee", 10, 5], ["bad", "Tee", 1, 1], ["2025-02-05", "Tee", 12, 5]]

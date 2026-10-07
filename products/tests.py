@@ -7,7 +7,7 @@ from .models import Product
 
 class ProductTests(TestCase):
     def setUp(self):
-        self.client.force_login(get_user_model().objects.create_user("boss", password="pw12345!", is_staff=True))
+        self.client.force_login(get_user_model().objects.create_user("boss", password="pw12345!", is_staff=True, is_superuser=True))
 
     def test_crud(self):
         self.client.post(reverse("product_create"), {"name": "Cap", "category": "Acc", "price": "5", "stock_quantity": 3, "reorder_level": 2})

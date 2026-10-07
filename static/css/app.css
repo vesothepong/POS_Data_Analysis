@@ -33,6 +33,16 @@ h1,h2,h3,h4,h5,h6,.brand,.workspace-title,.page-heading h1,.metric-card strong,.
 @media(max-width:420px){.metric-grid{grid-template-columns:1fr 1fr;gap:8px}.metric-card{padding:13px;min-height:104px}.metric-card strong{font-size:20px}.workspace-title{font-size:12px}.workspace-subtitle{display:none}.auth-card{padding:26px}.auth-theme{right:16px;top:16px}.auth-top-controls{right:16px;top:16px}}
 
 .auth-switch{margin:18px 0 0;text-align:center;color:var(--muted);font-size:14px}.auth-switch a{color:var(--brand);font-weight:600;text-decoration:none}.auth-card .helptext,.auth-card form ul:not(.errorlist){display:block;color:var(--muted);font-size:12px;margin-top:6px;padding-left:16px}.auth-card .errorlist{list-style:none;padding:0;margin:6px 0 0;color:var(--danger,#e5534b);font-size:13px}
+.auth-card input[type="radio"],.auth-card input[type="checkbox"]{display:inline-block!important;width:auto!important;margin-right:8px;vertical-align:middle;accent-color:var(--brand)}
+.auth-card ul:has(input[type="radio"]){list-style:none;padding:0;margin:8px 0 0;display:flex;flex-direction:column;gap:8px}
+.auth-card ul:has(input[type="radio"]) li label{display:flex;align-items:center;padding:9px 12px;border:1px solid var(--line);border-radius:7px;background:var(--ink-raised);cursor:pointer;font-size:13px;font-weight:500;margin-bottom:0;transition:all .15s ease}
+.auth-card ul:has(input[type="radio"]) li label:hover{border-color:var(--brand);background:var(--surface)}
+.demo-accounts-box{margin-top:20px;padding:12px;background:var(--ink-raised);border:1px solid var(--line);border-radius:8px;font-size:12px}
+.demo-accounts-title{font-weight:600;color:var(--text);margin-bottom:8px;display:flex;align-items:center;gap:6px}
+.demo-pill-btn{display:flex;align-items:center;justify-content:space-between;width:100%;padding:7px 10px;background:var(--surface);border:1px solid var(--line);border-radius:6px;color:var(--text);font-size:12px;cursor:pointer;margin-bottom:6px;transition:all .15s ease;text-align:left}
+.demo-pill-btn:hover{border-color:var(--brand);transform:translateY(-1px)}
+.demo-pill-btn:last-child{margin-bottom:0}
+
 
 /* Customer workspace uses the same shell, typography and tokens as operations. */
 .shop-shell .sidebar-nav{padding-top:24px}.shop-nav-label{display:block;padding:0 11px 9px;color:var(--muted);font-size:10px;font-weight:600;letter-spacing:.12em}.shop-nav-label-spaced{padding-top:25px}.cart-badge{margin-left:auto;background:var(--brand-soft);color:var(--brand);border-radius:4px;font-size:10px;font-weight:700;padding:2px 6px;line-height:1.4}.shop-main{max-width:1450px}.shop-top-cart{position:relative;text-decoration:none}.shop-cart-count{position:absolute;top:-6px;right:-6px;min-width:16px;height:16px;display:grid;place-items:center;border-radius:8px;background:var(--brand);color:var(--brand-dark);font-size:9px;font-weight:700;padding:0 3px}.shop-heading-icon{width:46px;height:46px;display:grid;place-items:center;border:1px solid var(--line);border-radius:6px;color:var(--brand);font-size:20px;background:var(--panel)}

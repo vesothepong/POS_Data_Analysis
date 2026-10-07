@@ -4,10 +4,14 @@ from django.shortcuts import redirect, render
 from django.urls import reverse
 
 from .forms import RegisterForm
+from .permissions import is_admin, is_staff_member
 
 
 def _landing_url(user):
-    return reverse("dashboard")
+    """Admin lands on Dashboard (full control); Staff lands on POS Catalog."""
+    if is_admin(user):
+        return reverse("dashboard")
+    return reverse("catalog")
 
 
 class AppLoginView(LoginView):
@@ -18,22 +22,25 @@ class AppLoginView(LoginView):
 
 
 def register(request):
-    """Every registered user has the Admin role."""
+    """Register either an Admin or Staff member with designated role & permissions."""
     if request.user.is_authenticated:
-        return redirect("dashboard")
+        return redirect(_landing_url(request.user))
     form = RegisterForm(request.POST or None)
     if request.method == "POST" and form.is_valid():
-        user = form.save(commit=False)
-        user.is_staff = True
-        user.save()
+        user = form.save()
         login(request, user, backend="django.contrib.auth.backends.ModelBackend")
-        return redirect("dashboard")
+        return redirect(_landing_url(user))
     return render(request, "accounts/register.html", {"form": form})
 
 
 def home(request):
-    """Root URL: if authenticated, redirect to dashboard.
-    If unauthenticated, redirect to login."""
+    """Root URL:
+    - If unauthenticated, redirect to login.
+    - If Admin, redirect to dashboard (full control).
+    - If Staff, redirect to POS catalog (POS control).
+    """
     if not request.user.is_authenticated:
         return redirect("login")
-    return redirect("dashboard")
+    if is_admin(request.user):
+        return redirect("dashboard")
+    return redirect("catalog")

@@ -11,7 +11,7 @@ from .models import Order
 class StorefrontFlowTests(TestCase):
     def setUp(self):
         U = get_user_model()
-        self.admin = U.objects.create_user("boss", password="pw12345!", is_staff=True)
+        self.admin = U.objects.create_user("boss", password="pw12345!", is_staff=True, is_superuser=True)
         self.customer = U.objects.create_user("shopper", password="pw12345!")
         self.product = Product.objects.create(name="Tee", category="Clothing", price="10.00", stock_quantity=5, reorder_level=2)
 
@@ -78,11 +78,24 @@ class StorefrontFlowTests(TestCase):
 
 class RegistrationTests(TestCase):
     def test_register_creates_admin_and_logs_in(self):
-        r = self.client.post(reverse("register"), {"username": "newuser", "email": "n@example.com",
-                                                    "password1": "Sup3rSecret!", "password2": "Sup3rSecret!"})
-        user = get_user_model().objects.get(username="newuser")
+        r = self.client.post(reverse("register"), {"username": "newadmin", "email": "admin@example.com",
+                                                    "role": "admin",
+                                                    "password1": "Sup3rSecret!1", "password2": "Sup3rSecret!1"})
+        user = get_user_model().objects.get(username="newadmin")
+        self.assertTrue(user.is_superuser)
         self.assertTrue(user.is_staff)
+        self.assertEqual(user.profile.role, "admin")
         self.assertRedirects(r, reverse("dashboard"))
+
+    def test_register_creates_staff_and_logs_in_to_pos(self):
+        r = self.client.post(reverse("register"), {"username": "newstaff", "email": "staff@example.com",
+                                                    "role": "staff",
+                                                    "password1": "Sup3rSecret!1", "password2": "Sup3rSecret!1"})
+        user = get_user_model().objects.get(username="newstaff")
+        self.assertFalse(user.is_superuser)
+        self.assertTrue(user.is_staff)
+        self.assertEqual(user.profile.role, "staff")
+        self.assertRedirects(r, reverse("catalog"))
 
 
 class WalkInPOSTests(TestCase):

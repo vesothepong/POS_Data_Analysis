@@ -6,6 +6,7 @@ from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_POST
 
+from accounts.permissions import is_staff_member
 from products.models import Product
 
 from .forms import AddToCartForm
@@ -214,9 +215,12 @@ def checkout_view(request):
 
 
 def order_history(request):
-    """Walk-in order history: displays customer orders or session's recent walk-in tickets."""
+    """Walk-in order history: displays customer orders or session's recent walk-in tickets.
+    Staff and Admin can review all recent POS orders so they can manage order tickets."""
     recent_ids = request.session.get("placed_order_ids", [])
-    if request.user.is_authenticated:
+    if is_staff_member(request.user):
+        orders = Order.objects.prefetch_related("items__product").distinct().order_by("-created_at")[:100]
+    elif request.user.is_authenticated:
         orders = Order.objects.filter(
             Q(customer=request.user) | Q(id__in=recent_ids)
         ).prefetch_related("items__product").distinct().order_by("-created_at")
