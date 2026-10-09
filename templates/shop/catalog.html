@@ -184,9 +184,9 @@
   .pos-card-bottom {
     display: flex !important;
     flex-direction: column !important;
-    gap: 10px !important;
+    gap: 8px !important;
     margin-top: auto !important;
-    padding-top: 10px !important;
+    padding-top: 8px !important;
     border-top: 1px dashed var(--line) !important;
   }
 
@@ -195,22 +195,19 @@
     align-items: center !important;
     justify-content: space-between !important;
     gap: 8px !important;
+    margin-top: 2px !important;
+    margin-bottom: 6px !important;
   }
 
-  .pos-card-price {
-    font-family: var(--font-heading) !important;
-    font-size: 20px !important;
-    font-weight: 800 !important;
-    color: var(--text) !important;
-    font-variant-numeric: tabular-nums !important;
-    line-height: 1 !important;
+  .pos-card-stock {
+    display: inline-flex !important;
+    align-items: center !important;
   }
 
-  .pos-stock-badge {
-    font-size: 11px !important;
-    font-weight: 600 !important;
-    padding: 3px 9px !important;
-    border-radius: 999px !important;
+  .pos-stock {
+    font-size: 11.5px !important;
+    font-weight: 500 !important;
+    color: var(--muted) !important;
     display: inline-flex !important;
     align-items: center !important;
     gap: 5px !important;
@@ -218,21 +215,35 @@
     line-height: 1.2 !important;
   }
 
-  .pos-stock-badge.in-stock {
-    background: var(--success-soft) !important;
+  .pos-stock.in-stock {
     color: var(--success) !important;
-    border: 1px solid color-mix(in srgb, var(--success) 24%, transparent) !important;
   }
-  .pos-stock-badge.low-stock {
-    background: var(--warning-soft) !important;
+  .pos-stock.low-stock {
     color: var(--warning) !important;
-    border: 1px solid color-mix(in srgb, var(--warning) 24%, transparent) !important;
   }
-  .pos-stock-badge.out-stock {
-    background: var(--danger-soft) !important;
+  .pos-stock.out-stock {
     color: var(--danger) !important;
-    border: 1px solid color-mix(in srgb, var(--danger) 24%, transparent) !important;
     font-weight: 600 !important;
+  }
+
+  .pos-dot {
+    width: 6px !important;
+    height: 6px !important;
+    border-radius: 50% !important;
+    display: inline-block !important;
+    background: currentColor !important;
+    flex-shrink: 0 !important;
+  }
+
+  .pos-card-price {
+    font-family: var(--font-heading) !important;
+    font-size: 19px !important;
+    font-weight: 800 !important;
+    color: var(--text) !important;
+    font-variant-numeric: tabular-nums !important;
+    line-height: 1 !important;
+    text-align: right !important;
+    margin-left: auto !important;
   }
 
   .pos-card-actions-row {
@@ -377,22 +388,23 @@
 
         <div class="pos-card-content">
           <h3 class="pos-card-title" title="{{ p.name }}">{{ p.name }}</h3>
-          <div class="pos-card-bottom">
-            <!-- Row 1: Price and Stock Badge -->
-            <div class="pos-card-meta-row">
-              <span class="pos-card-price">${{ p.price|floatformat:2 }}</span>
-              <div class="pos-card-stock">
-                {% if p.stock_quantity > 10 %}
-                <span class="pos-stock-badge in-stock"><span class="pos-dot"></span>{{ p.stock_quantity }} in stock</span>
-                {% elif p.stock_quantity > 0 %}
-                <span class="pos-stock-badge low-stock"><span class="pos-dot"></span>Only {{ p.stock_quantity }} left</span>
-                {% else %}
-                <span class="pos-stock-badge out-stock"><i class="bi bi-x-circle me-1"></i>Sold Out</span>
-                {% endif %}
-              </div>
-            </div>
 
-            <!-- Row 2: Action Buttons (Custom + Quick Add) -->
+          <!-- Row: Stock (Left, small text) and Price (Right) directly under product name -->
+          <div class="pos-card-meta-row">
+            <div class="pos-card-stock">
+              {% if p.stock_quantity > 10 %}
+              <span class="pos-stock in-stock"><span class="pos-dot"></span>{{ p.stock_quantity }} in stock</span>
+              {% elif p.stock_quantity > 0 %}
+              <span class="pos-stock low-stock"><span class="pos-dot"></span>Only {{ p.stock_quantity }} left</span>
+              {% else %}
+              <span class="pos-stock out-stock"><i class="bi bi-x-circle me-1"></i>Sold Out</span>
+              {% endif %}
+            </div>
+            <span class="pos-card-price">${{ p.price|floatformat:2 }}</span>
+          </div>
+
+          <div class="pos-card-bottom">
+            <!-- Action Buttons (Custom + Quick Add) -->
             <div class="pos-card-actions-row">
               {% if p.stock_quantity > 0 %}
               <button type="button" class="btn pos-btn-customize" data-action="customize-item" data-id="{{ p.id }}" data-name="{{ p.name }}" data-price="{{ p.price }}" data-category="{{ p.category|default:'Special' }}" title="Customize Toppings">

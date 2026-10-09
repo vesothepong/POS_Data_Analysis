@@ -332,9 +332,9 @@ h1,h2,h3,h4,h5,h6,.brand,.workspace-title,.page-heading h1,.metric-card strong,.
 .pos-card-bottom {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 8px;
   margin-top: auto;
-  padding-top: 10px;
+  padding-top: 8px;
   border-top: 1px dashed var(--line);
 }
 
@@ -343,15 +343,57 @@ h1,h2,h3,h4,h5,h6,.brand,.workspace-title,.page-heading h1,.metric-card strong,.
   align-items: center;
   justify-content: space-between;
   gap: 8px;
+  margin-top: 2px;
+  margin-bottom: 6px;
+}
+
+.pos-card-stock {
+  display: inline-flex;
+  align-items: center;
+}
+
+.pos-stock {
+  font-size: 11.5px;
+  font-weight: 500;
+  color: var(--muted);
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  white-space: nowrap;
+  line-height: 1.2;
+}
+
+.pos-stock.in-stock {
+  color: var(--success);
+}
+
+.pos-stock.low-stock {
+  color: var(--warning);
+}
+
+.pos-stock.out-stock {
+  color: var(--danger);
+  font-weight: 600;
+}
+
+.pos-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+  display: inline-block;
+  flex-shrink: 0;
 }
 
 .pos-card-price {
   font-family: var(--font-heading);
-  font-size: 20px;
+  font-size: 19px;
   font-weight: 800;
   color: var(--text);
   font-variant-numeric: tabular-nums;
   line-height: 1;
+  text-align: right;
+  margin-left: auto;
 }
 
 .pos-stock-badge {
@@ -381,14 +423,6 @@ h1,h2,h3,h4,h5,h6,.brand,.workspace-title,.page-heading h1,.metric-card strong,.
   color: var(--danger);
   border: 1px solid color-mix(in srgb, var(--danger) 24%, transparent);
   font-weight: 600;
-}
-
-.pos-dot {
-  width: 5px;
-  height: 5px;
-  border-radius: 50%;
-  background: currentColor;
-  display: inline-block;
 }
 
 .pos-card-actions-row {
