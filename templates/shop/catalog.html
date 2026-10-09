@@ -180,18 +180,141 @@
     border-color: var(--bs-primary) !important;
     background: color-mix(in srgb, var(--bs-primary) 12%, transparent);
   }
+  /* Clean, balanced product card footer */
+  .pos-card-bottom {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 10px !important;
+    margin-top: auto !important;
+    padding-top: 10px !important;
+    border-top: 1px dashed var(--line) !important;
+  }
+
+  .pos-card-meta-row {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 8px !important;
+  }
+
+  .pos-card-price {
+    font-family: var(--font-heading) !important;
+    font-size: 20px !important;
+    font-weight: 800 !important;
+    color: var(--text) !important;
+    font-variant-numeric: tabular-nums !important;
+    line-height: 1 !important;
+  }
+
+  .pos-stock-badge {
+    font-size: 11px !important;
+    font-weight: 600 !important;
+    padding: 3px 9px !important;
+    border-radius: 999px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 5px !important;
+    white-space: nowrap !important;
+    line-height: 1.2 !important;
+  }
+
+  .pos-stock-badge.in-stock {
+    background: var(--success-soft) !important;
+    color: var(--success) !important;
+    border: 1px solid color-mix(in srgb, var(--success) 24%, transparent) !important;
+  }
+  .pos-stock-badge.low-stock {
+    background: var(--warning-soft) !important;
+    color: var(--warning) !important;
+    border: 1px solid color-mix(in srgb, var(--warning) 24%, transparent) !important;
+  }
+  .pos-stock-badge.out-stock {
+    background: var(--danger-soft) !important;
+    color: var(--danger) !important;
+    border: 1px solid color-mix(in srgb, var(--danger) 24%, transparent) !important;
+    font-weight: 600 !important;
+  }
+
+  .pos-card-actions-row {
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    width: 100% !important;
+  }
+
   .pos-btn-customize {
-    border-radius: 8px !important;
-    font-weight: 600;
-    transition: transform 0.1s ease;
+    flex: 1 1 45% !important;
+    height: 36px !important;
+    min-height: 36px !important;
+    background: var(--panel-hover) !important;
+    color: var(--text) !important;
+    border: 1px solid var(--line-strong) !important;
+    font-weight: 600 !important;
+    font-size: 12px !important;
+    border-radius: 9px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 5px !important;
+    transition: all 0.16s ease !important;
+    padding: 0 10px !important;
+    white-space: nowrap !important;
   }
-  .pos-btn-customize:active {
-    transform: scale(0.95);
+
+  .pos-btn-customize:hover {
+    background: var(--brand-soft) !important;
+    color: var(--brand) !important;
+    border-color: color-mix(in srgb, var(--brand) 45%, transparent) !important;
+    transform: translateY(-1px) !important;
   }
+
+  .pos-btn-add {
+    flex: 1 1 55% !important;
+    height: 36px !important;
+    min-height: 36px !important;
+    background: var(--brand) !important;
+    color: var(--brand-dark) !important;
+    font-weight: 700 !important;
+    font-size: 12.5px !important;
+    border-radius: 9px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 5px !important;
+    transition: all 0.16s ease !important;
+    border: 0 !important;
+    width: 100% !important;
+    padding: 0 10px !important;
+    white-space: nowrap !important;
+  }
+
+  .pos-btn-add:hover:not(.disabled) {
+    background: var(--brand-hover) !important;
+    color: var(--brand-dark) !important;
+    transform: translateY(-1px) !important;
+    box-shadow: 0 4px 12px var(--brand-soft) !important;
+  }
+
+  .pos-btn-soldout {
+    height: 36px !important;
+    background: var(--panel-hover) !important;
+    color: var(--muted) !important;
+    border: 1px solid var(--line) !important;
+    font-weight: 600 !important;
+    font-size: 12px !important;
+    border-radius: 9px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    cursor: not-allowed !important;
+    opacity: 0.65 !important;
+    width: 100% !important;
+  }
+
   .pos-ticket-item-toppings {
     font-size: 11px !important;
     color: var(--bs-primary) !important;
-    font-weight: 500;
+    font-weight: 500 !important;
   }
 </style>
 <div class="pos-layout">
@@ -255,35 +378,41 @@
         <div class="pos-card-content">
           <h3 class="pos-card-title" title="{{ p.name }}">{{ p.name }}</h3>
           <div class="pos-card-bottom">
-            <div class="pos-card-pricing">
+            <!-- Row 1: Price and Stock Badge -->
+            <div class="pos-card-meta-row">
               <span class="pos-card-price">${{ p.price|floatformat:2 }}</span>
-              {% if p.stock_quantity > 10 %}
-              <span class="pos-stock in-stock"><span class="pos-dot"></span>{{ p.stock_quantity }} in stock</span>
-              {% elif p.stock_quantity > 0 %}
-              <span class="pos-stock low-stock"><span class="pos-dot"></span>Only {{ p.stock_quantity }} left</span>
-              {% else %}
-              <span class="pos-stock out-stock"><i class="bi bi-x-circle me-1"></i>Sold Out</span>
-              {% endif %}
+              <div class="pos-card-stock">
+                {% if p.stock_quantity > 10 %}
+                <span class="pos-stock-badge in-stock"><span class="pos-dot"></span>{{ p.stock_quantity }} in stock</span>
+                {% elif p.stock_quantity > 0 %}
+                <span class="pos-stock-badge low-stock"><span class="pos-dot"></span>Only {{ p.stock_quantity }} left</span>
+                {% else %}
+                <span class="pos-stock-badge out-stock"><i class="bi bi-x-circle me-1"></i>Sold Out</span>
+                {% endif %}
+              </div>
             </div>
 
-            <!-- Action Buttons: Customize & Quick Add -->
-            <div class="pos-card-actions d-flex align-items-center gap-1">
+            <!-- Row 2: Action Buttons (Custom + Quick Add) -->
+            <div class="pos-card-actions-row">
               {% if p.stock_quantity > 0 %}
-              <button type="button" class="btn btn-sm btn-outline-primary pos-btn-customize py-1 px-2" data-action="customize-item" data-id="{{ p.id }}" data-name="{{ p.name }}" data-price="{{ p.price }}" data-category="{{ p.category|default:'Special' }}" title="Customize &amp; Add Toppings">
+              <button type="button" class="btn pos-btn-customize" data-action="customize-item" data-id="{{ p.id }}" data-name="{{ p.name }}" data-price="{{ p.price }}" data-category="{{ p.category|default:'Special' }}" title="Customize Toppings">
                 <i class="bi bi-sliders"></i>
-                <span class="d-none d-sm-inline ms-1" style="font-size: 11px;">Custom</span>
+                <span>Custom</span>
               </button>
-              {% endif %}
-              <!-- Quick Add Button with progressive form fallback -->
-              <form method="post" action="{% url 'add_to_cart' p.id %}" class="pos-add-form m-0">
+              <form method="post" action="{% url 'add_to_cart' p.id %}" class="pos-add-form flex-grow-1 m-0">
                 {% csrf_token %}
                 <input type="hidden" name="quantity" value="1">
                 <input type="hidden" name="next" value="{{ request.get_full_path }}">
-                <button type="button" class="btn pos-btn-add {% if p.stock_quantity <= 0 %}disabled{% endif %}" data-action="add-item" data-id="{{ p.id }}" data-name="{{ p.name }}" data-price="{{ p.price }}" {% if p.stock_quantity <= 0 %}disabled{% endif %}>
+                <button type="button" class="btn pos-btn-add" data-action="add-item" data-id="{{ p.id }}" data-name="{{ p.name }}" data-price="{{ p.price }}">
                   <i class="bi bi-plus-lg"></i>
                   <span>Add</span>
                 </button>
               </form>
+              {% else %}
+              <button type="button" class="btn pos-btn-soldout" disabled>
+                <i class="bi bi-slash-circle me-1"></i> Sold Out
+              </button>
+              {% endif %}
             </div>
           </div>
         </div>

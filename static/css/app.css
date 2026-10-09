@@ -331,38 +331,57 @@ h1,h2,h3,h4,h5,h6,.brand,.workspace-title,.page-heading h1,.metric-card strong,.
 
 .pos-card-bottom {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
+  flex-direction: column;
   gap: 10px;
   margin-top: auto;
-  padding-top: 8px;
+  padding-top: 10px;
   border-top: 1px dashed var(--line);
 }
 
-.pos-card-pricing {
+.pos-card-meta-row {
   display: flex;
-  flex-direction: column;
-  gap: 2px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
 }
 
 .pos-card-price {
   font-family: var(--font-heading);
-  font-size: 19px;
-  font-weight: 700;
+  font-size: 20px;
+  font-weight: 800;
   color: var(--text);
   font-variant-numeric: tabular-nums;
+  line-height: 1;
 }
 
-.pos-stock {
-  font-size: 10px;
+.pos-stock-badge {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 8px;
+  border-radius: 999px;
   display: inline-flex;
   align-items: center;
-  gap: 4px;
+  gap: 5px;
+  white-space: nowrap;
+  line-height: 1.2;
 }
 
-.pos-stock.in-stock { color: var(--success); }
-.pos-stock.low-stock { color: var(--warning); }
-.pos-stock.out-stock { color: var(--danger); font-weight: 600; }
+.pos-stock-badge.in-stock {
+  background: var(--success-soft);
+  color: var(--success);
+  border: 1px solid color-mix(in srgb, var(--success) 24%, transparent);
+}
+.pos-stock-badge.low-stock {
+  background: var(--warning-soft);
+  color: var(--warning);
+  border: 1px solid color-mix(in srgb, var(--warning) 24%, transparent);
+}
+.pos-stock-badge.out-stock {
+  background: var(--danger-soft);
+  color: var(--danger);
+  border: 1px solid color-mix(in srgb, var(--danger) 24%, transparent);
+  font-weight: 600;
+}
 
 .pos-dot {
   width: 5px;
@@ -372,18 +391,55 @@ h1,h2,h3,h4,h5,h6,.brand,.workspace-title,.page-heading h1,.metric-card strong,.
   display: inline-block;
 }
 
+.pos-card-actions-row {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  width: 100%;
+}
+
+.pos-btn-customize {
+  flex: 1 1 44%;
+  height: 35px;
+  min-height: 35px;
+  background: var(--panel-hover);
+  color: var(--text);
+  border: 1px solid var(--line-strong);
+  font-weight: 600;
+  font-size: 12px;
+  border-radius: 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  transition: all 0.16s ease;
+  padding: 0 8px;
+}
+
+.pos-btn-customize:hover {
+  background: var(--brand-soft);
+  color: var(--brand);
+  border-color: color-mix(in srgb, var(--brand) 45%, transparent);
+  transform: translateY(-1px);
+}
+
 .pos-btn-add {
+  flex: 1 1 56%;
+  height: 35px;
+  min-height: 35px;
   background: var(--brand);
   color: var(--brand-dark);
   font-weight: 700;
   font-size: 12px;
-  padding: 6px 14px;
   border-radius: 8px;
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 5px;
   transition: all 0.16s ease;
   border: 0;
+  width: 100%;
+  padding: 0 8px;
 }
 
 .pos-btn-add:hover:not(.disabled) {
@@ -393,8 +449,23 @@ h1,h2,h3,h4,h5,h6,.brand,.workspace-title,.page-heading h1,.metric-card strong,.
   box-shadow: 0 4px 12px var(--brand-soft);
 }
 
+.pos-btn-soldout {
+  height: 35px;
+  background: var(--panel-hover);
+  color: var(--muted);
+  border: 1px solid var(--line);
+  font-weight: 600;
+  font-size: 12px;
+  border-radius: 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: not-allowed;
+  opacity: 0.65;
+}
+
 .pos-btn-clicked {
-  transform: scale(0.92) !important;
+  transform: scale(0.94) !important;
 }
 
 /* Right Sticky Walk-in Ticket Panel */
