@@ -7,7 +7,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_POST
 
 from accounts.permissions import is_staff_member
-from products.models import Product
+from products.models import Product, Topping
 
 from .forms import AddToCartForm
 from .models import Order
@@ -49,6 +49,20 @@ def catalog(request):
     category_data = [{"name": c, "count": Product.objects.filter(category=c).count()} for c in categories]
     total_products_count = Product.objects.count()
 
+    # Active toppings for customization
+    all_toppings = Topping.objects.filter(is_active=True).prefetch_related("products").order_by("name")
+    toppings_json = json.dumps([
+        {
+            "id": t.id,
+            "name": t.name,
+            "price": float(t.price),
+            "stock_quantity": t.stock_quantity,
+            "applicable_category": t.applicable_category,
+            "product_ids": list(t.products.values_list("id", flat=True)),
+        }
+        for t in all_toppings
+    ])
+
     cart_items, cart_total, cart_warnings = cart_contents(request.session)
     for w in cart_warnings:
         messages.warning(request, w)
@@ -57,7 +71,7 @@ def catalog(request):
     receipt_order = None
     last_order_id = request.session.pop("last_walkin_order_id", None)
     if last_order_id:
-        receipt_order = Order.objects.filter(id=last_order_id).prefetch_related("items__product").first()
+        receipt_order = Order.objects.filter(id=last_order_id).prefetch_related("items__product", "items__toppings").first()
 
     context = {
         "products": products,
@@ -70,6 +84,8 @@ def catalog(request):
         "cart_total": cart_total,
         "cart_count": sum(it["quantity"] for it in cart_items),
         "receipt_order": receipt_order,
+        "toppings": all_toppings,
+        "toppings_json": toppings_json,
     }
     return render(request, "shop/catalog.html", context)
 
@@ -85,13 +101,22 @@ def add_to_cart(request, pk):
             except (ValueError, TypeError):
                 qty = 1
 
+        # Extract selected topping IDs
+        raw_toppings = request.POST.getlist("toppings")
+        topping_ids = []
+        for item in raw_toppings:
+            if isinstance(item, str) and "," in item:
+                topping_ids.extend([t.strip() for t in item.split(",") if t.strip()])
+            elif str(item).strip():
+                topping_ids.append(str(item).strip())
+
         if product.stock_quantity <= 0:
             msg = f"{product.name} is currently out of stock."
             if _is_json_request(request):
                 return JsonResponse({"success": False, "message": msg, "cart": cart_summary(request.session)}, status=400)
             messages.error(request, msg)
         else:
-            _add_to_cart(request.session, product.id, qty)
+            _add_to_cart(request.session, product.id, qty, topping_ids=topping_ids)
             msg = f"Added {qty} × {product.name} to order."
             if _is_json_request(request):
                 return JsonResponse({
@@ -109,13 +134,13 @@ def cart_view(request):
     """View and modify the walk-in cart. Supports AJAX update/remove/clear and standard POST."""
     if request.method == "POST":
         action = request.POST.get("action")
-        pid = request.POST.get("product_id")
+        item_key = request.POST.get("item_key") or request.POST.get("product_id")
 
-        if action == "remove" and pid:
-            remove_from_cart(request.session, pid)
-        elif action == "update" and pid:
+        if action == "remove" and item_key:
+            remove_from_cart(request.session, item_key)
+        elif action == "update" and item_key:
             qty = request.POST.get("quantity", 0)
-            set_quantity(request.session, pid, qty)
+            set_quantity(request.session, item_key, qty)
         elif action == "clear":
             clear_cart(request.session)
 
@@ -180,8 +205,10 @@ def checkout_view(request):
                         "quantity": it.quantity,
                         "price": float(it.price),
                         "subtotal": float(it.subtotal),
+                        "toppings": [t.topping_name for t in it.toppings.all()],
+                        "toppings_text": it.toppings_summary,
                     }
-                    for it in order.items.all()
+                    for it in order.items.all().prefetch_related("toppings")
                 ]
                 return JsonResponse({
                     "success": True,

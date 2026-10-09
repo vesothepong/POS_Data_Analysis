@@ -105,3 +105,22 @@ class OrderItem(models.Model):
     @property
     def subtotal(self):
         return self.quantity * self.price
+
+    @property
+    def toppings_summary(self):
+        """Returns comma-separated names of selected toppings (e.g. 'Boba, Egg Pudding')."""
+        names = [t.topping_name for t in self.toppings.all()]
+        return ", ".join(names)
+
+
+class OrderItemTopping(models.Model):
+    order_item = models.ForeignKey(OrderItem, on_delete=models.CASCADE, related_name="toppings")
+    topping = models.ForeignKey("products.Topping", on_delete=models.PROTECT, related_name="order_item_records")
+    topping_name = models.CharField(max_length=120)
+    price = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+
+    class Meta:
+        ordering = ["id"]
+
+    def __str__(self):
+        return f"{self.topping_name} (+${self.price:.2f})"

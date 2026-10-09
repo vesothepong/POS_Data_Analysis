@@ -40,12 +40,18 @@
         <tbody>
           {% for it in items %}
             <tr>
-              <td class="fw-semibold">{{ it.product.name }}</td>
+              <td>
+                <div class="fw-semibold">{{ it.product.name }}</div>
+                {% if it.toppings_text %}
+                  <div class="small text-primary fw-normal mt-1"><i class="bi bi-plus-circle me-1"></i>{{ it.toppings_text }}</div>
+                {% endif %}
+              </td>
               <td class="text-end text-muted numeric">${{ it.price|floatformat:2 }}</td>
               <td class="text-center">
                 <form method="post" class="d-inline-flex align-items-center gap-1">
                   {% csrf_token %}
                   <input type="hidden" name="action" value="update">
+                  <input type="hidden" name="item_key" value="{{ it.item_key|default:it.product.id }}">
                   <input type="hidden" name="product_id" value="{{ it.product.id }}">
                   <input type="number" name="quantity" value="{{ it.quantity }}" min="1" max="{{ it.product.stock_quantity }}" class="form-control form-control-sm text-center" style="width: 65px;">
                   <button type="submit" class="btn btn-sm btn-outline-primary" title="Update">Save</button>
@@ -56,6 +62,7 @@
                 <form method="post">
                   {% csrf_token %}
                   <input type="hidden" name="action" value="remove">
+                  <input type="hidden" name="item_key" value="{{ it.item_key|default:it.product.id }}">
                   <input type="hidden" name="product_id" value="{{ it.product.id }}">
                   <button class="icon-button" type="submit" title="Remove {{ it.product.name }}" aria-label="Remove {{ it.product.name }}">
                     <i class="bi bi-trash"></i>

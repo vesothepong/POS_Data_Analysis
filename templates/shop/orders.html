@@ -48,7 +48,12 @@
               <tbody>
                 {% for it in o.items.all %}
                   <tr>
-                    <td class="fw-medium">{{ it.product.name }}</td>
+                    <td>
+                      <div class="fw-medium">{{ it.product.name }}</div>
+                      {% if it.toppings_summary %}
+                        <div class="small text-primary fw-normal mt-1" style="font-size: 11.5px;"><i class="bi bi-plus-circle me-1"></i>{{ it.toppings_summary }}</div>
+                      {% endif %}
+                    </td>
                     <td class="text-center"><span class="badge bg-secondary-subtle text-secondary-emphasis">{{ it.quantity }}</span></td>
                     <td class="text-end text-muted numeric">${{ it.price|floatformat:2 }}</td>
                     <td class="text-end numeric fw-semibold">${{ it.subtotal|floatformat:2 }}</td>

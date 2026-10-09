@@ -2,10 +2,10 @@ from django.contrib.auth import get_user_model
 from django.test import TestCase
 from django.urls import reverse
 
-from products.models import Product
+from products.models import Product, Topping
 from sales.models import SalesRecord
 
-from .models import Order
+from .models import Order, OrderItemTopping
 
 
 class StorefrontFlowTests(TestCase):
@@ -211,6 +211,99 @@ class DailyOrderTicketTests(TestCase):
         order.save()
         order.refresh_from_db()
         self.assertEqual(order.ticket_number, orig_ticket)
+
+
+class POSToppingFlowTests(TestCase):
+    def setUp(self):
+        self.drink = Product.objects.create(
+            name="Brown Sugar Boba Milk",
+            category="Drink",
+            price="4.00",
+            stock_quantity=20,
+            reorder_level=5,
+        )
+        self.topping_boba = Topping.objects.create(
+            name="Extra Boba",
+            price="0.50",
+            stock_quantity=50,
+            applicable_category="Drink",
+        )
+        self.topping_pudding = Topping.objects.create(
+            name="Custard Pudding",
+            price="0.75",
+            stock_quantity=30,
+            applicable_category="Drink",
+        )
+
+    def test_add_to_cart_with_toppings_calculates_correct_price(self):
+        # Add item with boba and pudding (4.00 + 0.50 + 0.75 = 5.25 each x 2 = 10.50)
+        r = self.client.post(
+            reverse("add_to_cart", args=[self.drink.id]),
+            {"quantity": 2, "toppings": f"{self.topping_boba.id},{self.topping_pudding.id}"},
+            HTTP_X_REQUESTED_WITH="XMLHttpRequest",
+        )
+        self.assertEqual(r.status_code, 200)
+        data = r.json()
+        self.assertTrue(data["success"])
+        self.assertEqual(data["cart"]["count"], 2)
+        self.assertEqual(data["cart"]["total"], 10.50)
+
+    def test_add_same_product_with_different_toppings_creates_distinct_lines(self):
+        # Line 1: Drink with Extra Boba (4.00 + 0.50 = 4.50)
+        self.client.post(
+            reverse("add_to_cart", args=[self.drink.id]),
+            {"quantity": 1, "toppings": str(self.topping_boba.id)},
+            HTTP_X_REQUESTED_WITH="XMLHttpRequest",
+        )
+        # Line 2: Plain Drink (4.00)
+        self.client.post(
+            reverse("add_to_cart", args=[self.drink.id]),
+            {"quantity": 1},
+            HTTP_X_REQUESTED_WITH="XMLHttpRequest",
+        )
+        r = self.client.get(reverse("cart"), HTTP_X_REQUESTED_WITH="XMLHttpRequest")
+        cart_data = r.json()["cart"]
+        self.assertEqual(cart_data["count"], 2)
+        self.assertEqual(len(cart_data["items"]), 2)
+        self.assertEqual(cart_data["total"], 8.50)
+
+    def test_checkout_with_toppings_decrements_stock_and_creates_records(self):
+        # Add 2x Customized Drink: 4.00 + 0.50 + 0.75 = 5.25 x 2 = 10.50
+        self.client.post(
+            reverse("add_to_cart", args=[self.drink.id]),
+            {"quantity": 2, "toppings": f"{self.topping_boba.id},{self.topping_pudding.id}"},
+            HTTP_X_REQUESTED_WITH="XMLHttpRequest",
+        )
+
+        r = self.client.post(
+            reverse("checkout"),
+            {"order_type": "dine_in", "customer_name": "Bob", "table_number": "Table 1", "payment_method": "cash"},
+            HTTP_X_REQUESTED_WITH="XMLHttpRequest",
+        )
+        self.assertEqual(r.status_code, 200)
+        co_data = r.json()
+        self.assertTrue(co_data["success"])
+        self.assertEqual(co_data["total"], 10.50)
+
+        # Verify product stock decremented by 2
+        self.drink.refresh_from_db()
+        self.assertEqual(self.drink.stock_quantity, 18)
+
+        # Verify toppings stock decremented by 2
+        self.topping_boba.refresh_from_db()
+        self.assertEqual(self.topping_boba.stock_quantity, 48)
+        self.topping_pudding.refresh_from_db()
+        self.assertEqual(self.topping_pudding.stock_quantity, 28)
+
+        # Verify OrderItem and OrderItemTopping records
+        order = Order.objects.get(id=co_data["order_id"])
+        self.assertEqual(order.items.count(), 1)
+        item = order.items.first()
+        self.assertEqual(item.quantity, 2)
+        self.assertEqual(float(item.price), 5.25)
+        self.assertEqual(item.toppings.count(), 2)
+        self.assertIn("Extra Boba", item.toppings_summary)
+        self.assertIn("Custard Pudding", item.toppings_summary)
 
 
 

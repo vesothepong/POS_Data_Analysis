@@ -165,6 +165,34 @@
       max-width: 100vw !important;
     }
   }
+
+  .pos-topping-row {
+    transition: all 0.15s ease-in-out;
+    cursor: pointer;
+    background: var(--panel);
+    border: 1px solid var(--line) !important;
+  }
+  .pos-topping-row:hover {
+    border-color: var(--bs-primary) !important;
+    background: color-mix(in srgb, var(--bs-primary) 5%, transparent);
+  }
+  .pos-topping-row.is-selected {
+    border-color: var(--bs-primary) !important;
+    background: color-mix(in srgb, var(--bs-primary) 12%, transparent);
+  }
+  .pos-btn-customize {
+    border-radius: 8px !important;
+    font-weight: 600;
+    transition: transform 0.1s ease;
+  }
+  .pos-btn-customize:active {
+    transform: scale(0.95);
+  }
+  .pos-ticket-item-toppings {
+    font-size: 11px !important;
+    color: var(--bs-primary) !important;
+    font-weight: 500;
+  }
 </style>
 <div class="pos-layout">
   <!-- LEFT: Menu & Catalog Area -->
@@ -238,16 +266,25 @@
               {% endif %}
             </div>
 
-            <!-- Quick Add Button with progressive form fallback -->
-            <form method="post" action="{% url 'add_to_cart' p.id %}" class="pos-add-form m-0">
-              {% csrf_token %}
-              <input type="hidden" name="quantity" value="1">
-              <input type="hidden" name="next" value="{{ request.get_full_path }}">
-              <button type="button" class="btn pos-btn-add {% if p.stock_quantity <= 0 %}disabled{% endif %}" data-action="add-item" data-id="{{ p.id }}" data-name="{{ p.name }}" data-price="{{ p.price }}" {% if p.stock_quantity <= 0 %}disabled{% endif %}>
-                <i class="bi bi-plus-lg"></i>
-                <span>Add</span>
+            <!-- Action Buttons: Customize & Quick Add -->
+            <div class="pos-card-actions d-flex align-items-center gap-1">
+              {% if p.stock_quantity > 0 %}
+              <button type="button" class="btn btn-sm btn-outline-primary pos-btn-customize py-1 px-2" data-action="customize-item" data-id="{{ p.id }}" data-name="{{ p.name }}" data-price="{{ p.price }}" data-category="{{ p.category|default:'Special' }}" title="Customize &amp; Add Toppings">
+                <i class="bi bi-sliders"></i>
+                <span class="d-none d-sm-inline ms-1" style="font-size: 11px;">Custom</span>
               </button>
-            </form>
+              {% endif %}
+              <!-- Quick Add Button with progressive form fallback -->
+              <form method="post" action="{% url 'add_to_cart' p.id %}" class="pos-add-form m-0">
+                {% csrf_token %}
+                <input type="hidden" name="quantity" value="1">
+                <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                <button type="button" class="btn pos-btn-add {% if p.stock_quantity <= 0 %}disabled{% endif %}" data-action="add-item" data-id="{{ p.id }}" data-name="{{ p.name }}" data-price="{{ p.price }}" {% if p.stock_quantity <= 0 %}disabled{% endif %}>
+                  <i class="bi bi-plus-lg"></i>
+                  <span>Add</span>
+                </button>
+              </form>
+            </div>
           </div>
         </div>
       </article>
@@ -315,19 +352,22 @@
         <!-- Lines rendered dynamically by JS or server template below -->
         {% if cart_items %}
         {% for it in cart_items %}
-        <div class="pos-ticket-item" data-product-id="{{ it.product.id }}" data-name="{{ it.product.name|escape }}" data-price="{{ it.price }}" data-quantity="{{ it.quantity }}" data-subtotal="{{ it.subtotal }}">
+        <div class="pos-ticket-item" data-item-key="{{ it.item_key|default:it.product.id }}" data-product-id="{{ it.product.id }}" data-name="{{ it.product.name|escape }}" data-price="{{ it.price }}" data-quantity="{{ it.quantity }}" data-subtotal="{{ it.subtotal }}" data-toppings="{{ it.toppings_text|default:'' }}">
           <div class="pos-ticket-item-details">
             <div class="pos-ticket-item-name">{{ it.product.name }}</div>
+            {% if it.toppings_text %}
+            <div class="pos-ticket-item-toppings text-primary small" style="font-size: 11px; margin-top: 1px;"><i class="bi bi-plus-circle me-1"></i>{{ it.toppings_text }}</div>
+            {% endif %}
             <div class="pos-ticket-item-price">${{ it.price|floatformat:2 }} each</div>
           </div>
           <div class="pos-ticket-item-controls">
             <div class="pos-qty-stepper">
-              <button type="button" class="pos-stepper-btn btn-dec" data-action="decrease" data-id="{{ it.product.id }}" aria-label="Decrease quantity">−</button>
+              <button type="button" class="pos-stepper-btn btn-dec" data-action="decrease" data-item-key="{{ it.item_key|default:it.product.id }}" data-id="{{ it.product.id }}" aria-label="Decrease quantity">−</button>
               <span class="pos-stepper-val">{{ it.quantity }}</span>
-              <button type="button" class="pos-stepper-btn btn-inc" data-action="increase" data-id="{{ it.product.id }}" aria-label="Increase quantity">+</button>
+              <button type="button" class="pos-stepper-btn btn-inc" data-action="increase" data-item-key="{{ it.item_key|default:it.product.id }}" data-id="{{ it.product.id }}" aria-label="Increase quantity">+</button>
             </div>
             <div class="pos-ticket-item-subtotal">${{ it.subtotal|floatformat:2 }}</div>
-            <button type="button" class="pos-ticket-item-del" data-action="remove" data-id="{{ it.product.id }}" title="Remove item" aria-label="Remove item">
+            <button type="button" class="pos-ticket-item-del" data-action="remove" data-item-key="{{ it.item_key|default:it.product.id }}" data-id="{{ it.product.id }}" title="Remove item" aria-label="Remove item">
               <i class="bi bi-x"></i>
             </button>
           </div>
@@ -386,6 +426,78 @@
   {% endblock %}
 
   {% block modals %}
+  <!-- CUSTOMIZE ITEM & TOPPINGS MODAL -->
+  <div class="modal fade pos-customize-modal" id="posCustomizeModal" tabindex="-1" aria-labelledby="posCustomizeModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content shadow-lg border-0" style="border-radius: 16px; overflow: hidden; background: var(--panel);">
+        <div class="modal-header border-bottom py-3 px-4">
+          <div class="d-flex align-items-center gap-2">
+            <div class="pos-ticket-badge-icon" style="width: 38px; height: 38px; display: flex; align-items: center; justify-content: center; border-radius: 8px; background: rgba(var(--bs-primary-rgb), 0.12); color: var(--bs-primary);">
+              <i class="bi bi-sliders fs-5"></i>
+            </div>
+            <div>
+              <h5 class="modal-title fw-bold mb-0" id="customizeProductName">Customize Item</h5>
+              <small class="text-muted" id="customizeProductCategory">Menu Item</small>
+            </div>
+          </div>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+
+        <div class="modal-body p-4" style="max-height: 65vh; overflow-y: auto;">
+          <!-- Base Price Card -->
+          <div class="d-flex justify-content-between align-items-center p-3 mb-3 rounded" style="background: color-mix(in srgb, var(--ink-raised) 40%, transparent); border: 1px solid var(--line);">
+            <div>
+              <div class="fw-semibold">Base Price</div>
+              <small class="text-muted">Standard portion</small>
+            </div>
+            <div class="fs-5 fw-bold" id="customizeBasePrice">$0.00</div>
+          </div>
+
+          <!-- Toppings / Modifiers Section -->
+          <div class="mb-3">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+              <label class="form-label fw-bold mb-0">
+                <i class="bi bi-plus-circle me-1 text-primary"></i> Add-on Toppings &amp; Modifiers
+              </label>
+              <span class="badge bg-secondary-subtle text-secondary-emphasis">Optional</span>
+            </div>
+            <p class="text-muted small mb-3">Select any extra toppings or modifiers for this item.</p>
+
+            <div class="pos-toppings-list d-flex flex-column gap-2" id="posToppingsList">
+              <!-- Dynamically populated toppings -->
+            </div>
+            <div id="posNoToppingsMsg" class="text-muted small text-center py-3 d-none">
+              <i class="bi bi-info-circle me-1"></i> No extra toppings configured for this item.
+            </div>
+          </div>
+
+          <!-- Quantity Stepper -->
+          <div class="d-flex justify-content-between align-items-center pt-3 border-top">
+            <div>
+              <span class="fw-semibold d-block">Quantity</span>
+              <small class="text-muted" id="modalItemUnitPrice">$0.00 each</small>
+            </div>
+            <div class="pos-qty-stepper" style="background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 2px 6px;">
+              <button type="button" class="pos-stepper-btn" id="modalQtyDec" style="border:none;background:transparent;font-weight:bold;font-size:18px;padding:0 8px;cursor:pointer;">−</button>
+              <span class="pos-stepper-val px-2 fw-bold" id="modalQtyVal">1</span>
+              <button type="button" class="pos-stepper-btn" id="modalQtyInc" style="border:none;background:transparent;font-weight:bold;font-size:18px;padding:0 8px;cursor:pointer;">+</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-footer border-top py-3 px-4 d-flex justify-content-between align-items-center">
+          <div>
+            <span class="text-muted small d-block">Item Total</span>
+            <strong class="fs-4 text-primary" id="modalCalculatedTotal">$0.00</strong>
+          </div>
+          <button type="button" class="btn btn-primary px-4 py-2 fw-semibold" id="modalAddCustomizedBtn">
+            <i class="bi bi-cart-plus me-1"></i> Add to Ticket
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- DIGITAL WALK-IN RECEIPT MODAL -->
   <div class="modal fade pos-receipt-modal" id="posReceiptModal" tabindex="-1" aria-labelledby="posReceiptModalLabel" aria-hidden="true" {% if receipt_order %}data-auto-open="true" {% endif %}>
     <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
@@ -590,6 +702,7 @@
   {% endblock %}
 
   {% block scripts %}
+  <script id="posToppingsData" type="application/json">{{ toppings_json|safe }}</script>
   <script>
     (function () {
       const CSRF_TOKEN = '{{ csrf_token }}';
@@ -597,6 +710,147 @@
       const CART_URL = "{% url 'cart' %}";
       const CHECKOUT_URL = "{% url 'checkout' %}";
       const CLEAR_URL = "{% url 'cart_clear' %}";
+
+      // Toppings data
+      let ALL_TOPPINGS = [];
+      try {
+        ALL_TOPPINGS = JSON.parse(document.getElementById('posToppingsData')?.textContent || '[]');
+      } catch (e) {
+        ALL_TOPPINGS = [];
+      }
+
+      // Customize Modal Elements & State
+      let currentModalPid = null;
+      let currentModalBasePrice = 0;
+      let modalQty = 1;
+      const customizeModalEl = document.getElementById('posCustomizeModal');
+      if (customizeModalEl && customizeModalEl.parentElement !== document.body) {
+        document.body.appendChild(customizeModalEl);
+      }
+      const customizeModal = (customizeModalEl && typeof bootstrap !== 'undefined' && bootstrap.Modal) ? new bootstrap.Modal(customizeModalEl) : null;
+      const modalCalculatedTotal = document.getElementById('modalCalculatedTotal');
+      const modalItemUnitPrice = document.getElementById('modalItemUnitPrice');
+      const modalQtyVal = document.getElementById('modalQtyVal');
+      const modalQtyDec = document.getElementById('modalQtyDec');
+      const modalQtyInc = document.getElementById('modalQtyInc');
+      const modalAddCustomizedBtn = document.getElementById('modalAddCustomizedBtn');
+
+      function updateModalTotal() {
+        const selectedChecks = document.querySelectorAll('.pos-topping-check:checked');
+        let toppingsTotal = 0;
+        selectedChecks.forEach(chk => {
+          toppingsTotal += parseFloat(chk.dataset.price || '0');
+        });
+        const unitPrice = currentModalBasePrice + toppingsTotal;
+        const lineTotal = unitPrice * modalQty;
+        if (modalCalculatedTotal) modalCalculatedTotal.textContent = `$${lineTotal.toFixed(2)}`;
+        if (modalItemUnitPrice) modalItemUnitPrice.textContent = `$${unitPrice.toFixed(2)} each`;
+      }
+
+      function openCustomizeModal(pid, name, price, cat) {
+        currentModalPid = pid;
+        currentModalBasePrice = parseFloat(price);
+        modalQty = 1;
+
+        const modalNameEl = document.getElementById('customizeProductName');
+        const modalCatEl = document.getElementById('customizeProductCategory');
+        const modalBasePriceEl = document.getElementById('customizeBasePrice');
+        const toppingsList = document.getElementById('posToppingsList');
+        const noToppingsMsg = document.getElementById('posNoToppingsMsg');
+
+        if (modalNameEl) modalNameEl.textContent = name;
+        if (modalCatEl) modalCatEl.textContent = cat || 'Menu Item';
+        if (modalBasePriceEl) modalBasePriceEl.textContent = `$${currentModalBasePrice.toFixed(2)}`;
+        if (modalQtyVal) modalQtyVal.textContent = '1';
+
+        // Filter applicable toppings:
+        // 1. Specifically assigned to this product: t.product_ids.includes(pid)
+        // 2. Or matching product category: t.applicable_category.toLowerCase() == cat.toLowerCase()
+        // 3. Or globally available (no product_ids and applicable_category is empty)
+        const applicable = ALL_TOPPINGS.filter(t => {
+          if (t.product_ids && t.product_ids.length > 0) {
+            return t.product_ids.includes(pid);
+          }
+          if (t.applicable_category && t.applicable_category.trim()) {
+            return t.applicable_category.trim().toLowerCase() === (cat || '').trim().toLowerCase();
+          }
+          return true;
+        });
+
+        if (toppingsList) {
+          if (applicable.length === 0) {
+            toppingsList.innerHTML = '';
+            if (noToppingsMsg) noToppingsMsg.classList.remove('d-none');
+          } else {
+            if (noToppingsMsg) noToppingsMsg.classList.add('d-none');
+            let html = '';
+            applicable.forEach(t => {
+              const priceStr = t.price > 0 ? `+$${t.price.toFixed(2)}` : 'Free';
+              const isLow = t.stock_quantity > 0 && t.stock_quantity <= 5;
+              const lowBadge = isLow ? `<span class="badge bg-warning-subtle text-warning-emphasis small ms-1" style="font-size:10px;">Only ${t.stock_quantity} left</span>` : '';
+              html += `
+                <label class="pos-topping-row d-flex align-items-center justify-content-between p-2 rounded border" style="cursor: pointer; user-select: none;">
+                  <div class="d-flex align-items-center gap-2">
+                    <input type="checkbox" class="form-check-input pos-topping-check" value="${t.id}" data-price="${t.price}" data-name="${t.name}">
+                    <span class="fw-medium text-body" style="font-size: 13.5px;">${t.name}</span>
+                    ${lowBadge}
+                  </div>
+                  <span class="fw-bold text-primary" style="font-size: 13.5px;">${priceStr}</span>
+                </label>
+              `;
+            });
+            toppingsList.innerHTML = html;
+
+            toppingsList.querySelectorAll('.pos-topping-check').forEach(chk => {
+              chk.addEventListener('change', function() {
+                const row = this.closest('.pos-topping-row');
+                if (row) {
+                  row.classList.toggle('is-selected', this.checked);
+                }
+                updateModalTotal();
+              });
+            });
+          }
+        }
+
+        updateModalTotal();
+        if (customizeModal) customizeModal.show();
+      }
+
+      if (modalQtyDec) {
+        modalQtyDec.addEventListener('click', () => {
+          if (modalQty > 1) {
+            modalQty--;
+            if (modalQtyVal) modalQtyVal.textContent = modalQty;
+            updateModalTotal();
+          }
+        });
+      }
+      if (modalQtyInc) {
+        modalQtyInc.addEventListener('click', () => {
+          modalQty++;
+          if (modalQtyVal) modalQtyVal.textContent = modalQty;
+          updateModalTotal();
+        });
+      }
+      if (modalAddCustomizedBtn) {
+        modalAddCustomizedBtn.addEventListener('click', () => {
+          if (!currentModalPid) return;
+          const selectedChecks = document.querySelectorAll('.pos-topping-check:checked');
+          const toppingIds = [];
+          selectedChecks.forEach(chk => toppingIds.push(chk.value));
+
+          const postData = {
+            quantity: modalQty,
+          };
+          if (toppingIds.length > 0) {
+            postData.toppings = toppingIds.join(',');
+          }
+
+          performCartAction(`${ADD_URL}${currentModalPid}/`, postData);
+          if (customizeModal) customizeModal.hide();
+        });
+      }
 
       // Elements
       const ticketPanel = document.getElementById('posTicketPanel');
@@ -830,20 +1084,23 @@
         let html = '';
         const eachText = window.t ? window.t('each') : 'each';
         cart.items.forEach(it => {
+          const itemKey = it.item_key || it.product_id;
+          const toppingsHtml = it.toppings_text ? `<div class="pos-ticket-item-toppings text-primary small" style="font-size: 11px; margin-top: 1px;"><i class="bi bi-plus-circle me-1"></i>${it.toppings_text}</div>` : '';
           html += `
-        <div class="pos-ticket-item" data-product-id="${it.product_id}">
+        <div class="pos-ticket-item" data-item-key="${itemKey}" data-product-id="${it.product_id}">
           <div class="pos-ticket-item-details">
             <div class="pos-ticket-item-name">${it.name}</div>
+            ${toppingsHtml}
             <div class="pos-ticket-item-price">$${it.price.toFixed(2)} ${eachText}</div>
           </div>
           <div class="pos-ticket-item-controls">
             <div class="pos-qty-stepper">
-              <button type="button" class="pos-stepper-btn btn-dec" data-action="decrease" data-id="${it.product_id}" aria-label="Decrease quantity">−</button>
+              <button type="button" class="pos-stepper-btn btn-dec" data-action="decrease" data-item-key="${itemKey}" data-id="${it.product_id}" aria-label="Decrease quantity">−</button>
               <span class="pos-stepper-val">${it.quantity}</span>
-              <button type="button" class="pos-stepper-btn btn-inc" data-action="increase" data-id="${it.product_id}" aria-label="Increase quantity">+</button>
+              <button type="button" class="pos-stepper-btn btn-inc" data-action="increase" data-item-key="${itemKey}" data-id="${it.product_id}" aria-label="Increase quantity">+</button>
             </div>
             <div class="pos-ticket-item-subtotal">$${it.subtotal.toFixed(2)}</div>
-            <button type="button" class="pos-ticket-item-del" data-action="remove" data-id="${it.product_id}" title="Remove item" aria-label="Remove item">
+            <button type="button" class="pos-ticket-item-del" data-action="remove" data-item-key="${itemKey}" data-id="${it.product_id}" title="Remove item" aria-label="Remove item">
               <i class="bi bi-x"></i>
             </button>
           </div>
@@ -878,13 +1135,15 @@
         let total = parseFloat(ticketPanel?.dataset.cartTotal || '0');
 
         lines.forEach(el => {
+          const itemKey = el.dataset.itemKey || el.dataset.productId || '0';
           const pid = parseInt(el.dataset.productId || '0', 10);
           const name = el.dataset.name || (el.querySelector('.pos-ticket-item-name') ? el.querySelector('.pos-ticket-item-name').textContent.trim() : '');
           const price = parseFloat(el.dataset.price || '0');
           const quantity = parseInt(el.dataset.quantity || (el.querySelector('.pos-stepper-val') ? el.querySelector('.pos-stepper-val').textContent.trim() : '0'), 10);
           const subtotal = parseFloat(el.dataset.subtotal || (price * quantity).toFixed(2));
+          const toppings_text = el.dataset.toppings || (el.querySelector('.pos-ticket-item-toppings') ? el.querySelector('.pos-ticket-item-toppings').textContent.trim() : '');
           if (pid > 0 && quantity > 0) {
-            items.push({ product_id: pid, name, price, quantity, subtotal });
+            items.push({ item_key: itemKey, product_id: pid, name, price, quantity, subtotal, toppings_text });
           }
         });
 
@@ -932,8 +1191,19 @@
         }
       }
 
-      // Listen for Add to Order clicks on menu cards
+      // Listen for Add to Order or Customize clicks on menu cards
       document.addEventListener('click', function (e) {
+        // Customize Button
+        const custBtn = e.target.closest('[data-action="customize-item"]');
+        if (custBtn) {
+          const pid = parseInt(custBtn.dataset.id);
+          const name = custBtn.dataset.name;
+          const price = parseFloat(custBtn.dataset.price);
+          const cat = custBtn.dataset.category || '';
+          openCustomizeModal(pid, name, price, cat);
+          return;
+        }
+
         const addBtn = e.target.closest('[data-action="add-item"]');
         if (addBtn && !addBtn.disabled) {
           const pid = addBtn.dataset.id;
@@ -946,23 +1216,23 @@
         // Stepper Increase
         const incBtn = e.target.closest('[data-action="increase"]');
         if (incBtn) {
-          const pid = incBtn.dataset.id;
+          const itemKey = incBtn.dataset.itemKey || incBtn.dataset.id;
           const row = incBtn.closest('.pos-ticket-item');
           const curQty = parseInt(row.querySelector('.pos-stepper-val').textContent.trim()) || 1;
-          performCartAction(CART_URL, { action: 'update', product_id: pid, quantity: curQty + 1 });
+          performCartAction(CART_URL, { action: 'update', item_key: itemKey, quantity: curQty + 1 });
           return;
         }
 
         // Stepper Decrease
         const decBtn = e.target.closest('[data-action="decrease"]');
         if (decBtn) {
-          const pid = decBtn.dataset.id;
+          const itemKey = decBtn.dataset.itemKey || decBtn.dataset.id;
           const row = decBtn.closest('.pos-ticket-item');
           const curQty = parseInt(row.querySelector('.pos-stepper-val').textContent.trim()) || 1;
           if (curQty > 1) {
-            performCartAction(CART_URL, { action: 'update', product_id: pid, quantity: curQty - 1 });
+            performCartAction(CART_URL, { action: 'update', item_key: itemKey, quantity: curQty - 1 });
           } else {
-            performCartAction(CART_URL, { action: 'remove', product_id: pid });
+            performCartAction(CART_URL, { action: 'remove', item_key: itemKey });
           }
           return;
         }
@@ -970,8 +1240,8 @@
         // Stepper Remove
         const remBtn = e.target.closest('[data-action="remove"]');
         if (remBtn) {
-          const pid = remBtn.dataset.id;
-          performCartAction(CART_URL, { action: 'remove', product_id: pid });
+          const itemKey = remBtn.dataset.itemKey || remBtn.dataset.id;
+          performCartAction(CART_URL, { action: 'remove', item_key: itemKey });
           return;
         }
       });
@@ -1385,10 +1655,12 @@
                 let itemsHtml = '';
                 res.items.forEach(it => {
                   const unitPrice = (typeof it.price === 'number') ? it.price.toFixed(2) : (it.subtotal / (it.quantity || 1)).toFixed(2);
+                  const toppingsHtml = it.toppings_text ? `<div class="pos-receipt-item-toppings text-muted small" style="font-size: 9.5px; font-style: italic;">+ ${it.toppings_text}</div>` : '';
                   itemsHtml += `
                 <div class="pos-receipt-item-row">
                   <div class="pos-receipt-item-main">
                     <div class="pos-receipt-item-name">${it.name}</div>
+                    ${toppingsHtml}
                     <div class="pos-receipt-item-calc">${it.quantity} × $${unitPrice}</div>
                   </div>
                   <div class="pos-receipt-item-amt">$${it.subtotal.toFixed(2)}</div>
