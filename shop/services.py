@@ -234,7 +234,7 @@ def cart_summary(session):
     }
 
 
-def checkout(user, session, order_type="dine_in", customer_name="Walk-in Guest", table_number="", payment_method="cash"):
+def checkout(user, session, order_type="dine_in", customer_name="Walk-in Guest", table_number="", payment_method="cash", amount_tendered=None, change_due=None, payment_reference=""):
     """Validate stock, create Order and OrderItems (with OrderItemTopping records), decrement stock,
     and mirror each line into SalesRecord."""
     enriched, total, warnings = cart_contents(session)
@@ -243,6 +243,25 @@ def checkout(user, session, order_type="dine_in", customer_name="Walk-in Guest",
     today = timezone.localdate()
     customer_user = user if (user and getattr(user, "is_authenticated", False)) else None
     display_name = customer_name.strip() if customer_name and customer_name.strip() else "Walk-in Guest"
+    dec_total = Decimal(str(round(total, 2)))
+
+    # Calculate or default tender and change
+    pay_method = (payment_method or "cash").strip().lower()
+    if amount_tendered is not None:
+        try:
+            tender_val = Decimal(str(amount_tendered))
+        except Exception:
+            tender_val = dec_total
+    else:
+        tender_val = dec_total
+
+    if change_due is not None:
+        try:
+            change_val = Decimal(str(change_due))
+        except Exception:
+            change_val = max(Decimal("0.00"), tender_val - dec_total)
+    else:
+        change_val = max(Decimal("0.00"), tender_val - dec_total)
 
     with transaction.atomic():
         order = Order.objects.create(
@@ -250,8 +269,11 @@ def checkout(user, session, order_type="dine_in", customer_name="Walk-in Guest",
             customer_name=display_name,
             order_type=order_type or "dine_in",
             table_number=(table_number or "").strip(),
-            payment_method=payment_method or "cash",
-            total_amount=Decimal(str(round(total, 2))),
+            payment_method=pay_method,
+            amount_tendered=tender_val,
+            change_due=change_val,
+            payment_reference=(payment_reference or "").strip(),
+            total_amount=dec_total,
         )
         for row in enriched:
             product = Product.objects.get(pk=row["product"].pk)  # re-fetch: stock may have changed

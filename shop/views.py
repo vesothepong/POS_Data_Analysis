@@ -174,6 +174,23 @@ def checkout_view(request):
         customer_name = request.POST.get("customer_name", "Walk-in Guest").strip()
         table_number = request.POST.get("table_number", "").strip()
         payment_method = request.POST.get("payment_method", "cash").strip()
+        amount_tendered_raw = request.POST.get("amount_tendered", "").strip()
+        change_due_raw = request.POST.get("change_due", "").strip()
+        payment_reference = request.POST.get("payment_reference", "").strip()
+
+        amount_tendered = None
+        if amount_tendered_raw:
+            try:
+                amount_tendered = Decimal(amount_tendered_raw)
+            except Exception:
+                amount_tendered = None
+
+        change_due = None
+        if change_due_raw:
+            try:
+                change_due = Decimal(change_due_raw)
+            except Exception:
+                change_due = None
 
         try:
             order, warnings = checkout(
@@ -183,6 +200,9 @@ def checkout_view(request):
                 customer_name=customer_name,
                 table_number=table_number,
                 payment_method=payment_method,
+                amount_tendered=amount_tendered,
+                change_due=change_due,
+                payment_reference=payment_reference,
             )
 
             # Keep track of recent walk-in orders in session for guest history
@@ -220,6 +240,9 @@ def checkout_view(request):
                     "table_number": order.table_number,
                     "payment_method": order.payment_method,
                     "payment_method_display": order.get_payment_method_display(),
+                    "amount_tendered": float(order.amount_tendered),
+                    "change_due": float(order.change_due),
+                    "payment_reference": order.payment_reference,
                     "total": float(order.total_amount),
                     "created_at": order.created_at.strftime("%b %d, %Y • %H:%M"),
                     "items": items_data,

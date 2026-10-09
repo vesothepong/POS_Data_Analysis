@@ -12,9 +12,9 @@ ORDER_TYPE_CHOICES = [
 ]
 
 PAYMENT_METHOD_CHOICES = [
-    ("cash", "Cash at Counter"),
+    ("cash", "Cash"),
     ("card", "Credit / Debit Card"),
-    ("qr", "QR Scan / Mobile Pay"),
+    ("qr", "Scan QR Code"),
 ]
 
 
@@ -24,6 +24,9 @@ class Order(models.Model):
     order_type = models.CharField(max_length=20, choices=ORDER_TYPE_CHOICES, default="dine_in")
     table_number = models.CharField(max_length=50, blank=True, default="")
     payment_method = models.CharField(max_length=20, choices=PAYMENT_METHOD_CHOICES, default="cash")
+    amount_tendered = models.DecimalField(max_digits=14, decimal_places=2, default=0)
+    change_due = models.DecimalField(max_digits=14, decimal_places=2, default=0)
+    payment_reference = models.CharField(max_length=100, blank=True, default="")
     ticket_number = models.CharField(max_length=20, blank=True, default="")
     created_at = models.DateTimeField(auto_now_add=True)
     total_amount = models.DecimalField(max_digits=14, decimal_places=2, default=0)

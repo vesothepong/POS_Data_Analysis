@@ -305,5 +305,66 @@ class POSToppingFlowTests(TestCase):
         self.assertIn("Extra Boba", item.toppings_summary)
         self.assertIn("Custard Pudding", item.toppings_summary)
 
+    def test_checkout_cash_payment_with_change(self):
+        """Test Cash payment calculating and saving amount tendered and change due."""
+        self.client.post(
+            reverse("add_to_cart", args=[self.drink.id]),
+            {"quantity": 1},
+            HTTP_X_REQUESTED_WITH="XMLHttpRequest",
+        )
+        r = self.client.post(
+            reverse("checkout"),
+            {
+                "order_type": "takeaway",
+                "customer_name": "Alice",
+                "payment_method": "cash",
+                "amount_tendered": "10.00",
+                "change_due": "6.00",
+            },
+            HTTP_X_REQUESTED_WITH="XMLHttpRequest",
+        )
+        self.assertEqual(r.status_code, 200)
+        data = r.json()
+        self.assertTrue(data["success"])
+        self.assertEqual(data["payment_method"], "cash")
+        self.assertEqual(data["amount_tendered"], 10.00)
+        self.assertEqual(data["change_due"], 6.00)
+
+        order = Order.objects.get(id=data["order_id"])
+        self.assertEqual(order.payment_method, "cash")
+        self.assertEqual(float(order.amount_tendered), 10.00)
+        self.assertEqual(float(order.change_due), 6.00)
+
+    def test_checkout_qr_code_payment(self):
+        """Test Scan QR Code payment with reference code."""
+        self.client.post(
+            reverse("add_to_cart", args=[self.drink.id]),
+            {"quantity": 2},
+            HTTP_X_REQUESTED_WITH="XMLHttpRequest",
+        )
+        r = self.client.post(
+            reverse("checkout"),
+            {
+                "order_type": "dine_in",
+                "customer_name": "Bob QR",
+                "table_number": "Table 2",
+                "payment_method": "qr",
+                "amount_tendered": "8.00",
+                "change_due": "0.00",
+                "payment_reference": "KHQR-TXN-88219",
+            },
+            HTTP_X_REQUESTED_WITH="XMLHttpRequest",
+        )
+        self.assertEqual(r.status_code, 200)
+        data = r.json()
+        self.assertTrue(data["success"])
+        self.assertEqual(data["payment_method"], "qr")
+        self.assertEqual(data["payment_reference"], "KHQR-TXN-88219")
+
+        order = Order.objects.get(id=data["order_id"])
+        self.assertEqual(order.payment_method, "qr")
+        self.assertEqual(order.payment_reference, "KHQR-TXN-88219")
+        self.assertEqual(float(order.total_amount), 8.00)
+
 
 

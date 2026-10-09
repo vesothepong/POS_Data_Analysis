@@ -327,6 +327,49 @@
     color: var(--bs-primary) !important;
     font-weight: 500 !important;
   }
+
+  /* Payment Modal Styles */
+  .pos-pay-tab-btn {
+    background: transparent;
+    color: var(--muted);
+    border: 1px solid transparent;
+    border-radius: 12px;
+    transition: all 0.16s ease;
+  }
+  .pos-pay-tab-btn:hover {
+    color: var(--text);
+    background: color-mix(in srgb, var(--panel) 60%, transparent);
+  }
+  .pos-pay-tab-btn.active {
+    background: var(--panel) !important;
+    color: var(--text) !important;
+    border-color: var(--line-strong) !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  }
+  .pos-quick-cash-chip {
+    padding: 7px 14px;
+    border-radius: 9px;
+    font-weight: 700;
+    font-size: 13px;
+    background: var(--panel);
+    border: 1px solid var(--line-strong);
+    color: var(--text);
+    cursor: pointer;
+    transition: all 0.14s ease;
+    user-select: none;
+  }
+  .pos-quick-cash-chip:hover {
+    background: var(--brand-soft);
+    color: var(--brand);
+    border-color: var(--brand);
+    transform: translateY(-1px);
+  }
+  .pos-quick-cash-chip.active {
+    background: var(--brand) !important;
+    color: var(--brand-dark) !important;
+    border-color: var(--brand) !important;
+    box-shadow: 0 2px 8px var(--brand-soft);
+  }
 </style>
 <div class="pos-layout">
   <!-- LEFT: Menu & Catalog Area -->
@@ -639,6 +682,168 @@
     </div>
   </div>
 
+  <!-- PAYMENT MODAL (CASH & SCAN QR) -->
+  <div class="modal fade pos-payment-modal" id="posPaymentModal" tabindex="-1" aria-labelledby="posPaymentModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+      <div class="modal-content shadow-lg border-0" style="border-radius: 20px; overflow: hidden; background: var(--panel);">
+        
+        <!-- Header -->
+        <div class="modal-header border-bottom py-3 px-4" style="background: var(--ink-raised);">
+          <div class="d-flex align-items-center gap-3">
+            <div class="pos-pay-header-icon" style="width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; border-radius: 12px; background: rgba(var(--bs-primary-rgb), 0.12); color: var(--bs-primary);">
+              <i class="bi bi-wallet2 fs-4"></i>
+            </div>
+            <div>
+              <h5 class="modal-title fw-bold mb-0" id="posPaymentModalLabel">Charge Order</h5>
+              <div class="text-muted small d-flex align-items-center gap-2 mt-1">
+                <span id="posPayModalOrderType" class="badge bg-secondary-subtle text-secondary">DINE IN</span>
+                <span id="posPayModalCustomer">Walk-in Guest</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Total Display on the right of header -->
+          <div class="text-end">
+            <div class="small text-muted text-uppercase fw-semibold" style="font-size: 11px; letter-spacing: 0.05em;">Total Due</div>
+            <div class="fs-4 fw-black text-primary numeric" id="posPayModalTotalDue">$0.00</div>
+            <div class="small text-muted numeric" id="posPayModalTotalKhr" style="font-size: 11px;">0 ៛</div>
+          </div>
+        </div>
+
+        <div class="modal-body p-4">
+          <!-- Method Selection Tabs: Cash vs Scan QR -->
+          <div class="pos-payment-tabs d-flex gap-2 mb-4 p-1 rounded-3" style="background: color-mix(in srgb, var(--ink-raised) 70%, transparent); border: 1px solid var(--line);">
+            <button type="button" class="btn pos-pay-tab-btn active flex-fill py-2 px-3 text-center" id="tabPayCash" data-pay-method="cash">
+              <i class="bi bi-cash-stack me-2 fs-5"></i>
+              <span class="fw-bold">Cash</span>
+              <span class="d-block small text-muted" style="font-size: 11px;">Physical Notes &amp; Coins</span>
+            </button>
+            <button type="button" class="btn pos-pay-tab-btn flex-fill py-2 px-3 text-center" id="tabPayQr" data-pay-method="qr">
+              <i class="bi bi-qr-code-scan me-2 fs-5"></i>
+              <span class="fw-bold">Scan QR</span>
+              <span class="d-block small text-muted" style="font-size: 11px;">KHQR / Mobile Banking</span>
+            </button>
+          </div>
+
+          <!-- PANE 1: CASH -->
+          <div id="panePayCash" class="pos-pay-pane">
+            <div class="row g-4">
+              <!-- Left side: Tender amount input & quick tender chips -->
+              <div class="col-md-7">
+                <label class="form-label fw-bold mb-1">Amount Tendered</label>
+                <div class="input-group input-group-lg mb-3">
+                  <span class="input-group-text fw-bold border-end-0" style="background: var(--ink-raised); color: var(--text);">$</span>
+                  <input type="number" step="0.01" min="0" class="form-control fw-bold fs-4 numeric" id="posCashTenderInput" placeholder="0.00" style="background: var(--panel); color: var(--text);">
+                  <button class="btn btn-outline-secondary" type="button" id="posCashClearBtn" title="Clear">
+                    <i class="bi bi-x-lg"></i>
+                  </button>
+                </div>
+
+                <!-- Quick Tender Cash Buttons -->
+                <label class="form-label small text-muted fw-semibold mb-2">QUICK CASH (USD)</label>
+                <div class="d-flex flex-wrap gap-2 mb-3" id="posQuickCashGroup">
+                  <!-- Dynamically populated: Exact, $5, $10, $20, $50, $100 -->
+                </div>
+
+                <div class="p-2 rounded small text-muted d-flex justify-content-between align-items-center" style="background: var(--panel-hover); border: 1px dashed var(--line);">
+                  <span>Exchange Rate (Cambodia)</span>
+                  <strong class="text-body numeric">1 USD = 4,100 KHR</strong>
+                </div>
+              </div>
+
+              <!-- Right side: Change Calculation Card -->
+              <div class="col-md-5 d-flex flex-column">
+                <div class="pos-change-card p-3 rounded-3 flex-fill d-flex flex-column justify-content-between" id="posChangeCard" style="background: color-mix(in srgb, var(--ink-raised) 50%, transparent); border: 1px solid var(--line);">
+                  <div>
+                    <div class="text-uppercase small fw-bold text-muted mb-1" style="letter-spacing: 0.05em;">Change Calculation</div>
+                    <div class="d-flex justify-content-between py-1 border-bottom small">
+                      <span class="text-muted">Total Due:</span>
+                      <strong class="numeric" id="posChangeTotalCalc">$0.00</strong>
+                    </div>
+                    <div class="d-flex justify-content-between py-1 border-bottom small">
+                      <span class="text-muted">Tendered:</span>
+                      <strong class="numeric" id="posChangeTenderCalc">$0.00</strong>
+                    </div>
+                  </div>
+
+                  <div class="my-3 text-center py-3 rounded-2" id="posChangeDisplayBox" style="background: var(--success-soft); border: 1px solid color-mix(in srgb, var(--success) 30%, transparent);">
+                    <div class="small fw-semibold text-success mb-1" id="posChangeStatusLabel">CHANGE DUE</div>
+                    <div class="fs-2 fw-black text-success numeric" id="posChangeDueUsd">$0.00</div>
+                    <div class="small text-muted numeric" id="posChangeDueKhr">0 ៛</div>
+                  </div>
+
+                  <button type="button" class="btn btn-primary pos-btn-confirm-pay w-100 py-3 fw-bold fs-6" id="posConfirmCashBtn">
+                    <i class="bi bi-check2-circle me-1 fs-5"></i>
+                    <span>Complete Cash Order</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- PANE 2: SCAN QR -->
+          <div id="panePayQr" class="pos-pay-pane d-none">
+            <div class="row g-4 align-items-center">
+              <div class="col-md-6 text-center">
+                <!-- QR Container -->
+                <div class="pos-qr-box p-3 rounded-3 mx-auto d-inline-block shadow-sm" style="background: #ffffff; border: 2px solid var(--line);">
+                  <div id="posQrCanvasWrapper" style="width: 200px; height: 200px; display: flex; align-items: center; justify-content: center;">
+                    <!-- QR Code will render here -->
+                  </div>
+                  <div class="mt-2 text-dark fw-bold small d-flex align-items-center justify-content-center gap-1">
+                    <span class="badge bg-danger">KHQR</span>
+                    <span style="font-size: 11px; letter-spacing: 0.04em;">SCAN TO PAY</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="col-md-6">
+                <div class="mb-3">
+                  <div class="badge bg-primary-subtle text-primary mb-2 px-2 py-1">
+                    <span class="spinner-grow spinner-grow-sm me-1" style="width: 8px; height: 8px;"></span>
+                    Awaiting Customer Payment
+                  </div>
+                  <h4 class="fw-bold mb-1 text-primary numeric" id="posQrAmountUsd">$0.00 USD</h4>
+                  <div class="text-muted fs-6 numeric fw-semibold" id="posQrAmountKhr">0 ៛ (KHR)</div>
+                </div>
+
+                <div class="p-3 rounded-3 mb-3 small" style="background: var(--ink-raised); border: 1px solid var(--line);">
+                  <div class="d-flex justify-content-between mb-1">
+                    <span class="text-muted">Merchant:</span>
+                    <strong class="text-body">២ឆ្នាំចាំស្នេហ៍ Cafe POS</strong>
+                  </div>
+                  <div class="d-flex justify-content-between mb-1">
+                    <span class="text-muted">Transaction Ref:</span>
+                    <strong class="text-body font-monospace" id="posQrRefCode">KHQR-POS-...</strong>
+                  </div>
+                  <div class="d-flex justify-content-between">
+                    <span class="text-muted">Supported:</span>
+                    <span class="text-body fw-semibold">Bakong, ABA, Wing, ACLEDA</span>
+                  </div>
+                </div>
+
+                <button type="button" class="btn btn-success w-100 py-3 fw-bold fs-6" id="posConfirmQrBtn">
+                  <i class="bi bi-check-circle-fill me-1"></i>
+                  <span>Confirm QR Payment Received</span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <div class="modal-footer border-top py-2 px-4 justify-content-between" style="background: var(--ink-raised);">
+          <small class="text-muted">
+            <i class="bi bi-shield-check me-1 text-success"></i>
+            Instant receipt &amp; sales synchronization
+          </small>
+          <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
   <!-- DIGITAL WALK-IN RECEIPT MODAL -->
   <div class="modal fade pos-receipt-modal" id="posReceiptModal" tabindex="-1" aria-labelledby="posReceiptModalLabel" aria-hidden="true" {% if receipt_order %}data-auto-open="true" {% endif %}>
     <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
@@ -753,11 +958,15 @@
             </div>
             <div class="pos-receipt-calc-row small text-muted">
               <span>Amount Tendered</span>
-              <strong id="receiptTendered">${% if receipt_order %}{{ receipt_order.total_amount|floatformat:2 }}{% else %}0.00{% endif %}</strong>
+              <strong id="receiptTendered">${% if receipt_order %}{{ receipt_order.amount_tendered|floatformat:2 }}{% else %}0.00{% endif %}</strong>
             </div>
             <div class="pos-receipt-calc-row small text-muted">
               <span>Change Due</span>
-              <strong>$0.00</strong>
+              <strong id="receiptChangeDue">${% if receipt_order %}{{ receipt_order.change_due|floatformat:2 }}{% else %}0.00{% endif %}</strong>
+            </div>
+            <div class="pos-receipt-calc-row small text-muted {% if not receipt_order or not receipt_order.payment_reference %}d-none{% endif %}" id="receiptRefRow">
+              <span>QR Ref Code</span>
+              <strong id="receiptPaymentRef">{% if receipt_order %}{{ receipt_order.payment_reference }}{% endif %}</strong>
             </div>
 
             <!-- Barcode simulation -->
@@ -843,6 +1052,7 @@
   {% endblock %}
 
   {% block scripts %}
+  <script src="{% static 'js/qrcode.min.js' %}"></script>
   <script id="posToppingsData" type="application/json">{{ toppings_json|safe }}</script>
   <script>
     (function () {
@@ -1027,7 +1237,21 @@
       const receiptTotalAmount = document.getElementById('receiptTotalAmount');
       const receiptSubtotalEl = document.getElementById('receiptSubtotal');
       const receiptTenderedEl = document.getElementById('receiptTendered');
+      const receiptChangeDueEl = document.getElementById('receiptChangeDue');
+      const receiptRefRow = document.getElementById('receiptRefRow');
+      const receiptPaymentRef = document.getElementById('receiptPaymentRef');
       const receiptBarcodeText = document.getElementById('receiptBarcodeText');
+
+      // Payment Modal elements
+      const paymentModalEl = document.getElementById('posPaymentModal');
+      if (paymentModalEl && paymentModalEl.parentElement !== document.body) {
+        document.body.appendChild(paymentModalEl);
+      }
+      const paymentModal = (paymentModalEl && typeof bootstrap !== 'undefined' && bootstrap.Modal) ? new bootstrap.Modal(paymentModalEl, {
+        backdrop: true,
+        keyboard: true,
+        focus: true
+      }) : null;
 
       // If server rendered a receipt_order on reload, show it immediately then clear flag
       if (receiptModal && receiptModalEl && receiptModalEl.dataset.autoOpen === 'true') {
@@ -1734,119 +1958,366 @@
         }
       };
 
-      // Complete Order Action
-      if (completeBtn) {
-        completeBtn.addEventListener('click', async function (e) {
-          e.preventDefault();
-          if (completeBtn.disabled || completeBtn.classList.contains('disabled')) return;
+      // ==========================================
+      // PAYMENT MODAL CONTROLLER (CASH & SCAN QR)
+      // ==========================================
+      const posPayModalTotalDue = document.getElementById('posPayModalTotalDue');
+      const posPayModalTotalKhr = document.getElementById('posPayModalTotalKhr');
+      const posPayModalOrderType = document.getElementById('posPayModalOrderType');
+      const posPayModalCustomer = document.getElementById('posPayModalCustomer');
 
-          const hasItems = currentCartData && currentCartData.items && currentCartData.items.length > 0;
-          if (!hasItems) return;
+      const tabPayCash = document.getElementById('tabPayCash');
+      const tabPayQr = document.getElementById('tabPayQr');
+      const panePayCash = document.getElementById('panePayCash');
+      const panePayQr = document.getElementById('panePayQr');
 
-          const orderTypeVal = document.querySelector('input[name="order_type_toggle"]:checked')?.value || 'dine_in';
-          const custNameVal = customerNameInput?.value.trim() || 'Walk-in Guest';
-          const tableNumVal = tableInput?.value.trim() || '';
-          const payMethodVal = 'cash';
+      const posCashTenderInput = document.getElementById('posCashTenderInput');
+      const posCashClearBtn = document.getElementById('posCashClearBtn');
+      const posQuickCashGroup = document.getElementById('posQuickCashGroup');
+      const posChangeTotalCalc = document.getElementById('posChangeTotalCalc');
+      const posChangeTenderCalc = document.getElementById('posChangeTenderCalc');
+      const posChangeDisplayBox = document.getElementById('posChangeDisplayBox');
+      const posChangeStatusLabel = document.getElementById('posChangeStatusLabel');
+      const posChangeDueUsd = document.getElementById('posChangeDueUsd');
+      const posChangeDueKhr = document.getElementById('posChangeDueKhr');
+      const posConfirmCashBtn = document.getElementById('posConfirmCashBtn');
 
-          // Show spinner
-          const btnText = completeBtn.querySelector('.pos-btn-text');
-          const btnSpinner = completeBtn.querySelector('.pos-btn-spinner');
-          if (btnText) btnText.classList.add('d-none');
-          if (btnSpinner) btnSpinner.classList.remove('d-none');
-          completeBtn.disabled = true;
+      const posQrCanvasWrapper = document.getElementById('posQrCanvasWrapper');
+      const posQrAmountUsd = document.getElementById('posQrAmountUsd');
+      const posQrAmountKhr = document.getElementById('posQrAmountKhr');
+      const posQrRefCode = document.getElementById('posQrRefCode');
+      const posConfirmQrBtn = document.getElementById('posConfirmQrBtn');
 
-          const formData = new FormData();
-          formData.append('csrfmiddlewaretoken', CSRF_TOKEN);
-          formData.append('order_type', orderTypeVal);
-          formData.append('customer_name', custNameVal);
-          formData.append('table_number', tableNumVal);
-          formData.append('payment_method', payMethodVal);
+      let currentActivePaymentMethod = 'cash';
+      let currentOrderTotalDue = 0;
+      let currentGeneratedQrRef = '';
 
-          try {
-            const resp = await fetch(CHECKOUT_URL, {
-              method: 'POST',
-              headers: {
-                'X-Requested-With': 'XMLHttpRequest',
-                'X-CSRFToken': CSRF_TOKEN,
-              },
-              body: formData,
+      const KHR_RATE = 4100; // 1 USD = 4,100 KHR
+
+      function switchPaymentTab(method) {
+        currentActivePaymentMethod = method;
+        if (method === 'cash') {
+          tabPayCash?.classList.add('active');
+          tabPayQr?.classList.remove('active');
+          panePayCash?.classList.remove('d-none');
+          panePayQr?.classList.add('d-none');
+          if (posCashTenderInput) {
+            posCashTenderInput.focus();
+            posCashTenderInput.select();
+          }
+        } else {
+          tabPayQr?.classList.add('active');
+          tabPayCash?.classList.remove('active');
+          panePayQr?.classList.remove('d-none');
+          panePayCash?.classList.add('d-none');
+          renderQrCodeForOrder(currentOrderTotalDue);
+        }
+      }
+
+      tabPayCash?.addEventListener('click', () => switchPaymentTab('cash'));
+      tabPayQr?.addEventListener('click', () => switchPaymentTab('qr'));
+
+      function renderQrCodeForOrder(total) {
+        if (!posQrCanvasWrapper) return;
+        posQrCanvasWrapper.innerHTML = '';
+        if (!currentGeneratedQrRef) {
+          const rand = Math.floor(1000 + Math.random() * 9000);
+          const nowStr = new Date().toISOString().slice(2, 10).replace(/-/g, '');
+          currentGeneratedQrRef = `KHQR-${nowStr}-${rand}`;
+        }
+        if (posQrRefCode) posQrRefCode.textContent = currentGeneratedQrRef;
+        if (posQrAmountUsd) posQrAmountUsd.textContent = `$${total.toFixed(2)} USD`;
+        if (posQrAmountKhr) posQrAmountKhr.textContent = `${Math.round(total * KHR_RATE).toLocaleString()} ៛ (KHR)`;
+
+        const qrText = `KHQR:ARTISAN-CAFE|USD:${total.toFixed(2)}|REF:${currentGeneratedQrRef}`;
+        try {
+          if (typeof QRCode !== 'undefined') {
+            new QRCode(posQrCanvasWrapper, {
+              text: qrText,
+              width: 180,
+              height: 180,
+              colorDark: '#111827',
+              colorLight: '#ffffff',
+              correctLevel: QRCode.CorrectLevel.M
             });
+          } else {
+            posQrCanvasWrapper.innerHTML = `<div class="p-3 text-center text-muted small"><i class="bi bi-qr-code fs-1 d-block mb-1"></i>${qrText}</div>`;
+          }
+        } catch (e) {
+          console.warn("QR Code render error:", e);
+          posQrCanvasWrapper.innerHTML = `<div class="p-3 text-center text-muted small"><i class="bi bi-qr-code fs-1 d-block mb-1"></i>${qrText}</div>`;
+        }
+      }
 
-            const res = await resp.json();
-            if (res.success) {
-              // Reset UI
-              renderTicket({ items: [], count: 0, total: 0 });
+      function updateCashChangeUI() {
+        const tendered = parseFloat(posCashTenderInput?.value || '0') || 0;
+        const total = currentOrderTotalDue;
+        const change = tendered - total;
 
-              // Populate receipt modal
-              if (receiptTicketNum) receiptTicketNum.textContent = res.ticket_number;
-              if (receiptOrderType) {
-                let label = res.order_type_display.toUpperCase();
-                if (res.table_number) label += ` • ${res.table_number.toUpperCase()}`;
-                receiptOrderType.textContent = label;
+        if (posChangeTotalCalc) posChangeTotalCalc.textContent = `$${total.toFixed(2)}`;
+        if (posChangeTenderCalc) posChangeTenderCalc.textContent = `$${tendered.toFixed(2)}`;
+
+        // Highlight matching quick chip
+        document.querySelectorAll('.pos-quick-cash-chip').forEach(chip => {
+          const val = parseFloat(chip.dataset.val || '0');
+          chip.classList.toggle('active', Math.abs(val - tendered) < 0.009);
+        });
+
+        if (change >= -0.001) {
+          const safeChange = Math.max(0, change);
+          if (posChangeDisplayBox) {
+            posChangeDisplayBox.style.background = 'var(--success-soft)';
+            posChangeDisplayBox.style.borderColor = 'color-mix(in srgb, var(--success) 30%, transparent)';
+          }
+          if (posChangeStatusLabel) {
+            posChangeStatusLabel.textContent = safeChange === 0 ? 'EXACT AMOUNT' : 'CHANGE DUE';
+            posChangeStatusLabel.className = 'small fw-semibold text-success mb-1';
+          }
+          if (posChangeDueUsd) {
+            posChangeDueUsd.textContent = `$${safeChange.toFixed(2)}`;
+            posChangeDueUsd.className = 'fs-2 fw-black text-success numeric';
+          }
+          if (posChangeDueKhr) {
+            posChangeDueKhr.textContent = `${Math.round(safeChange * KHR_RATE).toLocaleString()} ៛`;
+          }
+          if (posConfirmCashBtn) {
+            posConfirmCashBtn.disabled = false;
+            posConfirmCashBtn.innerHTML = `<i class="bi bi-check2-circle me-1 fs-5"></i><span>Complete Cash Order${safeChange > 0 ? ` • Change $${safeChange.toFixed(2)}` : ''}</span>`;
+          }
+        } else {
+          const needed = Math.abs(change);
+          if (posChangeDisplayBox) {
+            posChangeDisplayBox.style.background = 'var(--warning-soft)';
+            posChangeDisplayBox.style.borderColor = 'color-mix(in srgb, var(--warning) 30%, transparent)';
+          }
+          if (posChangeStatusLabel) {
+            posChangeStatusLabel.textContent = 'AMOUNT SHORT';
+            posChangeStatusLabel.className = 'small fw-semibold text-warning-emphasis mb-1';
+          }
+          if (posChangeDueUsd) {
+            posChangeDueUsd.textContent = `-$${needed.toFixed(2)}`;
+            posChangeDueUsd.className = 'fs-2 fw-black text-warning-emphasis numeric';
+          }
+          if (posChangeDueKhr) {
+            posChangeDueKhr.textContent = `Need ${Math.round(needed * KHR_RATE).toLocaleString()} ៛ more`;
+          }
+          if (posConfirmCashBtn) {
+            posConfirmCashBtn.disabled = true;
+            posConfirmCashBtn.innerHTML = `<i class="bi bi-exclamation-triangle me-1"></i><span>Need $${needed.toFixed(2)} More</span>`;
+          }
+        }
+      }
+
+      posCashTenderInput?.addEventListener('input', updateCashChangeUI);
+      posCashClearBtn?.addEventListener('click', () => {
+        if (posCashTenderInput) {
+          posCashTenderInput.value = '';
+          updateCashChangeUI();
+          posCashTenderInput.focus();
+        }
+      });
+
+      function generateQuickCashButtons(total) {
+        if (!posQuickCashGroup) return;
+        posQuickCashGroup.innerHTML = '';
+
+        const amounts = [total];
+        const ceilDollar = Math.ceil(total);
+        if (ceilDollar > total) amounts.push(ceilDollar);
+
+        const denoms = [5, 10, 15, 20, 50, 100];
+        denoms.forEach(d => {
+          if (d > total && !amounts.includes(d)) {
+            amounts.push(d);
+          }
+        });
+
+        const topAmounts = amounts.slice(0, 5);
+
+        topAmounts.forEach((amt, idx) => {
+          const isExact = idx === 0;
+          const btn = document.createElement('button');
+          btn.type = 'button';
+          btn.className = `btn pos-quick-cash-chip ${isExact ? 'active' : ''}`;
+          btn.dataset.val = amt.toFixed(2);
+          btn.textContent = isExact ? `Exact ($${amt.toFixed(2)})` : `$${amt.toFixed(2)}`;
+          btn.addEventListener('click', () => {
+            if (posCashTenderInput) {
+              posCashTenderInput.value = amt.toFixed(2);
+              updateCashChangeUI();
+            }
+          });
+          posQuickCashGroup.appendChild(btn);
+        });
+      }
+
+      function openPaymentModal() {
+        const hasItems = currentCartData && currentCartData.items && currentCartData.items.length > 0;
+        if (!hasItems) return;
+
+        currentOrderTotalDue = currentCartData.total || 0;
+        currentGeneratedQrRef = '';
+
+        const orderTypeVal = document.querySelector('input[name="order_type_toggle"]:checked')?.value || 'dine_in';
+        const custNameVal = customerNameInput?.value.trim() || 'Walk-in Guest';
+        const tableNumVal = tableInput?.value.trim() || '';
+
+        let orderTypeLabel = orderTypeVal.toUpperCase();
+        if (tableNumVal) orderTypeLabel += ` • ${tableNumVal.toUpperCase()}`;
+        if (posPayModalOrderType) posPayModalOrderType.textContent = orderTypeLabel;
+        if (posPayModalCustomer) posPayModalCustomer.textContent = custNameVal;
+
+        if (posPayModalTotalDue) posPayModalTotalDue.textContent = `$${currentOrderTotalDue.toFixed(2)}`;
+        if (posPayModalTotalKhr) posPayModalTotalKhr.textContent = `${Math.round(currentOrderTotalDue * KHR_RATE).toLocaleString()} ៛`;
+
+        switchPaymentTab('cash');
+        generateQuickCashButtons(currentOrderTotalDue);
+        if (posCashTenderInput) {
+          posCashTenderInput.value = currentOrderTotalDue.toFixed(2);
+        }
+        updateCashChangeUI();
+
+        if (paymentModal) {
+          paymentModal.show();
+        }
+      }
+
+      async function executeFinalCheckout(method) {
+        const hasItems = currentCartData && currentCartData.items && currentCartData.items.length > 0;
+        if (!hasItems) return;
+
+        const orderTypeVal = document.querySelector('input[name="order_type_toggle"]:checked')?.value || 'dine_in';
+        const custNameVal = customerNameInput?.value.trim() || 'Walk-in Guest';
+        const tableNumVal = tableInput?.value.trim() || '';
+
+        let tendered = currentOrderTotalDue;
+        let change = 0;
+        let refCode = '';
+
+        if (method === 'cash') {
+          tendered = parseFloat(posCashTenderInput?.value || '0') || currentOrderTotalDue;
+          change = Math.max(0, tendered - currentOrderTotalDue);
+          if (tendered < currentOrderTotalDue - 0.001) {
+            alert("Tendered amount is less than total due.");
+            return;
+          }
+        } else if (method === 'qr') {
+          tendered = currentOrderTotalDue;
+          change = 0;
+          refCode = currentGeneratedQrRef || `KHQR-${Date.now()}`;
+        }
+
+        const confirmBtn = method === 'cash' ? posConfirmCashBtn : posConfirmQrBtn;
+        const originalBtnHtml = confirmBtn ? confirmBtn.innerHTML : '';
+        if (confirmBtn) {
+          confirmBtn.disabled = true;
+          confirmBtn.innerHTML = `<span class="spinner-border spinner-border-sm me-2" role="status"></span>Processing...`;
+        }
+
+        const formData = new FormData();
+        formData.append('csrfmiddlewaretoken', CSRF_TOKEN);
+        formData.append('order_type', orderTypeVal);
+        formData.append('customer_name', custNameVal);
+        formData.append('table_number', tableNumVal);
+        formData.append('payment_method', method);
+        formData.append('amount_tendered', tendered.toFixed(2));
+        formData.append('change_due', change.toFixed(2));
+        formData.append('payment_reference', refCode);
+
+        try {
+          const resp = await fetch(CHECKOUT_URL, {
+            method: 'POST',
+            headers: {
+              'X-Requested-With': 'XMLHttpRequest',
+              'X-CSRFToken': CSRF_TOKEN,
+            },
+            body: formData,
+          });
+
+          const res = await resp.json();
+          if (res.success) {
+            if (paymentModal) paymentModal.hide();
+
+            renderTicket({ items: [], count: 0, total: 0 });
+
+            if (receiptTicketNum) receiptTicketNum.textContent = res.ticket_number;
+            if (receiptOrderType) {
+              let label = res.order_type_display.toUpperCase();
+              if (res.table_number) label += ` • ${res.table_number.toUpperCase()}`;
+              receiptOrderType.textContent = label;
+            }
+            if (receiptCustomerName) receiptCustomerName.textContent = res.customer_name;
+            if (receiptDateTime) receiptDateTime.textContent = res.created_at;
+            if (receiptPayment) receiptPayment.textContent = res.payment_method_display;
+            if (receiptTotalAmount) receiptTotalAmount.textContent = `$${res.total.toFixed(2)}`;
+            if (receiptSubtotalEl) receiptSubtotalEl.textContent = `$${res.total.toFixed(2)}`;
+            if (receiptTenderedEl) receiptTenderedEl.textContent = `$${(res.amount_tendered || res.total).toFixed(2)}`;
+            if (receiptChangeDueEl) receiptChangeDueEl.textContent = `$${(res.change_due || 0).toFixed(2)}`;
+            if (receiptBarcodeText) receiptBarcodeText.textContent = `*${res.ticket_number}*`;
+
+            if (receiptRefRow && receiptPaymentRef) {
+              if (res.payment_reference) {
+                receiptPaymentRef.textContent = res.payment_reference;
+                receiptRefRow.classList.remove('d-none');
+              } else {
+                receiptRefRow.classList.add('d-none');
               }
-              if (receiptCustomerName) receiptCustomerName.textContent = res.customer_name;
-              if (receiptDateTime) receiptDateTime.textContent = res.created_at;
-              if (receiptPayment) receiptPayment.textContent = res.payment_method_display;
-              if (receiptTotalAmount) receiptTotalAmount.textContent = `$${res.total.toFixed(2)}`;
-              if (receiptSubtotalEl) receiptSubtotalEl.textContent = `$${res.total.toFixed(2)}`;
-              if (receiptTenderedEl) receiptTenderedEl.textContent = `$${res.total.toFixed(2)}`;
-              if (receiptBarcodeText) receiptBarcodeText.textContent = `*${res.ticket_number}*`;
+            }
 
-              if (receiptItemsList && res.items) {
-                let itemsHtml = '';
-                res.items.forEach(it => {
-                  const unitPrice = (typeof it.price === 'number') ? it.price.toFixed(2) : (it.subtotal / (it.quantity || 1)).toFixed(2);
-                  const toppingsHtml = it.toppings_text ? `<div class="pos-receipt-item-toppings text-muted small" style="font-size: 9.5px; font-style: italic;">+ ${it.toppings_text}</div>` : '';
-                  itemsHtml += `
-                <div class="pos-receipt-item-row">
-                  <div class="pos-receipt-item-main">
-                    <div class="pos-receipt-item-name">${it.name}</div>
-                    ${toppingsHtml}
-                    <div class="pos-receipt-item-calc">${it.quantity} × $${unitPrice}</div>
+            if (receiptItemsList && res.items) {
+              let itemsHtml = '';
+              res.items.forEach(it => {
+                const unitPrice = (typeof it.price === 'number') ? it.price.toFixed(2) : (it.subtotal / (it.quantity || 1)).toFixed(2);
+                const toppingsHtml = it.toppings_text ? `<div class="pos-receipt-item-toppings text-muted small" style="font-size: 9.5px; font-style: italic;">+ ${it.toppings_text}</div>` : '';
+                itemsHtml += `
+                  <div class="pos-receipt-item-row">
+                    <div class="pos-receipt-item-main">
+                      <div class="pos-receipt-item-name">${it.name}</div>
+                      ${toppingsHtml}
+                      <div class="pos-receipt-item-calc">${it.quantity} × $${unitPrice}</div>
+                    </div>
+                    <div class="pos-receipt-item-amt">$${it.subtotal.toFixed(2)}</div>
                   </div>
-                  <div class="pos-receipt-item-amt">$${it.subtotal.toFixed(2)}</div>
-                </div>
-              `;
-                });
-                receiptItemsList.innerHTML = itemsHtml;
-              }
-
-              // Close mobile drawer if open
-              if (ticketPanel) ticketPanel.classList.remove('pos-drawer-open');
-              if (drawerBackdrop) drawerBackdrop.classList.remove('is-open');
-
-              // Open receipt modal!
-              if (receiptModal) {
-                receiptModal.show();
-              }
-              playSuccessAudio();
-            } else {
-              alert(res.message || "Failed to place order. Please try again.");
+                `;
+              });
+              receiptItemsList.innerHTML = itemsHtml;
             }
-          } catch (err) {
-            console.error("Checkout error:", err);
-            // Fallback to standard form submission
-            const hType = document.getElementById('hiddenOrderType');
-            const hName = document.getElementById('hiddenCustomerName');
-            const hTable = document.getElementById('hiddenTableNumber');
-            const hPay = document.getElementById('hiddenPaymentMethod');
-            const f = document.getElementById('posCheckoutForm');
-            if (f && hType && hName && hTable && hPay) {
-              hType.value = orderTypeVal;
-              hName.value = custNameVal;
-              hTable.value = tableNumVal;
-              hPay.value = payMethodVal;
-              f.submit();
-            } else {
-              alert("Could not complete order. Please check your network connection and try again.");
+
+            if (ticketPanel) ticketPanel.classList.remove('pos-drawer-open');
+            if (drawerBackdrop) drawerBackdrop.classList.remove('is-open');
+
+            if (receiptModal) {
+              receiptModal.show();
             }
-          } finally {
-            if (btnText) btnText.classList.remove('d-none');
-            if (btnSpinner) btnSpinner.classList.add('d-none');
-            const activeItems = currentCartData && currentCartData.items && currentCartData.items.length > 0;
+            playSuccessAudio();
+          } else {
+            alert(res.message || "Failed to place order. Please try again.");
+          }
+        } catch (err) {
+          console.error("Checkout error:", err);
+          alert("Could not complete order. Please check your network connection and try again.");
+        } finally {
+          if (confirmBtn) {
+            confirmBtn.disabled = false;
+            confirmBtn.innerHTML = originalBtnHtml;
+          }
+          const activeItems = currentCartData && currentCartData.items && currentCartData.items.length > 0;
+          if (completeBtn) {
             completeBtn.disabled = !activeItems;
             completeBtn.classList.toggle('disabled', !activeItems);
           }
+        }
+      }
+
+      posConfirmCashBtn?.addEventListener('click', () => executeFinalCheckout('cash'));
+      posConfirmQrBtn?.addEventListener('click', () => executeFinalCheckout('qr'));
+
+      // Complete Order Button Opens Payment Modal
+      if (completeBtn) {
+        completeBtn.addEventListener('click', function (e) {
+          e.preventDefault();
+          if (completeBtn.disabled || completeBtn.classList.contains('disabled')) return;
+          openPaymentModal();
         });
       }
     })();
